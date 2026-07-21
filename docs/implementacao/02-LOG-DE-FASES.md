@@ -21,3 +21,14 @@ date: 2026-07-21
 ## Decisao antecipada para PHASE-001
 
 O DOC-21 descreve criacao de repositorio separado. O prompt mestre, de maior precedencia, determina que o repositorio atual ja e o alvo canonico e proibe novo remoto, `git init` e remocao de historico. Portanto PHASE-001 validara e preservara o Git existente e adicionara somente a fundacao; nao criara outro repositorio.
+
+## PHASE-001 - Repositorio greenfield
+
+- Inicio: `2026-07-21`.
+- Estado: `APPROVED`.
+- Gate: `GATE-001 = APPROVED`.
+- Arquivos: `.gitignore`, `README.md`, `LICENSE`.
+- Decisao: reutilizar repo/remoto/historico existentes conforme DEV-0019; licenca neutra conforme DEV-0020.
+- Validacao prevista: status, branch, remote, historico, ignore de secrets e auditoria independente.
+- QA: SPEC aprovada; qualidade aprovada; validacao final `READY_TO_APPROVE`.
+- Proxima fase: PHASE-002.

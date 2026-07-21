@@ -1,0 +1,44 @@
+# Dependencies and package-manager state
+node_modules/
+.pnpm-store/
+
+# Build and test outputs
+dist/
+build/
+coverage/
+.turbo/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# Runtime data
+/data/
+/storage/
+/uploads/
+/tmp/
+/temp/
+*.pid
+*.log
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local infrastructure state
+infrastructure/docker/volumes/
+infrastructure/**/secrets/
+
+# Editors and operating systems
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.DS_Store
+Thumbs.db
+Desktop.ini

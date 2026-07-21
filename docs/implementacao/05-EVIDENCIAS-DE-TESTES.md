@@ -21,3 +21,14 @@ phase: PHASE-000
 | 2026-07-21 | Validacao final independente | Subagente auditor, somente leitura | PASS | `READY_TO_APPROVE`; nenhum HARD_BLOCKER atual |
 
 Nenhum teste de codigo, banco, API ou browser se aplica antes do bootstrap. Nenhum resultado foi simulado.
+
+## PHASE-001
+
+| Data | Comando/checagem | Ambiente | Resultado | Evidencia |
+|---|---|---|---|---|
+| 2026-07-21 | `git status`, branch, remote e log | Git 2.53.0 | PASS_WITH_PREEXISTING_CHANGES | Branch `feature/greenfield-foundation`, origin canonico e historico preservado |
+| 2026-07-21 | `git check-ignore --no-index -v` | Git 2.53.0 | PASS | Runtime raiz, `.env*`, dependencias, outputs e secrets ignorados; paths de codigo homonimos, `.env.example`, `.vscode` permitidos, README, LICENSE e docs preservados |
+| 2026-07-21 | `git diff --cached --check` apos staging por pathspec | Git 2.53.0 | PASS | Todos os 8 arquivos criados/alterados da fase cobertos; nenhum erro de whitespace |
+| 2026-07-21 | `git fsck --connectivity-only` | Git 2.53.0 | PASS_WITH_DANGLING_STASH_OBJECTS | Conectividade valida; objetos dangling sao stashes temporarios ja restaurados/removidos |
+| 2026-07-21 | Varredura de atribuicoes de credenciais | PowerShell/rg | PASS | Nenhum segredo literal nos arquivos da fase |
+| 2026-07-21 | Revisao SPEC, qualidade e validacao final | Tres revisores independentes, somente leitura | PASS | `READY_TO_APPROVE`; nenhum HARD_BLOCKER atual |
