@@ -1,0 +1,20 @@
+services:
+  pgbouncer:
+    networks:
+      - lyvox_internal
+      - lyvox_loopback
+    ports:
+      - 127.0.0.1:${PGBOUNCER_HOST_PORT:-6432}:5432
+
+  mailpit:
+    networks:
+      - lyvox_internal
+      - lyvox_loopback
+    ports:
+      - 127.0.0.1:${MAILPIT_SMTP_HOST_PORT:-1025}:1025
+      - 127.0.0.1:${MAILPIT_UI_HOST_PORT:-8025}:8025
+
+networks:
+  lyvox_loopback:
+    name: ${COMPOSE_PROJECT_NAME:-lyvox-gerenciamento-local}-loopback
+    driver: bridge

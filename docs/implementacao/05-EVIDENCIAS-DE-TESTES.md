@@ -65,3 +65,23 @@ Nenhum teste de codigo, banco, API ou browser se aplica antes do bootstrap. Nenh
 | 2026-07-21 | Revisao SPEC, qualidade e validacao final | Tres revisores independentes, somente leitura | PASS | `READY_TO_APPROVE`; cleanup/parsing revisados, zero secret, zero overreach e nenhum `HARD_BLOCKER` |
 
 Esta validacao prova apenas o ambiente de desenvolvimento concorrente da PHASE-003; nao declara web, API, worker, portas ou health checks funcionais.
+
+## PHASE-004
+
+| Data | Comando/checagem | Ambiente | Resultado | Evidencia |
+|---|---|---|---|---|
+| 2026-07-21 | `pnpm infra:config` e `docker compose ... config --quiet` | Docker Compose 5.2.0 | PASS | Quatro servicos e dois manifests validos; imagens sem tag `latest` |
+| 2026-07-21 | Bootstrap de `.env` | Node 20.20.2 | PASS | Senha aleatoria gerada sem exibicao; `.env` ignorado e ausente de `git ls-files`; placeholder apenas em `.env.example` |
+| 2026-07-21 | Primeira/segunda execucoes `infra:up` | Docker Desktop 4.81.0 / Engine 29.6.1 | FAIL_RESOLVED | Quatro containers ficaram healthy; validadores expuseram corpo vazio de `/readyz`, merge de override e bind inativo em rede somente internal; DEV-0023 registra correcoes |
+| 2026-07-21 | `pnpm infra:up` e `pnpm infra:health` finais | Docker Compose 5.2.0 | PASS | `LYVOX_INFRA_HEALTH_OK services=postgres,pgbouncer,redis,mailpit` em duas execucoes consecutivas |
+| 2026-07-21 | Consultas de dependencia | Containers locais | PASS | PostgreSQL `pg_isready` + `SELECT 1`; PgBouncer `SELECT 1`; Redis `PONG`; Mailpit `/readyz` HTTP 200 |
+| 2026-07-21 | Rede, portas, volumes e TCP | Docker inspect + Node net | PASS | Rede de dados `Internal=true`; PostgreSQL/Redis sem bind; PgBouncer 6432 e Mailpit 1025/8025 apenas `127.0.0.1`; tres volumes nomeados; tres portas acessiveis |
+| 2026-07-21 | `infra:down` seguido de inspect e `infra:up` | Docker Compose 5.2.0 | PASS | Zero container orfao; volumes preservados; quatro servicos voltaram healthy |
+| 2026-07-21 | `pnpm infra:reset` sem confirmacao | Development | PASS | Operacao destrutiva recusada; nenhuma remocao de volume executada |
+| 2026-07-21 | Versoes e IDs locais | Docker Engine 29.6.1 | PASS | PostgreSQL 16.14 `786dab...`; PgBouncer 1.25.2 `7d7a27...`; Redis 7.4.9 `6ab0b6...`; Mailpit 1.30.5 `b868af...` |
+| 2026-07-21 | Variaveis host conflitantes | Node 20.20.2 / Compose 5.2.0 | PASS | `COMPOSE_PROJECT_NAME` e senha curtos no shell nao sobrepuseram o `.env` validado; config permaneceu no projeto local |
+| 2026-07-21 | Endpoint Docker remoto simulado | `DOCKER_HOST=tcp://example.invalid:2375` | PASS | Comando recusado antes de chamar Compose; somente endpoints locais `npipe`/`unix` sao aceitos |
+| 2026-07-21 | Reexecucao com imagens imutaveis | Docker Compose 5.2.0 | PASS | Quatro referencias `tag@sha256`, quatro containers healthy e `infra:health` aprovado novamente |
+| 2026-07-21 | Revisao SPEC, qualidade e validacao final | Tres revisores independentes, somente leitura | PASS | `READY_TO_APPROVE`; zero secret, zero endpoint remoto, digests imutaveis e nenhum `HARD_BLOCKER` |
+
+O gate comprova apenas a infraestrutura de suporte local. Nenhuma aplicacao, migration, seed, schema ou prontidao de produto foi declarada.

@@ -1,0 +1,91 @@
+name: ${COMPOSE_PROJECT_NAME:-lyvox-gerenciamento-local}
+
+services:
+  postgres:
+    image: postgres:16.14-alpine3.22@sha256:786dab398303b8ce7cb76b407bb21ef2e4dfbbbd4c6abcf3d29b3130467ffdbc
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-lyvox}
+      POSTGRES_USER: ${POSTGRES_USER:-lyvox}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run pnpm infra:up to generate .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - lyvox_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  pgbouncer:
+    image: edoburu/pgbouncer:v1.25.2-p0@sha256:7d7a27d9e90985cab5cf42256f5c13a3120baa4b055b69df37beb272b89b2340
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${POSTGRES_DB:-lyvox}
+      DB_USER: ${POSTGRES_USER:-lyvox}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Run pnpm infra:up to generate .env}
+      AUTH_TYPE: scram-sha-256
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: "200"
+      DEFAULT_POOL_SIZE: "20"
+      IGNORE_STARTUP_PARAMETERS: extra_float_digits
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - lyvox_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U \"$${DB_USER}\" -d \"$${DB_NAME}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+
+  redis:
+    image: redis:7.4.9-alpine@sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - lyvox_internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  mailpit:
+    image: axllent/mailpit:v1.30.5@sha256:b868afa176bfd6cce2323ea316cd99ccad77915e51e595748f6d786700ecf109
+    restart: unless-stopped
+    environment:
+      MP_DATABASE: /data/mailpit.db
+      MP_MAX_MESSAGES: "5000"
+    volumes:
+      - mailpit_data:/data
+    networks:
+      - lyvox_internal
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+networks:
+  lyvox_internal:
+    name: ${COMPOSE_PROJECT_NAME:-lyvox-gerenciamento-local}-internal
+    internal: true
+
+volumes:
+  postgres_data:
+    name: ${COMPOSE_PROJECT_NAME:-lyvox-gerenciamento-local}-postgres-data
+  redis_data:
+    name: ${COMPOSE_PROJECT_NAME:-lyvox-gerenciamento-local}-redis-data
+  mailpit_data:
+    name: ${COMPOSE_PROJECT_NAME:-lyvox-gerenciamento-local}-mailpit-data

@@ -13,6 +13,11 @@
     "build": "turbo run build",
     "dev": "turbo run dev --concurrency=4",
     "dev:verify": "node scripts/verify-dev-concurrency.mjs",
+    "infra:config": "node scripts/infra-local.mjs config",
+    "infra:down": "node scripts/infra-local.mjs down",
+    "infra:health": "node scripts/infra-local.mjs health",
+    "infra:reset": "node scripts/infra-local.mjs reset",
+    "infra:up": "node scripts/infra-local.mjs up",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck"

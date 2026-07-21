@@ -34,6 +34,18 @@ pnpm dev
 
 Os comandos de build, lint, teste e typecheck tambem estao orquestrados no `package.json` raiz; cada app/pacote recebera sua implementacao nas fases seguintes. Nao use este README como substituto dos documentos canonicos.
 
+## Infraestrutura local
+
+Docker Desktop com Compose v2 deve estar ativo. O primeiro comando gera `.env` local com senha aleatoria, valida o manifesto, inicia os quatro servicos e executa os testes de saude:
+
+```powershell
+pnpm infra:up
+pnpm infra:health
+pnpm infra:down
+```
+
+PgBouncer fica em `127.0.0.1:6432`; Mailpit usa SMTP em `127.0.0.1:1025` e interface em `http://127.0.0.1:8025`. PostgreSQL e Redis nao publicam portas no host. `infra:down` preserva dados. O reset destrutivo e restrito a development/test e exige `pnpm infra:reset -- --confirm-local-data-loss`.
+
 ## Limites dos pacotes
 
 Pacotes nunca importam `apps/*`. Dependencias internas usam `workspace:*` e seguem apenas estas direcoes:

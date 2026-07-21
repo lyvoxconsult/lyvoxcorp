@@ -64,7 +64,21 @@ O DOC-21 descreve criacao de repositorio separado. O prompt mestre, de maior pre
 ## PHASE-004 - Infraestrutura local
 
 - Inicio: `2026-07-21`.
-- Estado: `IN_PROGRESS`.
-- Gate: `GATE-004 = PENDING_IMPLEMENTATION_VALIDATION`.
+- Conclusao: `2026-07-21`.
+- Estado: `APPROVED`.
+- Gate: `GATE-004 = APPROVED`.
 - Escopo: Docker Compose local com PostgreSQL 16, PgBouncer, Redis 7 e Mailpit, health checks, volumes nomeados e rede interna.
-- Proxima acao: consolidar DOC-14/DOC-18, implementar os manifests e provar saude e conectividade local.
+- Arquivos: `.env.example`, `docker-compose.yml`, `docker-compose.override.yml`, `scripts/infra-local.mjs`, scripts raiz e documentacao Docker.
+- Implementacao: imagens fixadas por versao e digest; rede de dados interna; rede separada para binds loopback de PgBouncer/Mailpit; tres volumes nomeados; segredo local gerado e ignorado; reset restrito e confirmado.
+- Validacao: config, up/wait, quatro health checks, PostgreSQL e PgBouncer `SELECT 1`, Redis `PING`, Mailpit `/readyz`, SMTP/HTTP TCP, isolamento de portas, persistencia apos down/up e guard de reset.
+- Documentacao consultada: Docker Compose atual via Context7; releases e healthcheck oficiais de PgBouncer/Mailpit.
+- QA: conformidade SPEC aprovada; qualidade aprovada apos corrigir escopo de ambiente/contexto e imutabilidade das imagens; validacao final independente `READY_TO_APPROVE`.
+- Proxima acao: iniciar automaticamente PHASE-005.
+
+## PHASE-005 - PostgreSQL 16 e migrations iniciais
+
+- Inicio: `2026-07-21`.
+- Estado: `IN_PROGRESS`.
+- Gate: `GATE-005 = PENDING_IMPLEMENTATION_VALIDATION`.
+- Escopo: schema Drizzle e migrations versionadas iniciais conforme DOC-08, executadas no PostgreSQL local aprovado.
+- Proxima acao: consolidar dicionario de dados e criterios do gate antes de criar schema/migrations.
