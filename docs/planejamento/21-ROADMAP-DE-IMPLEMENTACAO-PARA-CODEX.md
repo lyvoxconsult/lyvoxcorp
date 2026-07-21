@@ -1,178 +1,187 @@
 # 21 — Roadmap de Implementação para o Codex
 
 - **Documento ID:** DOC-21
-- **Versão:** 1.0.0
-- **Status:** APPROVED_BY_ARCHITECTURE_AGENT
+- **Versão:** 2.0.0
+- **Status:** APPROVED_FOR_CODEX_IMPLEMENTATION
 - **Data:** 2026-07-21
 - **Responsável:** Ottercraft (Lead Solution Architect & Technical PM)
-- **Classificação:** ARCHITECTURAL_DECISION / USER_CONFIRMED
-- **Documentos Dependentes:** Todos os documentos anteriores (DOC-01 a DOC-20)
-- **Fontes Consultadas:** PROMPT-MESTRE-OTTERCRAFT
+- **Classificação:** USER_APPROVED_FOR_PLANNING / ARCHITECTURAL_DECISION
+- **Documentos Dependentes:** Todos os documentos do pacote (DOC-00 a DOC-20)
+- **Fontes Consultadas:** PROMPT-FINAL-UNICO-OTTERCRAFT
 
 ---
 
 ## 1. Diretrizes de Execução do Roadmap
 
-Este roadmap estabelece a ordem **estrita, cronológica e dependente** de execução a ser seguida pelo agente executor **Codex**. 
+Este roadmap estabelece a ordem **estrita, cronológica e dependente** de execução (PHASE-000 a PHASE-030) a ser seguida pelo agente executor **Codex**. 
 
 > [!CAUTION]
 > **REGRA DE OURO DE EXECUÇÃO:**
-> O Codex é terminantemente proibido de avançar para a fase seguinte sem que todos os entregáveis, testes e **Quality Gates** da fase atual tenham sido integralmente concluídos, testados e validados.
+> O Codex é terminantemente proibido de avançar para a fase seguinte sem que todos os entregáveis, testes e **Quality Gates** da fase atual tenham sido integralmente concluídos e validados.
 
 ---
 
-## 2. Fases do Roadmap de Implementação (PHASE-000 a PHASE-021)
+## 2. Fases Sequenciais do Roadmap (PHASE-000 a PHASE-030)
 
-### PHASE-000: Preparação e Leitura do Pacote Documental
-- **Objetivo:** Garantir o alinhamento de contexto e entendimento completo de todos os 29 documentos.
-- **Pré-condições:** Liberação do repositório e disponibilidade dos documentos em `docs/planejamento/`.
+### PHASE-000: Leitura e Validação Documental
+- **Objetivo:** Alinhamento de contexto e confirmação da integridade de todos os 29 documentos.
+- **Inputs:** Pacote documental em `./docs/planejamento/`.
 - **Tarefas:** Leitura integral dos documentos DOC-00 a DOC-28. Leitura dos ADRs.
-- **Entregáveis:** Relatório de confirmação de leitura emitido pelo Codex sem ressalvas ou divergências.
+- **Arquivos:** N/A (Read-only).
+- **Entregáveis:** Relatório de confirmação de leitura emitido pelo Codex.
+- **Testes:** Validação de checksum dos 29 arquivos.
 - **Gate:** `GATE-000` (Conformidade de Leitura 100%).
+- **Rollback:** Parada imediata em caso de incoerência documental.
+- **Condições de Bloqueio:** Existência de arquivo corrompido ou ausente.
+- **Definition of Done:** 100% dos documentos lidos sem ressalvas.
 
-### PHASE-001: Estruturação do Repositório e Monorepo
-- **Objetivo:** Inicializar o monorepo pnpm workspaces com Turborepo e configurações base de TypeScript, ESLint e Prettier.
-- **Pré-condições:** PHASE-000 concluída.
-- **Tarefas:** Criar diretórios `apps/frontend`, `apps/backend`, `packages/config`. Criar `pnpm-workspace.yaml`, `package.json` raiz e `tsconfig.base.json`.
-- **Entregáveis:** Monorepo configurado e executando `pnpm install` sem erros.
-- **Gate:** `GATE-001` (Monorepo Bootstrap Validado).
+### PHASE-001: Novo Repositório Separado
+- **Objetivo:** Inicializar o novo repositório limpo do projeto.
+- **Inputs:** Diretrizes de Greenfield.
+- **Tarefas:** Criar novo repositório isolado sem dependência do projeto legado.
+- **Arquivos:** `.gitignore`, `README.md`, `LICENSE`.
+- **Entregáveis:** Repositório git inicializado.
+- **Testes:** Execução de `git status`.
+- **Gate:** `GATE-001` (Clean Repo Initialized).
 
-### PHASE-002: Configuração do Ambiente Local de Desenvolvimento
-- **Objetivo:** Subir infraestrutura local via Docker Compose.
-- **Pré-condições:** PHASE-001 concluída.
-- **Tarefas:** Criar `docker-compose.yml` local contendo PostgreSQL 16, Redis 7 e PgBouncer.
-- **Entregáveis:** Contêineres rodando e saudáveis localmente.
-- **Gate:** `GATE-002` (Local Environment Ready).
+### PHASE-002: Estrutura de Monorepo (pnpm + Turborepo)
+- **Objetivo:** Configurar a estrutura de pacotes e aplicações.
+- **Inputs:** Especificação do monorepo (DOC-05).
+- **Tarefas:** Criar `apps/web`, `apps/api`, `apps/worker`, `packages/config`, `packages/validation`, `packages/shared`. Configurar `pnpm-workspace.yaml` e Turborepo.
+- **Arquivos:** `pnpm-workspace.yaml`, `turbo.json`, `package.json` raiz.
+- **Entregáveis:** Monorepo configurado.
+- **Testes:** Execução de `pnpm install` sem erros.
+- **Gate:** `GATE-002` (Monorepo Bootstrap Ready).
 
-### PHASE-003: Infraestrutura Base e Logger Backend
-- **Objetivo:** Criar aplicação backend Fastify com TypeScript, Pino Logger e tratamento global de exceções.
-- **Pré-condições:** PHASE-002 concluída.
-- **Tarefas:** Configurar servidor Fastify em `apps/backend`, adicionar Zod env validation, middleware de Correlation ID e error handler RFC 7807.
-- **Entregáveis:** API escutando na porta 4000 e respondendo aos endpoints `/health` e `/readiness`.
-- **Gate:** `GATE-003` (Fastify Base Server Ready).
+### PHASE-003: Configuração do Desenvolvimento Local
+- **Objetivo:** Configurar scripts de dev local.
+- **Inputs:** DOC-18.
+- **Tarefas:** Criar scripts de inicialização simultânea dos workspaces.
+- **Arquivos:** `package.json` scripts (`pnpm dev`).
+- **Entregáveis:** Ambiente de dev unificado.
+- **Testes:** Verificação de execução concorrente dos scripts.
+- **Gate:** `GATE-003` (Local Dev Script Ready).
 
-### PHASE-004: PostgreSQL, Drizzle ORM e Migrations Initial
-- **Objetivo:** Estabelecer a camada de dados com Drizzle ORM e executar as migrations base.
-- **Pré-condições:** PHASE-003 concluída.
-- **Tarefas:** Declarar schemas Drizzle para todas as tabelas (DOC-08), gerar e executar migration `0001_initial_schema.sql`.
-- **Entregáveis:** Tabelas criadas no PostgreSQL local com FKs, PKs UUID, índices e constraints.
-- **Gate:** `GATE-004` (Database Schema Initialized).
+### PHASE-004: Infraestrutura Local (Docker Compose)
+- **Objetivo:** Subir infraestrutura local em contêineres.
+- **Inputs:** DOC-14.
+- **Tarefas:** Criar `docker-compose.yml` contendo PostgreSQL 16, Redis 7, PgBouncer e Mailpit.
+- **Arquivos:** `docker-compose.yml`, `docker-compose.override.yml`.
+- **Entregáveis:** Contêineres de suporte locais rodando e saudáveis.
+- **Testes:** Conexão TCP com PostgreSQL, Redis e Mailpit.
+- **Gate:** `GATE-004` (Local Containers Healthy).
 
-### PHASE-005: Módulo de Autenticação (Auth Engine)
-- **Objetivo:** Implementar fluxos de login, logout, refresh token em Redis e hash de senhas Argon2id.
-- **Pré-condições:** PHASE-004 concluída.
-- **Tarefas:** Implementar Use Cases de login/logout/refresh, cookies HTTP-Only, JWT RS256/HS256 e MFA TOTP.
-- **Entregáveis:** Endpoints `/api/v1/auth/*` 100% funcionais e testados.
-- **Gate:** `GATE-005` (Auth Engine Complete).
+### PHASE-005: PostgreSQL 16 e Migrations Iniciais
+- **Objetivo:** Estabelecer a camada de persistência mestre.
+- **Inputs:** Dicionário de Dados (DOC-08).
+- **Tarefas:** Declarar schemas Drizzle ORM para todas as tabelas (DOC-08) e gerar migration `0001_initial_schema.sql`.
+- **Arquivos:** `packages/database/src/schema/*`, `migrations/0001_initial_schema.sql`.
+- **Entregáveis:** Schemas e tabelas criados no PostgreSQL.
+- **Testes:** Execução de `pnpm db:migrate` sem erros.
+- **Gate:** `GATE-005` (Database Migration Success).
 
-### PHASE-006: Módulo RBAC e Guardas de Permissão
-- **Objetivo:** Aplicar controle de acesso granular por papel e organização em todas as rotas Fastify.
-- **Pré-condições:** PHASE-005 concluída.
-- **Tarefas:** Implementar middleware `rbacGuard`, matriz de permissões e isolamento por `organization_id`.
-- **Entregáveis:** Bloqueio HTTP 403 funcional para permissões negadas em testes automatizados.
-- **Gate:** `GATE-006` (RBAC & Multi-Tenancy Enforced).
+### PHASE-006: Autenticação e Sessões Opacas Server-Side
+- **Objetivo:** Implementar a engine de autenticação baseada em sessões opacas.
+- **Inputs:** DOC-10.
+- **Tarefas:** Implementar login, logout, revogação de sessão, cookies `HttpOnly, Secure, SameSite=Lax`, hash Argon2id e ativador MFA TOTP.
+- **Arquivos:** `apps/api/src/modules/auth/*`, `packages/auth/*`.
+- **Entregáveis:** Rotas `/api/v1/auth/*` 100% funcionais.
+- **Testes:** Testes unitários e de integração de autenticação (`Vitest`).
+- **Gate:** `GATE-006` (Opaque Session Auth Verified).
 
-### PHASE-007: Fundação de API e OpenAPI Spec
-- **Objetivo:** Configurar Swagger/OpenAPI 3.1 automático e padrões de paginação por cursor.
-- **Pré-condições:** PHASE-006 concluída.
-- **Tarefas:** Integrar `@fastify/swagger` e `@fastify/swagger-ui`, padronizar paginação e de-duplicação por `Idempotency-Key`.
-- **Entregáveis:** Rota `/docs` exposta com OpenAPI interativo funcional.
-- **Gate:** `GATE-007` (API Infrastructure Complete).
+### PHASE-007: Autorização RBAC e Scope Ownership
+- **Objetivo:** Implementar controle de acesso granular por papéis.
+- **Inputs:** DOC-10 (Matriz RBAC).
+- **Tarefas:** Criar middleware `RbacGuard`, matriz de permissões (`recurso.ação`) e controle de ownership.
+- **Arquivos:** `apps/api/src/core/guards/rbac.guard.ts`, `packages/permissions/*`.
+- **Entregáveis:** Bloqueio HTTP 403 funcional para acessos negados.
+- **Testes:** Testes de integração simulando os 5 papéis iniciais.
+- **Gate:** `GATE-007` (RBAC Authorization Enforced).
 
-### PHASE-008: Fundação Frontend SPA (React + Vite + Design System)
-- **Objetivo:** Construir a base do frontend com Tailwind CSS, Design System Dark Mode e React Router.
-- **Pré-condições:** PHASE-007 concluída.
-- **Tarefas:** Inicializar Vite em `apps/frontend`, implementar tokens de cores (DOC-04), componentes base (Button, Input, Table, Modal) e layout base (Sidebar, Header).
-- **Entregáveis:** Frontend inicial compilando sem erros e exibindo layout base.
-- **Gate:** `GATE-008` (Frontend Foundations & Design System Ready).
+### PHASE-008: Backend Foundation (NestJS + Fastify)
+- **Objetivo:** Estruturar a fundação da API REST.
+- **Inputs:** DOC-07 e DOC-09.
+- **Tarefas:** Configurar servidor NestJS/Fastify, middleware de Correlation ID, envelope de erro RFC 7807 e OpenAPI Swagger `/docs`.
+- **Arquivos:** `apps/api/src/main.ts`, `apps/api/src/app.module.ts`.
+- **Entregáveis:** API escutando e respondendo em `/health` e `/readiness`.
+- **Testes:** Testes HTTP de infraestrutura e OpenAPI spec.
+- **Gate:** `GATE-008` (Backend Foundation Ready).
 
-### PHASE-009: Módulos de Negócio P0 (Dashboard, Clientes, CRM)
-- **Objetivo:** Construir a camada completa (UI + API + DB) dos módulos vitais de negócio.
-- **Pré-condições:** PHASE-008 concluída.
-- **Tarefas:** Implementar CRUD e telas de Clientes, Kanban de Leads CRM e Dashboard com KPI Cards.
-- **Entregáveis:** Módulos P0 integrados e operacionais end-to-end.
-- **Gate:** `GATE-009` (Core P0 Modules Functional).
+### PHASE-009: Frontend Foundation (React 19 + Vite + Design System)
+- **Objetivo:** Estruturar a fundação do frontend SPA.
+- **Inputs:** DOC-04 e DOC-06.
+- **Tarefas:** Configurar Vite em `apps/web/`, Design Tokens Tailwind (com paleta `#4180ab`, `#ffffff`, `#8ab3cf`, `#bdd1de`, `#e4ebf0` e Google Fonts `Cormorant SC`, `Alegreya SC`, `Rasa`, `JetBrains Mono`), componentes base e layout (Sidebar, Header).
+- **Arquivos:** `apps/web/src/*`, `tailwind.config.js`.
+- **Entregáveis:** Frontend compilando e exibindo layout base.
+- **Testes:** Build Vite sem erros e testes de componentes visual.
+- **Gate:** `GATE-009` (Frontend Foundation & Tokens Ready).
 
-### PHASE-010: Módulos de Negócio P1 (Propostas, Projetos, Financeiro, Reuniões)
-- **Objetivo:** Implementar os módulos de operação, contratos, tarefas e controle financeiro.
-- **Pré-condições:** PHASE-009 concluída.
-- **Tarefas:** Implementar Propostas, Projetos com Kanban/Lista, Contas a Pagar/Receber e Agendamento de Reuniões.
-- **Entregáveis:** Módulos P1 integrados com validações de negócio (BR-050, BR-070, BR-080).
-- **Gate:** `GATE-010` (Core P1 Modules Functional).
+### PHASE-010 a PHASE-019: Módulos Funcionais de Negócio
+- **PHASE-010 (Clientes):** Cadastro de clientes PF/PJ, validação de CPF/CNPJ e busca. (`GATE-010`).
+- **PHASE-011 (Leads e CRM):** Funil de vendas Kanban, troca de etapas e conversão. (`GATE-011`).
+- **PHASE-012 (Reuniões):** Agendamento, pauta e anexos de reuniões. (`GATE-012`).
+- **PHASE-013 (Serviços):** Catálogo de serviços e versionamento de preços. (`GATE-013`).
+- **PHASE-014 (Propostas e Contratos):** Gerador de propostas, exportação em PDF e conversão em contrato. (`GATE-014`).
+- **PHASE-015 (Projetos e Tarefas):** Gestão de projetos, visualização Lista/Kanban/Calendário/Gantt e subtarefas (`parent_task_id`). (`GATE-015`).
+- **PHASE-016 (Financeiro):** Contas a pagar/receber, baixas e fluxo de caixa gerencial. (`GATE-016`).
+- **PHASE-017 (Marketing):** Ideias e calendário editorial. (`GATE-017`).
+- **PHASE-018 (Notificações):** Central in-app e e-mails transacionais. (`GATE-018`).
+- **PHASE-019 (Arquivos):** Upload/download seguro em storage privado em disco com validação Magic Bytes. (`GATE-019`).
 
-### PHASE-011: Módulo de Arquivos e Storage Privado
-- **Objetivo:** Implementar a gestão de upload, download e metadados de arquivos privados.
-- **Pré-condições:** PHASE-010 concluída.
-- **Tarefas:** Criar controlador de arquivos com validação de Magic Bytes, checksum SHA-256 e download via stream autenticada.
-- **Entregáveis:** Sistema de anexos e documentos operacional.
-- **Gate:** `GATE-011` (Storage System Operational).
+### PHASE-020: Filas Assíncronas e Engine de Automação
+- **Objetivo:** Processamento de jobs em segundo plano via BullMQ em processo separado (`apps/worker/`).
+- **Inputs:** DOC-11.
+- **Tarefas:** Implementar workers de e-mail, PDF, relatórios e DLQ.
+- **Entregáveis:** Processador de jobs assíncronos operacional.
+- **Gate:** `GATE-020` (Async Workers Operational).
 
-### PHASE-012: Motor de Filas Assíncronas (BullMQ & Workers)
-- **Objetivo:** Implementar o processador de jobs em background com Redis e BullMQ.
-- **Pré-condições:** PHASE-011 concluída.
-- **Tarefas:** Criar contêiner de Worker dedicado, filas `email_queue`, `pdf_queue` e tratamento de Dead Letter Queue (DLQ).
-- **Entregáveis:** Geração de PDFs e envios de e-mail ocorrendo de forma assíncrona.
-- **Gate:** `GATE-012` (Background Workers Operational).
+### PHASE-021: Integração com n8n Local
+- **Objetivo:** Conectar a aplicação ao motor n8n local via Transactional Outbox.
+- **Inputs:** DOC-13.
+- **Tarefas:** Implementar processador outbox, disparo de webhooks assinados com HMAC-SHA256 e callback inbox.
+- **Gate:** `GATE-021` (n8n Integration Verified).
 
-### PHASE-013: Integração com n8n Local e Webhooks Assinados
-- **Objetivo:** Conectar a aplicação ao motor n8n local via Outbox Pattern e HMAC.
-- **Pré-condições:** PHASE-012 concluída.
-- **Tarefas:** Implementar processador Outbox, disparo de webhooks assinados com HMAC-SHA256 e endpoint de recepção callback.
-- **Entregáveis:** Integração n8n testada com garantia de entrega e retries.
-- **Gate:** `GATE-013` (n8n Integration Verified).
+### PHASE-022: Camada de Inteligência Artificial Local (Ollama)
+- **Objetivo:** Conectar assistente virtual ao Ollama local em modo degradado sem fallback pago.
+- **Inputs:** DOC-13.
+- **Gate:** `GATE-022` (Ollama AI Operational).
 
-### PHASE-014: Camada de Inteligência Artificial (Ollama Local)
-- **Objetivo:** Integrar o assistente virtual e geração de cópias/atas via Ollama local.
-- **Pré-condições:** PHASE-013 concluída.
-- **Tarefas:** Conectar SDK ao Ollama local, implementar fallback para aviso amigável e fila de transcrição.
-- **Entregáveis:** Chat de IA e resumos de reunião funcionais em modo local.
-- **Gate:** `GATE-014` (AI Engine Operational).
+### PHASE-023: Trilha de Auditoria e Logs Imutáveis
+- **Objetivo:** Implementar a tabela imutável `audit_logs` para registro de ações sensíveis.
+- **Inputs:** DOC-10 e DOC-16.
+- **Gate:** `GATE-023` (Audit Logging Active).
 
-### PHASE-015: Observabilidade e Coleta de Métricas/Logs
-- **Objetivo:** Instrumentar a aplicação com OpenTelemetry, Prometheus e Pino Loki.
-- **Pré-condições:** PHASE-014 concluída.
-- **Tarefas:** Adicionar exportadores OpenTelemetry no Fastify, métricas Prometheus e logs JSON estruturados.
-- **Entregáveis:** Painéis no Grafana exibindo métricas e traces em tempo real.
-- **Gate:** `GATE-015` (Observability & Monitoring Active).
+### PHASE-024: Instrumentação de Observabilidade
+- **Objetivo:** Instrumentar Pino JSON, métricas Prometheus e exportadores OpenTelemetry.
+- **Inputs:** DOC-15.
+- **Gate:** `GATE-024` (Observability Instrumentated).
 
-### PHASE-016: Hardening de Segurança e Auditoria Final
-- **Objetivo:** Aplicar travas finais de segurança (OWASP) e trilha de auditoria completa.
-- **Pré-condições:** PHASE-015 concluída.
-- **Tarefas:** Auditar cabeçalhos de segurança (CSP, HSTS), rate limiters, sanidade de sanitização e tabela de auditoria imutável (`audit_logs`).
-- **Entregáveis:** Relatório de varredura de segurança sem vulnerabilidades críticas.
-- **Gate:** `GATE-016` (Security Hardening Complete).
+### PHASE-025: Hardening de Segurança (OWASP)
+- **Objetivo:** Validação final de segurança (CSP, HSTS, rate limiters, sanitização).
+- **Inputs:** DOC-10.
+- **Gate:** `GATE-025` (Security Hardening Passed).
 
-### PHASE-017: Testes de Carga, Stress e Performance (k6)
-- **Objetivo:** Validar a capacidade do sistema sob carga sustentada de 100 RPS e 500 VUs.
-- **Pré-condições:** PHASE-016 concluída.
-- **Tarefas:** Executar scripts k6 de carga, stress e soak test no ambiente de testes.
-- **Entregáveis:** Relatório de testes k6 comprovando P95 < 200ms e 0% de erro.
-- **Gate:** `GATE-017` (Performance Targets Validated).
+### PHASE-026: Testes de Carga e Performance (k6)
+- **Objetivo:** Execução de suíte de testes k6 validando latência P95 < 250ms e throughput de 100 RPS.
+- **Inputs:** DOC-16.
+- **Gate:** `GATE-026` (Performance Benchmark Passed).
 
-### PHASE-018: Implantação e Validação em Staging
-- **Objetivo:** Realizar deploy completo no ambiente de homologação (Staging VPS).
-- **Pré-condições:** PHASE-017 concluída.
-- **Tarefas:** Executar pipeline de CI/CD para staging, rodar migrations e executar suíte de testes E2E Playwright.
-- **Entregáveis:** Sistema Staging 100% idêntico à produção operacional.
-- **Gate:** `GATE-018` (Staging Environment Approved).
+### PHASE-027: Deploy no Ambiente de Staging
+- **Objetivo:** Deploy e validação em ambiente de homologação idêntico à produção.
+- **Inputs:** DOC-18 e DOC-20.
+- **Gate:** `GATE-027` (Staging Deployed).
 
-### PHASE-019: Homologação e Testes de Aceite (UAT)
-- **Objetivo:** Validação funcional completa com dados de teste representativos.
-- **Pré-condições:** PHASE-018 concluída.
-- **Tarefas:** Execução de checklist mestre de aceite (DOC-27) em todas as telas e fluxos.
-- **Entregáveis:** Sign-off formal de homologação aprovado.
-- **Gate:** `GATE-019` (User Acceptance Testing Complete).
+### PHASE-028: Homologação e Testes de Aceite (UAT)
+- **Objetivo:** Execução completa do Checklist Mestre de Aceite (DOC-27).
+- **Inputs:** DOC-27.
+- **Gate:** `GATE-028` (UAT Approved).
 
-### PHASE-020: Deploy de Produção e Lançamento
-- **Objetivo:** Realizar o deploy oficial na VPS de Produção.
-- **Pré-condições:** PHASE-019 concluída.
-- **Tarefas:** Executar deploy zero-downtime, bootstrap de dados essenciais e configuração de TLS Caddy.
-- **Entregáveis:** Sistema Lyvox Gerenciamento no ar no domínio oficial de produção.
-- **Gate:** `GATE-020` (Production Release Active).
+### PHASE-029: Deploy em Produção (Janela Controlada)
+- **Objetivo:** Deploy oficial na VPS de Produção da Lyvox.
+- **Inputs:** DOC-14 e DOC-20.
+- **Gate:** `GATE-029` (Production Released).
 
-### PHASE-021: Estabilização e Pós-Lançamento (Hypercare)
+### PHASE-030: Estabilização e Pós-Lançamento (Hypercare)
 - **Objetivo:** Monitoramento intensivo de 72 horas pós-lançamento.
-- **Pré-condições:** PHASE-020 concluída.
-- **Tarefas:** Acompanhar métricas de erro, uso de memória, integridade de backups e feedback inicial.
-- **Entregáveis:** Relatório final de estabilização sem bugs críticos abertos.
-- **Gate:** `GATE-021` (System Stabilization Complete).
+- **Inputs:** DOC-15 e DOC-25.
+- **Gate:** `GATE-030` (System Stabilized).

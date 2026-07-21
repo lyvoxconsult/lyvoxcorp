@@ -1,73 +1,62 @@
 # 26 — Handoff Executivo para o Codex
 
 - **Documento ID:** DOC-26
-- **Versão:** 1.0.0
-- **Status:** APPROVED_BY_ARCHITECTURE_AGENT
+- **Versão:** 2.0.0
+- **Status:** APPROVED_FOR_CODEX_IMPLEMENTATION
 - **Data:** 2026-07-21
-- **Responsável:** Ottercraft (Lead Solution Architect)
-- **Classificação:** ARCHITECTURAL_DECISION / USER_CONFIRMED
+- **Responsável:** Ottercraft (Lead System Architect)
+- **Classificação:** USER_APPROVED_FOR_PLANNING / ARCHITECTURAL_DECISION
 - **Documentos Dependentes:** Todos os documentos do pacote (DOC-00 a DOC-25)
-- **Fontes Consultadas:** PROMPT-MESTRE-OTTERCRAFT
+- **Fontes Consultadas:** PROMPT-FINAL-UNICO-OTTERCRAFT
 
 ---
 
-## 1. Contrato de Execução e Autoridade do Agente Codex
+## 1. Contrato de Execução para o Agente Codex
 
-O agente **Codex** é formalmente designado como o **IMPLEMENTATION_EXECUTOR** responsável por transformar a especificação documental produzida pelo Ottercraft no sistema funcional **Lyvox Gerenciamento**.
+Este documento formaliza o **Handoff Executivo** do pacote documental de planejamento aprovado do **Lyvox Gerenciamento** para o agente executor **Codex**.
 
-### 1.1 Limites de Autoridade do Codex
-1. **Fontes Canônicas:** Os 29 documentos Markdown presentes em `<PROJECT_ROOT>/docs/planejamento/` são a única fonte canônica de verdade.
-2. **Proibição de Leitura do Legado:** É expressamente proibido ao Codex pesquisar, ler, auditar, copular ou importar qualquer código, schema ou arquivo de projetos anteriores (`LEGACY_CODE_REUSE = NO`).
-3. **Proibição de Alteração de ADRs:** O Codex não pode alterar a stack (Fastify, React, PostgreSQL, Drizzle, Redis) ou decisões arquiteturais registradas nos ADRs (DOC-23) sem a autorização prévia e criação de um novo ADR.
-4. **Trabalho por Fases:** O Codex deve obrigatoriamente implementar o sistema fase por fase, respeitando a sequência e os Quality Gates declarados no **Roadmap (DOC-21)**.
+> [!IMPORTANT]
+> **TERMOS DO CONTRATO DE EXECUÇÃO:**
+> O Codex assume a responsabilidade de implementar o sistema em código a partir dos 29 documentos fornecidos, respeitando os seguintes limites inegociáveis:
+> 1. **Fidelidade Arquitetural 100%:** É proibido alterar stacks, ORMs, padrões de autenticação ou bibliotecas congeladas nos ADRs (DOC-23).
+> 2. **Respeito aos Gates:** É proibidíssimo avançar uma fase sem que o Quality Gate da fase atual esteja 100% verificado.
+> 3. **Proibição de Código Legado:** O desenvolvimento é 100% Greenfield em repositório novo.
+> 4. **Sem Dados Falsos em Produção:** Dados de teste residem exclusivamente nos ambientes de dev e test.
 
 ---
 
-## 2. Ordem Obrigatória de Leitura para o Codex
+## 2. Ordem de Leitura Recomendada para a Fase de Inicialização
 
-Antes de escrever qualquer linha de código, o Codex deve ler os documentos nesta ordem estrita:
+Para assimilar o contexto técnico antes de iniciar a `PHASE-001`, o Codex deve ler os documentos na seguinte sequência priorizada:
+
+1. **[00-INDICE-MESTRE-E-STATUS.md](./00-INDICE-MESTRE-E-STATUS.md):** Mapa geral do planejamento e status.
+2. **[01-VISAO-PRODUTO-ESCOPO-E-PRINCIPIOS.md](./01-VISAO-PRODUTO-ESCOPO-E-PRINCIPIOS.md):** Visão de produto e limites de escopo.
+3. **[02-REQUISITOS-FUNCIONAIS-E-REGRAS-DE-NEGOCIO.md](./02-REQUISITOS-FUNCIONAIS-E-REGRAS-DE-NEGOCIO.md):** Requisitos e regras funcionais.
+4. **[05-ARQUITETURA-GERAL-E-DECISOES-DE-STACK.md](./05-ARQUITETURA-GERAL-E-DECISOES-DE-STACK.md):** Stack congelada e arquitetura Modulith.
+5. **[08-MODELAGEM-POSTGRESQL-E-DICIONARIO-DE-DADOS.md](./08-MODELAGEM-POSTGRESQL-E-DICIONARIO-DE-DADOS.md):** Dicionário de dados e schemas SQL.
+6. **[09-CONTRATOS-API-REST-E-OPENAPI.md](./09-CONTRATOS-API-REST-E-OPENAPI.md):** Contratos de API e respostas RFC 7807.
+7. **[10-AUTENTICACAO-RBAC-E-SEGURANCA.md](./10-AUTENTICACAO-RBAC-E-SEGURANCA.md):** Modelo de sessões opacas e matriz RBAC.
+8. **[21-ROADMAP-DE-IMPLEMENTACAO-PARA-CODEX.md](./21-ROADMAP-DE-IMPLEMENTACAO-PARA-CODEX.md):** Fases sequenciais de execução (PHASE-000 a PHASE-030).
+9. **[22-MATRIZ-DE-RASTREABILIDADE.md](./22-MATRIZ-DE-RASTREABILIDADE.md):** Matriz de rastreabilidade completa.
+
+---
+
+## 3. Prompt de Inicialização Recomendado para o Codex
+
+Ao iniciar a fase de código, o seguinte prompt mestre deve ser fornecido ao Codex:
 
 ```text
-1. 00-INDICE-MESTRE-E-STATUS.md
-2. 01-VISAO-PRODUTO-ESCOPO-E-PRINCIPIOS.md
-3. 02-REQUISITOS-FUNCIONAIS-E-REGRAS-DE-NEGOCIO.md
-4. 05-ARQUITETURA-GERAL-E-DECISOES-DE-STACK.md
-5. 06-ARQUITETURA-FRONTEND.md
-6. 07-ARQUITETURA-BACKEND.md
-7. 08-MODELAGEM-POSTGRESQL-E-DICIONARIO-DE-DADOS.md
-8. 09-CONTRATOS-API-REST-E-OPENAPI.md
-9. 10-AUTENTICACAO-RBAC-E-SEGURANCA.md
-10. 21-ROADMAP-DE-IMPLEMENTACAO-PARA-CODEX.md
-11. 23-ADRS-DECISOES-ARQUITETURAIS.md
-12. 26-HANDOFF-EXECUTIVO-PARA-CODEX.md
-```
+Você é o Codex, agente executor de engenharia de software da Lyvox.
 
----
+Você recebeu o pacote documental de planejamento Greenfield 100% certificado e aprovado localizado em:
+docs/planejamento/
 
-## 3. Prompt de Inicialização Mestre para o Agent Codex
+Sua missão é executar rigorosamente o roadmap do documento 21-ROADMAP-DE-IMPLEMENTACAO-PARA-CODEX.md, iniciando na PHASE-000 e avançando sequencialmente até a PHASE-030.
 
-```text
-================================================================================
-PROMPT DE INICIALIZAÇÃO PARA O AGENTE EXECUÇÃO (CODEX)
-================================================================================
-
-Você é o CODEX, o IMPLEMENTATION_EXECUTOR responsável pela construção do sistema
-empresarial LYVOX GERENCIAMENTO.
-
-Sua única missão é implementar o sistema do zero (Clean Greenfield) seguindo
-rigorosamente o planejamento arquitetural e documental criado pelo Ottercraft e
-disponível em:
-
-<PROJECT_ROOT>/docs/planejamento/
-
-REGRAS INVIOLÁVEIS DE EXECUÇÃO:
-1. NUNCA acesse, pesquise ou copie código do projeto legado.
-2. NUNCA altere as escolhas de stack (Fastify + React + Drizzle + PostgreSQL + Redis).
-3. NUNCA pule uma fase do roadmap (DOC-21) sem aprovar o Quality Gate correspondente.
-4. NUNCA crie requisitos ou funções não mapeados nos documentos DOC-02 e DOC-22.
-5. Em cada fase, execute os testes automatizados correspondentes (pnpm test).
-6. Pare imediatamente e informe o usuário se encontrar uma decisão classificada como DECISION_BLOCKED.
-
-INICIE AGORA A EXECUÇÃO PELA PHASE-000 E PHASE-001 DO ROADMAP (DOC-21).
-================================================================================
+Regras invioláveis:
+1. Respeite todas as decisões técnicas congeladas nos ADRs (05-ARQUITETURA-GERAL-E-DECISOES-DE-STACK.md e 23-ADRS-DECISOES-ARQUITETURAIS.md).
+2. Não crie JWT em localStorage ou Bearer tokens no browser. A autenticação utiliza obrigatoriamente Sessões Opacas Server-Side com cookies HttpOnly (10-AUTENTICACAO-RBAC-E-SEGURANCA.md).
+3. Não pule nenhum Quality Gate. Execute a validação de cada fase antes de prosseguir.
+4. Utilize a stack congelada: React 19 + Vite + TypeScript + Tailwind CSS no frontend; NestJS com adaptador Fastify no backend; PostgreSQL 16 com Drizzle ORM; Redis 7 + BullMQ para filas.
+5. Inicie agora a PHASE-000 executando a verificação de integridade dos documentos.
 ```

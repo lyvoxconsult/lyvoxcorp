@@ -1,59 +1,56 @@
 # 07 — Arquitetura Backend
 
 - **Documento ID:** DOC-07
-- **Versão:** 1.0.0
-- **Status:** APPROVED_BY_ARCHITECTURE_AGENT
+- **Versão:** 2.0.0
+- **Status:** APPROVED_FOR_CODEX_IMPLEMENTATION
 - **Data:** 2026-07-21
 - **Responsável:** Ottercraft (Backend Architect)
-- **Classificação:** ARCHITECTURAL_DECISION / USER_CONFIRMED
-- **Documentos Dependentes:** [05-ARQUITETURA-GERAL-E-DECISOES-DE-STACK.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/05-ARQUITETURA-GERAL-E-DECISOES-DE-STACK.md)
-- **Fontes Consultadas:** PROMPT-MESTRE-OTTERCRAFT, Fastify Official Documentation, Clean Architecture Guidelines
+- **Classificação:** USER_APPROVED_FOR_PLANNING / ARCHITECTURAL_DECISION
+- **Documentos Dependentes:** [05-ARQUITETURA-GERAL-E-DECISOES-DE-STACK.md](./05-ARQUITETURA-GERAL-E-DECISOES-DE-STACK.md)
+- **Fontes Consultadas:** PROMPT-FINAL-UNICO-OTTERCRAFT, NestJS Official Documentation, Fastify Guide, Clean Architecture
 
 ---
 
 ## 1. Visão Geral da Arquitetura Backend
 
-O backend do **Lyvox Gerenciamento** é desenvolvido em **Node.js (v20 LTS)** utilizando o framework **Fastify** com **TypeScript**. A solução adota o padrão **Monólito Modular (Modulith)** com separação rigorosa em camadas dentro de cada módulo funcional (Clean Architecture / DDD prudente).
+O backend do **Lyvox Gerenciamento** é desenvolvido em **Node.js (v20 LTS)** utilizando **NestJS com adaptador Fastify** e **TypeScript** (`apps/api/`). A solução adota o padrão **Monólito Modular (Modulith)** com separação rigorosa em camadas dentro de cada módulo funcional.
 
 ---
 
-## 2. Estrutura de Diretórios do Backend (`apps/backend/`)
+## 2. Estrutura de Diretórios do Backend (`apps/api/`)
 
 ```text
-apps/backend/
+apps/api/
 ├── src/
-│   ├── @types/                # Sobrescritas de tipos Fastify e plugins
 │   ├── config/                # Validação de variáveis de ambiente via Zod (env.ts)
 │   ├── core/                  # Abstrações base compartilhadas do sistema
 │   │   ├── errors/            # Classes de Erros de Domínio (AppError, UnauthorizedError)
-│   │   ├── events/            # Barramento de eventos em memória / Event Emitter
-│   │   ├── guards/            # Fastify Pre-handlers (Auth Guard, RBAC Guard)
-│   │   ├── logger/            # Configuração do Pino Logger com JSON estruturado
-│   │   └── utils/             # Utilitários criptográficos e hash
+│   │   ├── events/            # Barramento de eventos em memória (EventBus)
+│   │   ├── guards/            # Guards de Autenticação e RBAC (AuthGuard, RbacGuard)
+│   │   ├── logger/            # Pino Logger com formato JSON estruturado
+│   │   └── utils/             # Utilitários criptográficos e hash Argon2id
 │   ├── infrastructure/        # Adaptadores de Infraestrutura Global
 │   │   ├── database/          # Conexão PostgreSQL (PgBouncer) e Drizzle Client
-│   │   │   ├── migrations/    # Arquivos de migrations SQL gerados pelo Drizzle
-│   │   │   ├── schema/        # Definição centralizada de tabelas Drizzle ORM
-│   │   │   └── seed.ts        # Script de Bootstrap de Administrador e Categorias
-│   │   ├── storage/           # Adaptador de Armazenamento Local / MinIO
+│   │   │   ├── migrations/    # Migration SQLs versionadas geradas pelo Drizzle
+│   │   │   └── seed.ts        # Script de Bootstrap do Administrador Inicial
+│   │   ├── storage/           # Adaptador de Armazenamento Privado em Disco
 │   │   ├── queue/             # Configuração de Conexão Redis e BullMQ
-│   │   └── telemetry/         # Traces OpenTelemetry e Métricas Prometheus
+│   │   └── telemetry/         # Instrumentação OpenTelemetry e Métricas Prometheus
 │   ├── modules/               # Módulos Funcionais de Domínio (Modulith)
-│   │   ├── auth/              # Módulo de Autenticação & Sessões
+│   │   ├── auth/              # Módulo de Autenticação & Sessões Opacas
 │   │   ├── clients/           # Módulo de Clientes
 │   │   ├── crm/               # Módulo de Leads & Pipeline CRM
 │   │   ├── meetings/          # Módulo de Reuniões
 │   │   ├── proposals/         # Módulo de Propostas & Contratos
-│   │   ├── projects/          # Módulo de Projetos, Tarefas & Timesheet
+│   │   ├── projects/          # Módulo de Projetos & Tarefas
 │   │   ├── financial/         # Módulo Financeiro (Contas a Pagar/Receber)
 │   │   ├── marketing/         # Módulo de Marketing Editorial
 │   │   ├── automations/       # Módulo de Automações & Engine n8n
-│   │   ├── files/             # Módulo de Arquivos e Metadados
+│   │   ├── files/             # Módulo de Arquivos Privados
 │   │   ├── ai/                # Módulo de Integração com Ollama Local AI
-│   │   └── audit/             # Módulo de Trilha de Auditoria
-│   ├── shared/                # DTOs e Interfaces compartilhadas entre módulos
-│   ├── server.ts              # Inicialização do Servidor Fastify e Graceful Shutdown
-│   └── app.ts                 # Registro de Plugins, Fastify Middlewares e Rotas
+│   │   └── audit/             # Módulo de Trilha de Auditoria Imutável
+│   ├── main.ts                # Inicialização do Servidor NestJS/Fastify e Graceful Shutdown
+│   └── app.module.ts          # Módulo Raiz da Aplicação
 ├── tests/                     # Testes de Integração e E2E Globais
 ├── package.json
 ├── tsconfig.json
@@ -64,11 +61,11 @@ apps/backend/
 
 ## 3. Estrutura Interna de um Módulo Funcional
 
-Cada módulo funcional localizado em `src/modules/<modulo>/` segue a divisão de 4 camadas bem definidas:
+Cada módulo localizado em `src/modules/<modulo>/` segue a divisão de 5 camadas bem definidas:
 
 ```text
 src/modules/clients/
-├── domain/                    # Entidades, Value Objects e Regras de Domínio puras
+├── domain/                    # Entidades e Regras de Domínio puras
 │   ├── client.entity.ts
 │   └── client-cnpj.vo.ts
 ├── application/               # Casos de Uso (Use Cases / Services) e DTOs
@@ -79,10 +76,10 @@ src/modules/clients/
 │       └── create-client.dto.ts
 ├── infrastructure/            # Implementação de Repositórios com Drizzle ORM
 │   └── client.repository.ts
-├── http/                      # Controllers Fastify, Schemas Zod e Definição de Rotas
-│   ├── client.controller.ts
-│   ├── client.schema.ts
-│   └── client.routes.ts
+├── interfaces/
+│   └── http/                  # Controllers NestJS/Fastify, Schemas Zod e Rotas REST
+│       ├── client.controller.ts
+│       └── client.schema.ts
 └── tests/                     # Testes Unitários e de Integração do Módulo
     └── create-client.spec.ts
 ```
@@ -93,15 +90,15 @@ src/modules/clients/
 
 > [!IMPORTANT]
 > **REGRAS DE COMUNICAÇÃO DE MÓDULOS (BOUNDED CONTEXTS):**
-> 1. **Proibição de Acesso Direto às Tabelas Internas:** Um módulo (ex: `Projetos`) não pode consultar ou alterar diretamente tabelas SQL exclusivas de outro módulo (ex: `Clientes`) via SQL/ORM direto sem passar pela interface pública do serviço ou contrato exposto pelo módulo proprietário.
+> 1. **Proibição de Acesso Direto às Tabelas Internas:** Um módulo (ex: `Projetos`) não pode consultar ou alterar diretamente tabelas SQL exclusivas de outro módulo (ex: `Clientes`) sem passar pela interface do serviço ou contrato exposto pelo módulo proprietário.
 > 2. **Comunicação por Casos de Uso ou Eventos:** A comunicação entre domínios é realizada injetando as interfaces de serviços compartilhadas ou emitindo eventos assíncronos via barramento interno (`EventBus`).
-> 3. **Independência de Transação SQL:** Operações transacionais que envolvem múltiplos domínios (ex: Aprovação de Proposta gerando Projeto e Lançamento Financeiro) devem ser orquestradas no Use Case da aplicação via gerenciador de transação trans-módulo ou padrão Outbox/Inboxing.
+> 3. **Independência de Transação SQL:** Operações transacionais que envolvem múltiplos domínios (ex: Aprovação de Proposta gerando Contrato e Lançamento Financeiro) são orquestradas no Use Case da aplicação via gerenciador de transação ou padrão Outbox/Inbox.
 
 ---
 
 ## 5. Envelope Padrão de Erro e Correlation ID
 
-Todas as respostas de erro da API seguem o padrão inspirado no **RFC 7807 (Problem Details)**:
+Todas as respostas de erro da API seguem o padrão **RFC 7807 (Problem Details)**:
 
 ```json
 {
@@ -126,5 +123,5 @@ Todas as respostas de erro da API seguem o padrão inspirado no **RFC 7807 (Prob
 
 ## 6. Endpoints de Verificação de Saúde (Health Check & Readiness)
 
-- **GET `/health` (Liveness Probe):** Retorna `HTTP 200 OK` se o processo Node.js/Fastify estiver rodando e respondendo a requisições.
-- **GET `/readiness` (Readiness Probe):** Retorna `HTTP 200 OK` somente se as conexões críticas com o PostgreSQL, Redis e PgBouncer estiverem ativas e funcionais. Caso contrário, retorna `HTTP 539 Service Unavailable`.
+- **GET `/health` (Liveness Probe):** Retorna `HTTP 200 OK` se o processo Node.js/NestJS estiver rodando e respondendo.
+- **GET `/readiness` (Readiness Probe):** Retorna `HTTP 200 OK` somente se as conexões com o PostgreSQL, Redis e PgBouncer estiverem ativas e funcionais.

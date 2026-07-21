@@ -1,63 +1,66 @@
 # 23 — ADRs: Registros de Decisões Arquiteturais (Architectural Decision Records)
 
 - **Documento ID:** DOC-23
-- **Versão:** 1.0.0
-- **Status:** APPROVED_BY_ARCHITECTURE_AGENT
+- **Versão:** 2.0.0
+- **Status:** APPROVED_FOR_CODEX_IMPLEMENTATION
 - **Data:** 2026-07-21
 - **Responsável:** Ottercraft (Chief Software Architect)
-- **Classificação:** ARCHITECTURAL_DECISION / USER_CONFIRMED
-- **Documentos Dependentes:** Todos os documentos técnicos (DOC-05 a DOC-20)
-- **Fontes Consultadas:** PROMPT-MESTRE-OTTERCRAFT, Michael Nygard ADR Template
+- **Classificação:** USER_APPROVED_FOR_PLANNING / ARCHITECTURAL_DECISION
+- **Documentos Dependentes:** [05-ARQUITETURA-GERAL-E-DECISOES-DE-STACK.md](./05-ARQUITETURA-GERAL-E-DECISOES-DE-STACK.md)
+- **Fontes Consultadas:** PROMPT-FINAL-UNICO-OTTERCRAFT, Michael Nygard ADR Template
 
 ---
 
-## ADR-001: Adocao do Estilo Arquitetural Monolito Modular (Modulith)
+## ADR-001: Adoção do Estilo Arquitetural Monólito Modular (Modulith)
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** O sistema necessita suportar múltiplos módulos empresariais mantendo simplicidade operacional em VPS própria sem a complexidade de rede e orquestração de microsserviços.
-- **Opções Avaliadas:** 1. Microsserviços Distribuídos; 2. Monólito Tradicional Não Estruturado; 3. Monólito Modular (Modulith).
-- **Critérios:** Latência de comunicação, complexidade de deploy, integridade transacional ACID e facilidade de manutenção.
-- **Decisão:** Adotar **Monólito Modular (Modulith)**. O código-fonte é organizado em módulos de domínio estritamente isolados (`src/modules/<modulo>`), comunicando-se via Use Cases ou Eventos de Domínio sem dependências diretas de tabela.
-- **Consequências Positivas:** Deploy único em contêiner, transações ACID nativas no PostgreSQL, latência de chamada de método em memória (<1ms) e facilidade de refatoração.
-- **Consequências Negativas:** Exige disciplina da equipe para não violar os limites dos módulos.
-- **Gatilho de Revisão:** Necessidade de escalar de forma totalmente independente a equipe de desenvolvimento em mais de 5 times isolados.
-- **Fontes:** Modular Monolith Architecture (Kamil Grzybek).
+- **Contexto:** O sistema necessita suportar múltiplos módulos empresariais mantendo simplicidade operacional em VPS única.
+- **Opções Avaliadas:** 1. Microsserviços Distribuídos; 2. Monólito Tradicional Não Estruturado; 3. Monólito Modular.
+- **Critérios:** Latência de comunicação, complexidade de deploy, integridade transacional ACID.
+- **Decisão:** Adotar **Monólito Modular (Modulith)**. O código é organizado em módulos de domínio isolados em `apps/api/src/modules/`.
+- **Consequências:** Deploy único em contêiner, transações ACID nativas e latência mínima em memória.
+- **Riscos:** Exige disciplina da equipe para respeitar os limites de módulos.
+- **Gatilho de Revisão:** Necessidade de escalar equipes em mais de 5 times isolados.
+- **Fontes Oficiais:** [Modular Monoliths (Martin Fowler)](https://martinfowler.com/bliki/MonolithFirst.html) [Acesso em 21/07/2026].
 
 ---
 
-## ADR-002: Escolha da Stack Frontend (React 18/19 + Vite + TypeScript)
+## ADR-002: Escolha da Stack Frontend (React 19 + Vite + TypeScript)
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** A interface exige alta reatividade, componentes ricos e excelente performance de carregamento no navegador.
-- **Opções Avaliadas:** 1. Next.js (App Router); 2. React + Vite SPA; 3. Vue 3 + Vite.
-- **Decisão:** Adotar **React + Vite + TypeScript Single Page Application (SPA)**.
-- **Consequências:** Compilação ultra-rápida via esbuild/Vite, total desacoplamento da camada de API Fastify, zero dependência de servidor Node.js para renderização de frontend (arquivos estáticos servidos pelo Caddy).
-- **Gatilho de Revisão:** Necessidade crítica de SEO público indexável em páginas dinâmicas (não aplicável ao sistema interno de gestão).
+- **Contexto:** A interface exige alta reatividade e desacoplamento total do backend.
+- **Opções Avaliadas:** 1. Next.js (App Router); 2. React 19 + Vite SPA; 3. Vue 3 + Vite.
+- **Decisão:** Adotar **React 19 + Vite + TypeScript SPA** (`apps/web/`).
+- **Consequências:** Compilação ultrarrápida, servidor web estático servido pelo Caddy e total desacoplamento.
+- **Riscos:** Necessidade de gerenciar roteamento exclusivamente no cliente.
+- **Gatilho de Revisão:** Exigência de SEO público indexável dinâmico.
+- **Fontes Oficiais:** [React Documentation](https://react.dev/), [Vite Guide](https://vitejs.dev/) [Acesso em 21/07/2026].
 
 ---
 
-## ADR-003: Escolha do Framework Backend (Node.js 20 LTS + Fastify)
+## ADR-003: Escolha do Framework Backend (NestJS com Adaptador Fastify)
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** O backend precisa processar requisições HTTP REST com baixíssima latência e consumo eficiente de memória RAM.
-- **Opções Avaliadas:** 1. Express.js; 2. NestJS; 3. Fastify; 4. Go (Gin).
-- **Decisão:** Adotar **Fastify com TypeScript e Node.js 20 LTS**.
-- **Consequências:** Fastify atinge até 30.000 req/sec (menor overhead que Express), possui integração nativa com Zod via Fastify Type Provider e sistema de plugins encapsulation de alta qualidade.
-- **Gatilho de Revisão:** Troca de runtime Node.js por Go ou Rust em caso de gargalo computacional extremo em CPU bound operations.
+- **Contexto:** Backend estruturado e opinativo em TypeScript com baixa latência.
+- **Opções Avaliadas:** 1. Express.js; 2. NestJS com Fastify Adapter; 3. Fastify puro; 4. Go (Gin).
+- **Decisão:** Adotar **NestJS com adaptador Fastify** (`apps/api/`).
+- **Consequências:** Estrutura modular limpa e opinativa aliada ao alto desempenho e baixo overhead de memória do Fastify.
+- **Gatilho de Revisão:** Reescrita de módulos pesados em linguagem compilada (Go/Rust).
+- **Fontes Oficiais:** [NestJS Performance (Fastify)](https://docs.nestjs.com/techniques/performance) [Acesso em 21/07/2026].
 
 ---
 
-## ADR-004: Adocao do Monorepo com pnpm Workspaces e Turborepo
+## ADR-004: Adoção do Monorepo com pnpm Workspaces e Turborepo
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Necessidade de compartilhar tipos TypeScript, schemas de validação e configurações entre frontend e backend em um único repositório.
-- **Opções Avaliadas:** 1. Repositórios Separados (Multi-repo); 2. Monorepo com pnpm Workspaces + Turborepo; 3. Monorepo com Nx.
+- **Contexto:** Compartilhamento direto de schemas Zod e DTOs entre frontend e backend.
 - **Decisão:** Adotar **pnpm Workspaces + Turborepo**.
-- **Consequências:** Reutilização direta de schemas Zod e DTOs, tempo de build reduzido devido ao caching inteligente do Turborepo e instalação ultrarrápida de dependências.
+- **Consequências:** Builds incrementais com cache rápido e reinstalações eficientes.
+- **Fontes Oficiais:** [Turborepo Documentation](https://turbo.build/repo) [Acesso em 21/07/2026].
 
 ---
 
@@ -65,10 +68,10 @@
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Persistência de dados corporativos exigindo integridade ACID, transações complexas, índices avançados e autonomia total (sem BaaS).
-- **Opções Avaliadas:** 1. Supabase (BaaS); 2. PostgreSQL 16 Native Self-Hosted; 3. MySQL 8; 4. MongoDB.
-- **Decisão:** Adotar **PostgreSQL 16 Self-Hosted** rodando em contêiner Docker com volume em disco NVMe.
-- **Consequências:** Zero custo de licença ou dependência de terceiros, controle total sobre tuning, extensões (`pg_trgm`, `uuid-ossp`) e segurança.
+- **Contexto:** Persistência relacional com garantia ACID e soberania total dos dados.
+- **Decisão:** Adotar **PostgreSQL 16 Self-Hosted** rodando em contêiner Docker.
+- **Consequências:** Autonomia total de infraestrutura e zero custo de licença BaaS.
+- **Fontes Oficiais:** [PostgreSQL 16 Documentation](https://www.postgresql.org/docs/16/) [Acesso em 21/07/2026].
 
 ---
 
@@ -76,39 +79,40 @@
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Mapeamento de dados type-safe com geração de SQL previsível e gerenciamento eficiente de pool de conexões.
-- **Opções Avaliadas:** 1. Prisma ORM; 2. Drizzle ORM; 3. Kysely; 4. SQL Cru (pg-node).
+- **Contexto:** Mapeamento type-safe sem overhead de binários pesados.
 - **Decisão:** Adotar **Drizzle ORM + PgBouncer**.
-- **Consequências:** O Drizzle possui overhead nulo (não utiliza binário Rust extra como o Prisma), é 100% type-safe e compila para consultas SQL simples e diretas. O PgBouncer garante a multiplexação eficiente de conexões.
+- **Consequências:** Consultas SQL diretas, previsíveis e pooler de conexões multiplexado.
+- **Fontes Oficiais:** [Drizzle ORM Documentation](https://orm.drizzle.team/) [Acesso em 21/07/2026].
 
 ---
 
-## ADR-007: Estrutura de Autenticação Própria (Argon2id + JWT + HTTP-Only Cookies)
+## ADR-007: Autenticação via Sessões Opacas Server-Side
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Garantir autenticação segura de usuários sem o custo operacional e consumo de RAM de um servidor IAM externo.
-- **Opções Avaliadas:** 1. Keycloak Server; 2. Auth0 / Supabase Auth; 3. Engine de Autenticação Própria.
-- **Decisão:** Adotar **Autenticação Própria** com hash de senha Argon2id, JWT Access Tokens de 15 min e Refresh Tokens em cookies `HttpOnly, Secure, SameSite=Strict`.
+- **Contexto:** Mitigação de vazamentos de tokens e suporte a revogação instantânea de acessos.
+- **Decisão:** Adotar **Sessões Opacas Server-Side** com cookies `HttpOnly, Secure, SameSite=Lax`.
+- **Consequências:** Zero exposição de tokens em `localStorage` ou cabeçalhos do navegador.
+- **Fontes Oficiais:** [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html) [Acesso em 21/07/2026].
 
 ---
 
-## ADR-008: Armazenamento de Sessões e Invalidacao via Redis 7
+## ADR-008: Fonte de Verdade da Sessão no PostgreSQL com Cache em Redis
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Necessidade de revogação instantânea de sessões e Refresh Tokens.
-- **Opções Avaliadas:** 1. Consulta exclusiva em banco de dados relacional; 2. Redis 7 Memory Store.
-- **Decisão:** Adotar **Redis 7** para persistência temporária de sessões e lista negra de tokens revogados.
+- **Contexto:** Garantir que o sistema de login não caia caso o Redis fique indisponível.
+- **Decisão:** Manter **PostgreSQL como fonte de verdade da sessão** e **Redis como cache acelerador**.
+- **Consequências:** Resiliência total de autenticação com fallback para o banco.
 
 ---
 
-## ADR-009: Modelo de Autorização Granular RBAC com Deny by Default
+## ADR-009: Modelo de Autorização Granular RBAC + Ownership
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Controle rigoroso de acesso a dados por papel de usuário e escopo de empresa/organização.
-- **Decisão:** Adotar **RBAC Granular com política Deny by Default**. Qualquer ação que não possua a permissão `recurso:ação` explicitamente atribuída ao papel do usuário é bloqueada.
+- **Contexto:** Garantir que usuários acessem apenas recursos autorizados.
+- **Decisão:** Adotar **RBAC Granular com política Deny by Default** e verificações de ownership.
 
 ---
 
@@ -116,8 +120,8 @@
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Reduzir a carga de leitura no PostgreSQL em consultas repetitivas (Dashboard, KPIs, Listagens).
-- **Decisão:** Adotar **Redis 7** como camada oficial de Caching com chaveamento padronizado (`lyvox:<env>:<modulo>:<tenant>:<key>`) e TTLs curtos.
+- **Contexto:** Aceleração de leitura de dados de KPI e controle de Rate Limiting.
+- **Decisão:** Adotar **Redis 7** como camada de cache volátil (não mestre).
 
 ---
 
@@ -125,18 +129,17 @@
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Processamento de tarefas demoradas (PDFs, e-mails, retries n8n) fora do loop principal do Fastify.
-- **Opções Avaliadas:** 1. RabbitMQ; 2. Kafka; 3. BullMQ + Redis.
-- **Decisão:** Adotar **BullMQ + Redis**. Aproveita a infraestrutura Redis existente sem adicionar novos serviços de mensageria pesados na VPS.
+- **Contexto:** Desacoplamento de tarefas pesadas da API HTTP.
+- **Decisão:** Adotar **BullMQ + Redis** em processo de worker dedicado (`apps/worker/`).
 
 ---
 
-## ADR-012: Armazenamento de Arquivos Privados Abstraído (Storage Driver)
+## ADR-012: Armazenamento de Arquivos Privados em Disk Storage Abstraído
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Armazenar documentos e comprovantes com segurança e privacidade total.
-- **Decisão:** Adotar **Armazenamento Privado em Volume Local (`/var/lib/lyvox/storage/`)** exposto através de uma interface de driver (`StorageDriver`) desacoplada.
+- **Contexto:** Armazenamento seguro de PDFs e anexos sem servidores externos no MVP.
+- **Decisão:** Adotar **Private Filesystem Volume (`/var/lib/lyvox/storage/`)** com driver abstrato. MinIO mantido como evolução futura.
 
 ---
 
@@ -144,28 +147,26 @@
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Proxy reverso com suporte nativo a renovação automática de certificados SSL/TLS Let's Encrypt.
-- **Opções Avaliadas:** 1. Nginx + Certbot; 2. Traefik; 3. Caddy Server.
-- **Decisão:** Adotar **Caddy Server 2**. Simplifica drasticamente a configuração de certificados HTTPS automáticos e suporte a HTTP/2.
+- **Contexto:** Proxy reverso com suporte a renovação automática de certificados SSL/TLS.
+- **Decisão:** Adotar **Caddy Server 2**.
 
 ---
 
-## ADR-014: Orquestração de Contêineres com Docker Compose v2 no Host VPS
+## ADR-014: Orquestração VPS com Docker Compose v2 e systemd
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Gerenciamento isolado dos contêineres da aplicação em ambiente VPS sob Ubuntu Linux.
-- **Opções Avaliadas:** 1. Kubernetes (k3s); 2. HashiCorp Nomad; 3. Docker Compose v2.
+- **Contexto:** Gerenciamento isolado dos contêineres da aplicação em ambiente VPS.
 - **Decisão:** Adotar **Docker Compose v2 + systemd**.
 
 ---
 
-## ADR-015: Stack de Observabilidade Open-Source (Prometheus + Grafana + Loki + OpenTelemetry)
+## ADR-015: Stack de Observabilidade (Pino JSON + Prometheus + Grafana + Loki)
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Coleta self-hosted de métricas, traces e agregação de logs JSON.
-- **Decisão:** Adotar **Prometheus, Grafana, Loki e OpenTelemetry**.
+- **Contexto:** Coleta self-hosted de métricas e agregação de logs.
+- **Decisão:** Adotar **Pino JSON, Prometheus, Grafana e Loki** com instrumentação OpenTelemetry.
 
 ---
 
@@ -173,17 +174,17 @@
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Garantir a recuperação da base de dados e arquivos em caso de destruição do servidor VPS principal.
-- **Decisão:** Utilizar **pgBackRest** para backup contínuo do PostgreSQL (WAL + Full diário) com envio criptografado AES-256 para **Storage Offsite Isolado**.
+- **Contexto:** Proteção contra desastre físico na VPS principal.
+- **Decisão:** Adotar **pgBackRest (PostgreSQL) + restic (arquivos)** com destino S3 offsite criptografado AES-256.
 
 ---
 
-## ADR-017: Integração com n8n via Outbox Pattern e HMAC
+## ADR-017: Integração com n8n via Transactional Outbox e HMAC
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Comunicação segura entre a API principal e o motor local de automações n8n.
-- **Decisão:** Adotar o padrão **Transactional Outbox** no PostgreSQL com disparo via worker e validação de assinaturas **HMAC-SHA256**.
+- **Contexto:** Comunicação assíncrona e segura com o motor n8n local.
+- **Decisão:** Adotar o padrão **Transactional Outbox** no PostgreSQL com validação de assinatura HMAC.
 
 ---
 
@@ -191,24 +192,41 @@
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Prover assistente virtual de geração de texto e resumos de reunião mantendo privacidade total de dados.
-- **Decisão:** Conectar a aplicação à instância local do **Ollama (Llama 3/Mistral)** com fallback gracioso em modo degradado.
+- **Contexto:** Copiloto de IA mantendo privacidade de dados sem custos de API externa.
+- **Decisão:** Conectar a aplicação ao **Ollama local (Llama 3 / Mistral)** em modo degradado.
 
 ---
 
-## 19. ADR-019: Estratégia Multi-Tenancy Discriminadora (Organization ID)
+## ADR-019: Modelo Organizacional de Instância Única (Lyvox Internal System)
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Isolamento lógico de dados entre diferentes empresas/organizações no mesmo banco de dados.
-- **Opções Avaliadas:** 1. Banco por Tenant; 2. Schema por Tenant; 3. Coluna `organization_id` por Tabela.
-- **Decisão:** Adotar **Coluna Discriminadora `organization_id`** em todas as tabelas transacionais com índices compostos.
+- **Contexto:** Foco no uso interno corporativo da Lyvox no MVP.
+- **Decisão:** Adotar **Modelo de Organização Única (`LYVOX`)**. SaaS multi-tenant mantido como evolução.
 
 ---
 
-## 20. ADR-020: Resiliência de Processo vs Alta Disponibilidade Física
+## ADR-020: Resiliência de Processo em VPS Única (Single Point of Failure)
 
 - **Status:** ACEITO
 - **Data:** 2026-07-21
-- **Contexto:** Esclarecimento de escopo sobre as limitações operacionais de hospedagem em uma única VPS física.
-- **Decisão:** Reconhecer formalmente que **uma VPS única não oferece Alta Disponibilidade (HA) do Host físico**, garantindo resiliência de software (restarts, transações, backups) e RTO de 4 horas.
+- **Contexto:** Limitações físicas de hospedagem em uma única VPS.
+- **Decisão:** Reconhecer que **uma VPS única não oferece Alta Disponibilidade física**, garantindo RTO de 4h via backups offsite.
+
+---
+
+## ADR-021: Estratégia de Deploy em Janela Controlada
+
+- **Status:** ACEITO
+- **Data:** 2026-07-21
+- **Contexto:** Publicação previsível de releases sem comprometer a integridade do banco.
+- **Decisão:** Adotar **Janela Controlada de Deploy com Backup Prévio Obrigatório**.
+
+---
+
+## ADR-022: Integridade de Pipeline CI/CD com GitHub Actions e GHCR
+
+- **Status:** ACEITO
+- **Data:** 2026-07-21
+- **Contexto:** Automação de testes, segurança e compilação de imagens imutáveis.
+- **Decisão:** Adotar **GitHub Actions + GitHub Container Registry (GHCR)**.

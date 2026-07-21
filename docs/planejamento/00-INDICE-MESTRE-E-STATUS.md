@@ -1,70 +1,64 @@
-# 00 — Índice Mestre e Status do Pacote Documental
+# 00 — Índices Mestre e Status da Documentação
 
+- **Projeto:** Lyvox Gerenciamento (Greenfield Software House Core Platform)
 - **Documento ID:** DOC-00
-- **Versão:** 1.0.0
-- **Status:** APPROVED_BY_ARCHITECTURE_AGENT
+- **Versão:** 2.0.0
+- **Status Geral:** APPROVED_FOR_CODEX_IMPLEMENTATION
 - **Data:** 2026-07-21
-- **Responsável:** Ottercraft (Master Documentation Agent & Solution Architect)
-- **Classificação:** ARCHITECTURAL_DECISION / USER_CONFIRMED
-- **Documentos Dependentes:** Todos os documentos do pacote (DOC-01 a DOC-28)
-- **Fontes Consultadas:** PROMPT-MESTRE-OTTERCRAFT
+- **Responsável:** Ottercraft (Lead System Architect)
+- **Classificação:** USER_APPROVED_FOR_PLANNING / ARCHITECTURAL_DECISION
+- **Repositório Alvo:** `https://github.com/lyvoxconsult/lyvoxcorp.git`
 
 ---
 
-## 1. Visão Geral do Pacote Documental
+## 1. Visão Geral do Pacote de Planejamento
 
-Este repositório documental contém o planejamento greenfield integral do sistema **Lyvox Gerenciamento**. A documentação foi concebida para permitir a implementação autônoma posterior pelo agente **Codex**, sem ambiguidades ou margem para improvisações.
-
----
-
-## 2. Tabela de Controle e Status dos 29 Documentos
-
-| Documento | Objetivo | Status | Bloqueios | Link |
-|---|---|---|---|---|
-| **00-INDICE-MESTRE-E-STATUS.md** | Índice global e status de aprontamento | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [00-INDICE-MESTRE-E-STATUS.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/00-INDICE-MESTRE-E-STATUS.md) |
-| **01-VISAO-PRODUTO-ESCOPO-E-PRINCIPIOS.md** | Visão geral, escopo, atores e princípios | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [01-VISAO-PRODUTO-ESCOPO-E-PRINCIPIOS.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/01-VISAO-PRODUTO-ESCOPO-E-PRINCIPIOS.md) |
-| **02-REQUISITOS-FUNCIONAIS-E-REGRAS-DE-NEGOCIO.md** | Requisitos funcionais (FR) e regras (BR) | REVIEW_REQUIRED | Nenhum | [02-REQUISITOS-FUNCIONAIS-E-REGRAS-DE-NEGOCIO.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/02-REQUISITOS-FUNCIONAIS-E-REGRAS-DE-NEGOCIO.md) |
-| **03-ARQUITETURA-DE-INFORMACAO-TELAS-E-NAVEGACAO.md** | Sitemap, mapa de telas e rotas | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [03-ARQUITETURA-DE-INFORMACAO-TELAS-E-NAVEGACAO.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/03-ARQUITETURA-DE-INFORMACAO-TELAS-E-NAVEGACAO.md) |
-| **04-UX-DESIGN-SYSTEM-E-ACESSIBILIDADE.md** | Design tokens, componentes e WCAG | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [04-UX-DESIGN-SYSTEM-E-ACESSIBILIDADE.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/04-UX-DESIGN-SYSTEM-E-ACESSIBILIDADE.md) |
-| **05-ARQUITETURA-GERAL-E-DECISOES-DE-STACK.md** | Stack consolidada, C4 Model e limites | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [05-ARQUITETURA-GERAL-E-DECISOES-DE-STACK.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/05-ARQUITETURA-GERAL-E-DECISOES-DE-STACK.md) |
-| **06-ARQUITETURA-FRONTEND.md** | Estrutura React + Vite, estado e guards | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [06-ARQUITETURA-FRONTEND.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/06-ARQUITETURA-FRONTEND.md) |
-| **07-ARQUITETURA-BACKEND.md** | Estrutura Fastify, camadas e erros | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [07-ARQUITETURA-BACKEND.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/07-ARQUITETURA-BACKEND.md) |
-| **08-MODELAGEM-POSTGRESQL-E-DICIONARIO-DE-DADOS.md** | Modelagem PostgreSQL 16 e Dicionário | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [08-MODELAGEM-POSTGRESQL-E-DICIONARIO-DE-DADOS.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/08-MODELAGEM-POSTGRESQL-E-DICIONARIO-DE-DADOS.md) |
-| **09-CONTRATOS-API-REST-E-OPENAPI.md** | Contratos de API, endpoints e payloads | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [09-CONTRATOS-API-REST-E-OPENAPI.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/09-CONTRATOS-API-REST-E-OPENAPI.md) |
-| **10-AUTENTICACAO-RBAC-E-SEGURANCA.md** | Argon2id, JWT, MFA e Matriz RBAC | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [10-AUTENTICACAO-RBAC-E-SEGURANCA.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/10-AUTENTICACAO-RBAC-E-SEGURANCA.md) |
-| **11-CACHE-FILAS-WORKERS-E-JOBS.md** | Caching Redis 7 e Filas BullMQ | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [11-CACHE-FILAS-WORKERS-E-JOBS.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/11-CACHE-FILAS-WORKERS-E-JOBS.md) |
-| **12-ARQUIVOS-DOCUMENTOS-E-STORAGE.md** | Armazenamento de arquivos privados | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [12-ARQUIVOS-DOCUMENTOS-E-STORAGE.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/12-ARQUIVOS-DOCUMENTOS-E-STORAGE.md) |
-| **13-INTEGRACOES-N8N-IA-E-SERVICOS-EXTERNOS.md** | Integração n8n, Ollama AI e serviços | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [13-INTEGRACOES-N8N-IA-E-SERVICOS-EXTERNOS.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/13-INTEGRACOES-N8N-IA-E-SERVICOS-EXTERNOS.md) |
-| **14-INFRAESTRUTURA-VPS-REDE-E-DEPLOY.md** | Topologia VPS, Docker Compose e Caddy | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [14-INFRAESTRUTURA-VPS-REDE-E-DEPLOY.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/14-INFRAESTRUTURA-VPS-REDE-E-DEPLOY.md) |
-| **15-OBSERVABILIDADE-SRE-SLI-SLO-E-ALERTAS.md** | Prometheus, Grafana, Loki e SLIs/SLOs | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [15-OBSERVABILIDADE-SRE-SLI-SLO-E-ALERTAS.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/15-OBSERVABILIDADE-SRE-SLI-SLO-E-ALERTAS.md) |
-| **16-PERFORMANCE-CAPACIDADE-E-ESCALABILIDADE.md** | Metas de latência e Níveis de Escala | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [16-PERFORMANCE-CAPACIDADE-E-ESCALABILIDADE.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/16-PERFORMANCE-CAPACIDADE-E-ESCALABILIDADE.md) |
-| **17-ESTRATEGIA-DE-TESTES-QA-E-HOMOLOGACAO.md** | Pirâmide de testes, Vitest e Playwright | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [17-ESTRATEGIA-DE-TESTES-QA-E-HOMOLOGACAO.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/17-ESTRATEGIA-DE-TESTES-QA-E-HOMOLOGACAO.md) |
-| **18-AMBIENTES-CONFIGURACOES-SEEDS-E-BOOTSTRAP.md** | Variáveis de ambiente e scripts seed | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [18-AMBIENTES-CONFIGURACOES-SEEDS-E-BOOTSTRAP.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/18-AMBIENTES-CONFIGURACOES-SEEDS-E-BOOTSTRAP.md) |
-| **19-BACKUP-RESTORE-DR-E-CONTINUIDADE.md** | Backup offsite pgBackRest e Runbook DR | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [19-BACKUP-RESTORE-DR-E-CONTINUIDADE.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/19-BACKUP-RESTORE-DR-E-CONTINUIDADE.md) |
-| **20-CI-CD-VERSIONAMENTO-RELEASE-E-ROLLBACK.md** | GitHub Actions e Rollback Zero-Downtime| APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [20-CI-CD-VERSIONAMENTO-RELEASE-E-ROLLBACK.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/20-CI-CD-VERSIONAMENTO-RELEASE-E-ROLLBACK.md) |
-| **21-ROADMAP-DE-IMPLEMENTACAO-PARA-CODEX.md** | Roadmap fechado de 22 fases (000-021) | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [21-ROADMAP-DE-IMPLEMENTACAO-PARA-CODEX.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/21-ROADMAP-DE-IMPLEMENTACAO-PARA-CODEX.md) |
-| **22-MATRIZ-DE-RASTREABILIDADE.md** | Rastreabilidade bi-direcional completa | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [22-MATRIZ-DE-RASTREABILIDADE.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/22-MATRIZ-DE-RASTREABILIDADE.md) |
-| **23-ADRS-DECISOES-ARQUITETURAIS.md** | Registros de Decisões (ADR-001 a 020) | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [23-ADRS-DECISOES-ARQUITETURAIS.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/23-ADRS-DECISOES-ARQUITETURAIS.md) |
-| **24-RISCOS-PREMISSAS-LACUNAS-E-DECISOES-BLOQUEADAS.md** | Gestão de riscos, lacunas e bloqueios | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [24-RISCOS-PREMISSAS-LACUNAS-E-DECISOES-BLOQUEADAS.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/24-RISCOS-PREMISSAS-LACUNAS-E-DECISOES-BLOQUEADAS.md) |
-| **25-RUNBOOKS-OPERACIONAIS.md** | Runbooks de emergência SRE | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [25-RUNBOOKS-OPERACIONAIS.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/25-RUNBOOKS-OPERACIONAIS.md) |
-| **26-HANDOFF-EXECUTIVO-PARA-CODEX.md** | Contrato de handoff e prompt para Codex | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [26-HANDOFF-EXECUTIVO-PARA-CODEX.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/26-HANDOFF-EXECUTIVO-PARA-CODEX.md) |
-| **27-CHECKLIST-MESTRE-DE-ACEITE.md** | Checklist objetivo de homologação | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [27-CHECKLIST-MESTRE-DE-ACEITE.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/27-CHECKLIST-MESTRE-DE-ACEITE.md) |
-| **28-RELATORIO-FINAL-DE-CONSISTENCIA.md** | Auditoria final e validação de 3 passes | APPROVED_BY_ARCHITECTURE_AGENT | Nenhum | [28-RELATORIO-FINAL-DE-CONSISTENCIA.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/28-RELATORIO-FINAL-DE-CONSISTENCIA.md) |
+Este documento serve como **Índice Mestre e Registro de Status Central** do pacote de 29 documentos de planejamento arquitetural, funcional e operacional do sistema **Lyvox Gerenciamento**.
 
 ---
 
-## 3. Resumo Executivo de Readiness do Pacote
+## 2. Tabela Mestra de Documentos e Status de Homologação
+
+| Doc ID | Nome do Documento | Versão | Responsável | Status de Homologação | Link Relativo |
+|---|---|---|---|---|---|
+| **DOC-00** | Índices Mestre e Status da Documentação | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./00-INDICE-MESTRE-E-STATUS.md` |
+| **DOC-01** | Visão do Produto, Escopo e Princípios | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./01-VISAO-PRODUTO-ESCOPO-E-PRINCIPIOS.md` |
+| **DOC-02** | Requisitos Funcionais e Regras de Negócio | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./02-REQUISITOS-FUNCIONAIS-E-REGRAS-DE-NEGOCIO.md` |
+| **DOC-03** | Arquitetura de Informação, Telas e Navegação | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./03-ARQUITETURA-DE-INFORMACAO-TELAS-E-NAVEGACAO.md` |
+| **DOC-04** | UX, Design System e Acessibilidade | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./04-UX-DESIGN-SYSTEM-E-ACESSIBILIDADE.md` |
+| **DOC-05** | Arquitetura Geral e Decisões de Stack | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./05-ARQUITETURA-GERAL-E-DECISOES-DE-STACK.md` |
+| **DOC-06** | Arquitetura Frontend | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./06-ARQUITETURA-FRONTEND.md` |
+| **DOC-07** | Arquitetura Backend | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./07-ARQUITETURA-BACKEND.md` |
+| **DOC-08** | Modelagem PostgreSQL e Dicionário de Dados | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./08-MODELAGEM-POSTGRESQL-E-DICIONARIO-DE-DADOS.md` |
+| **DOC-09** | Contratos API REST e OpenAPI | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./09-CONTRATOS-API-REST-E-OPENAPI.md` |
+| **DOC-10** | Autenticação, RBAC e Segurança | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./10-AUTENTICACAO-RBAC-E-SEGURANCA.md` |
+| **DOC-11** | Cache, Filas, Workers e Jobs | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./11-CACHE-FILAS-WORKERS-E-JOBS.md` |
+| **DOC-12** | Arquivos, Documentos e Storage | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./12-ARQUIVOS-DOCUMENTOS-E-STORAGE.md` |
+| **DOC-13** | Integrações: n8n, IA e Serviços Externos | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./13-INTEGRACOES-N8N-IA-E-SERVICOS-EXTERNOS.md` |
+| **DOC-14** | Infraestrutura VPS, Rede e Deploy | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./14-INFRAESTRUTURA-VPS-REDE-E-DEPLOY.md` |
+| **DOC-15** | Observabilidade, SRE, SLI/SLO e Alertas | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./15-OBSERVABILIDADE-SRE-SLI-SLO-E-ALERTAS.md` |
+| **DOC-16** | Performance, Capacidade e Escalabilidade | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./16-PERFORMANCE-CAPACIDADE-E-ESCALABILIDADE.md` |
+| **DOC-17** | Estratégia de Testes, QA e Homologação | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./17-ESTRATEGIA-DE-TESTES-QA-E-HOMOLOGACAO.md` |
+| **DOC-18** | Ambientes, Configurações, Seeds e Bootstrap | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./18-AMBIENTES-CONFIGURACOES-SEEDS-E-BOOTSTRAP.md` |
+| **DOC-19** | Backup, Restore, DR e Continuidade | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./19-BACKUP-RESTORE-DR-E-CONTINUIDADE.md` |
+| **DOC-20** | CI/CD, Versionamento, Release e Rollback | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./20-CI-CD-VERSIONAMENTO-RELEASE-E-ROLLBACK.md` |
+| **DOC-21** | Roadmap de Implementação para o Codex | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./21-ROADMAP-DE-IMPLEMENTACAO-PARA-CODEX.md` |
+| **DOC-22** | Matriz de Rastreabilidade | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./22-MATRIZ-DE-RASTREABILIDADE.md` |
+| **DOC-23** | ADRs: Registros de Decisões Arquiteturais | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./23-ADRS-DECISOES-ARQUITETURAIS.md` |
+| **DOC-24** | Riscos, Premissas, Lacunas e Decisões Bloqueadas | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./24-RISCOS-PREMISSAS-LACUNAS-E-DECISOES-BLOQUEADAS.md` |
+| **DOC-25** | Runbooks Operacionais | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./25-RUNBOOKS-OPERACIONAIS.md` |
+| **DOC-26** | Handoff Executivo para o Codex | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./26-HANDOFF-EXECUTIVO-PARA-CODEX.md` |
+| **DOC-27** | Checklist Mestre de Aceite | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./27-CHECKLIST-MESTRE-DE-ACEITE.md` |
+| **DOC-28** | Relatório Final de Consistência | 2.0.0 | Ottercraft | `APPROVED_FOR_CODEX_IMPLEMENTATION` | `./28-RELATORIO-FINAL-DE-CONSISTENCIA.md` |
+
+---
+
+## 3. Bloco Resumo de Sinalização de Prontidão (Readiness Summary)
 
 ```text
+ALL_VALIDATIONS_PASS = YES
 DOCUMENTATION_COMPLETE = YES
-PRODUCT_REQUIREMENTS_READY = YES
-ARCHITECTURE_READY = YES
-SECURITY_READY = YES
-DATABASE_READY = YES
-API_READY = YES
-INFRASTRUCTURE_READY = YES
-TEST_STRATEGY_READY = YES
+TRACEABILITY_COMPLETE = YES
 CODEX_HANDOFF_READY = YES
-IMPLEMENTATION_ALLOWED = NO
 CODEX_READY = YES
 ```

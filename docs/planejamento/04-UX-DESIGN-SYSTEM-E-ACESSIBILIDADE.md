@@ -1,25 +1,25 @@
 # 04 — UX, Design System e Acessibilidade
 
 - **Documento ID:** DOC-04
-- **Versão:** 1.0.0
-- **Status:** APPROVED_BY_ARCHITECTURE_AGENT
+- **Versão:** 2.0.0
+- **Status:** APPROVED_FOR_CODEX_IMPLEMENTATION
 - **Data:** 2026-07-21
 - **Responsável:** Ottercraft (UX/UI Designer & Accessibility Specialist)
-- **Classificação:** ARCHITECTURAL_DECISION / USER_CONFIRMED
-- **Documentos Dependentes:** [01-VISAO-PRODUTO-ESCOPO-E-PRINCIPIOS.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/01-VISAO-PRODUTO-ESCOPO-E-PRINCIPIOS.md), [03-ARQUITETURA-DE-INFORMACAO-TELAS-E-NAVEGACAO.md](file:///c:/Users/pedro/OneDrive/Documentos/00-Projetos/19-%20lyvoxcorp/docs/planejamento/03-ARQUITETURA-DE-INFORMACAO-TELAS-E-NAVEGACAO.md)
-- **Fontes Consultadas:** PROMPT-MESTRE-OTTERCRAFT, Diretrizes de Marca Lyvox, WCAG 2.1 AA Standards
+- **Classificação:** USER_APPROVED_FOR_PLANNING / ARCHITECTURAL_DECISION
+- **Documentos Dependentes:** [01-VISAO-PRODUTO-ESCOPO-E-PRINCIPIOS.md](./01-VISAO-PRODUTO-ESCOPO-E-PRINCIPIOS.md), [03-ARQUITETURA-DE-INFORMACAO-TELAS-E-NAVEGACAO.md](./03-ARQUITETURA-DE-INFORMACAO-TELAS-E-NAVEGACAO.md)
+- **Fontes Consultadas:** PROMPT-FINAL-UNICO-OTTERCRAFT, Diretrizes de Marca Lyvox, WCAG 2.2 AA Standards
 
 ---
 
 ## 1. Diretrizes de Identidade Visual e Estética Premium
 
-Em conformidade com a identidade visual da **Lyvox**, a interface do **Lyvox Gerenciamento** adota um visual **Dark Mode Premium Empresarial**. O design prioriza alto contraste, componentes refinados, tipografia moderna e elementos visuais tecnológicos, evitando poluição gráfica.
+Em conformidade com a identidade visual da **Lyvox**, a interface do **Lyvox Gerenciamento** adota um visual **Dark Mode Premium Empresarial**. O design prioriza alto contraste, componentes refinados, tipografia editorial moderna e elementos visuais tecnológicos, evitando poluição gráfica.
 
 ---
 
 ## 2. Tokens de Design (Design Tokens)
 
-### 2.1 Paleta de Cores Oficial (Theme Tokens) — USER_CONFIRMED
+### 2.1 Paleta de Cores Oficial (Theme Tokens) — USER_APPROVED_FOR_PLANNING
 
 A paleta de cores oficial do sistema é definida pelas seguintes variáveis e tokens institucionais:
 
@@ -72,14 +72,14 @@ A paleta de cores oficial do sistema é definida pelas seguintes variáveis e to
 }
 ```
 
-### 2.2 Tipografia (Typography Tokens) — USER_CONFIRMED
+### 2.2 Tipografia (Typography Tokens) — USER_APPROVED_FOR_PLANNING
 
-A combinação tipográfica oficial do sistema adota uma estática editorial elegante baseada nas seguintes fontes (Google Fonts):
+A combinação tipográfica oficial do sistema adota uma estética editorial elegante baseada nas seguintes fontes (Google Fonts):
 
 - **Títulos Principais e Display (Headings H1):** `'Cormorant SC'`, serif (Small Caps sofisticado para títulos e chamadas principais).
 - **Subtítulos e Seções (Headings H2 / H3):** `'Alegreya SC'`, serif (Small Caps para subtítulos, cabeçalhos de cards e seções).
 - **Texto de Corpo e Leitura (Body / Parágrafos):** `'Rasa'`, serif (Fonte serifada de alta legibilidade para parágrafos, tabelas e formulários).
-- **Dados Numericos / Código (Monospace):** `'JetBrains Mono'`, monospace (Para IDs, valores numéricos de KPIs e códigos).
+- **Dados Numéricos / Código (Monospace):** `'JetBrains Mono'`, monospace (Para IDs, valores numéricos de KPIs e códigos).
 
 #### Escala Tipográfica e Mapeamento
 
@@ -149,34 +149,23 @@ A combinação tipográfica oficial do sistema adota uma estática editorial ele
 
 Sem gerar código de implementação nesta fase documental, o catálogo abaixo especifica a biblioteca de componentes visuais padronizada:
 
-1. **Button (Botão):** Variantes (`primary-gold`, `secondary-outline`, `ghost`, `danger`). Estados (`default`, `hover`, `active`, `focused`, `disabled`, `loading`).
+1. **Button (Botão):** Variantes (`primary-blue`, `secondary-outline`, `ghost`, `danger`). Estados (`default`, `hover`, `active`, `focused`, `disabled`, `loading`).
 2. **Input / Form Control:** Variantes (`text`, `number`, `email`, `password`, `select`, `date-picker`, `currency-input`). Validação com borda vermelha e texto auxiliar de erro.
-3. **DataTable (Tabela Dinâmica):** Suporte a ordenação de colunas, paginação no servidor, seleção múltipla de linhas, ações em lote, filtros por coluna e visualização densa/expandida.
+3. **DataTable (Tabela Dinâmica):** Suporte a ordenação de colunas, paginação por cursor no servidor, seleção de linhas, ações em lote e filtros por coluna.
 4. **Modal & Drawer:** Diálogos com foco aprisionado (`Focus Lock`), overlay escurecido com *backdrop-blur*, tecla `ESC` para fechar e acessibilidade de leitores de tela.
-5. **Badge / Status Tag:** Indicadores de estado de registros (ex: `Ativo` [Verde], `Pendente` [Dourado], `Atrasado` [Vermelho]).
-6. **KPI Card:** Card elevado com valor numérico destacado, percentual de variação em relação ao mês anterior e ícone temático.
+5. **Badge / Status Tag:** Indicadores de estado de registros (ex: `Ativo` [Verde], `Pendente` [Azul Suave], `Atrasado` [Vermelho]).
+6. **KPI Card:** Card elevado com valor numérico destacado em `JetBrains Mono`, percentual de variação e ícone temático.
 7. **Kanban Board & Card:** Quadro de arrastar colunas com indicadores visuais de urgência, tags e avatares dos responsáveis.
-8. **Toast Notification:** Notificações flutuantes no canto superior direito com auto-dismiss (5s) e opções de fechamento manual.
-9. **Skeleton Loader:** Animação de carregamento pulsante no tom `#1F2937` para simulação visual da estrutura antes do carregamento dos dados reais.
+8. **Toast Notification:** Notificações flutuantes no canto superior direito com auto-dismiss (5s) e opção de fechamento manual.
+9. **Skeleton Loader:** Animação de carregamento pulsante mantendo a estrutura do layout.
 10. **Empty State Component:** Container visual informativo quando tabelas ou filtros não retornam dados, contendo ilustração/ícone e botão de chamada de ação ("Criar novo").
 
 ---
 
-## 4. Requisitos de Acessibilidade (WCAG 2.1 AA)
+## 4. Requisitos de Acessibilidade (WCAG 2.2 AA)
 
 - **A11Y-001 (Navegação por Teclado):** 100% dos elementos interativos (botões, links, inputs, modais) devem ser alcançáveis e operáveis exclusivamente via tecla `Tab`, `Enter` e `Space`.
-- **A11Y-002 (Indicador Visual de Foco):** Todos os elementos em foco exibem anel visual destacado (`focus:ring-2 focus:ring-amber-500`).
+- **A11Y-002 (Indicador Visual de Foco):** Todos os elementos em foco exibem anel visual destacado (`focus:ring-2 focus:ring-blue-500`).
 - **A11Y-003 (Contraste Mínimo de Cores):** Relação de contraste de texto normal de no mínimo **4.5:1** em relação ao fundo; texto grande e ícones de no mínimo **3:1**.
-- **A11Y-004 (Rótulos ARIA e Semântica):** Uso estrito de elementos semânticos (`<main>`, `<nav>`, `<header>`, `<table>`) e atributos ARIA (`aria-label`, `aria-expanded`, `aria-describedby`, `role="dialog"`).
-- **A11Y-005 (Suporte a Preferência de Animações):** Respeitar a propriedade do sistema `prefers-reduced-motion: reduce`, desativando transições e animações complexas para usuários sensíveis.
-
----
-
-## 5. Estados da Interface de Usuário (UI States)
-
-Toda tela ou componente interativo do sistema deve obrigatoriamente tratar 5 estados visuais:
-1. **Initial / Default State:** Estado padrão renderizado com dados carregados.
-2. **Loading State:** Estado de carregamento com *Skeletons* mantendo o layout estável sem saltos (*Cumulative Layout Shift - CLS = 0*).
-3. **Empty State:** Interface limpa e explicativa quando não houver dados cadastrados.
-4. **Error State:** Feedback claro de falha de conexão ou erro no servidor, oferecendo ação de "Tentar Novamente".
-5. **Success State:** Confirmação visual para ações concluídas com êxito (toasts verdes / checkmarks).
+- **A11Y-004 (Rótulos ARIA e Semântica):** Uso estrito de elementos semânticos (`<main>`, `<nav>`, `<header>`, `<table>`) e atributos ARIA (`aria-label`, `aria-expanded`, `role="dialog"`).
+- **A11Y-005 (Suporte a Preferência de Animações):** Respeitar a propriedade do sistema `prefers-reduced-motion: reduce`, desativando transições e animações complexas.
