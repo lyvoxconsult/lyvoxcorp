@@ -1,0 +1,21 @@
+---
+title: Bloqueios e Pendencias
+date: 2026-07-21
+phase: PHASE-000
+---
+
+# Bloqueios e pendencias
+
+## HARD_BLOCKER atual
+
+Nenhum para validacao documental ou desenvolvimento local.
+
+## Pendencias controladas
+
+| Item | Quando bloqueia | Tratamento |
+|---|---|---|
+| Vault `D:\Obsidian\obsidian` ausente | Sincronizacao do segundo cerebro | Manter registro no repo e sincronizar quando o vault existir |
+| Mobbin MCP indisponivel | Consulta de referencia visual real | Aplicar DOC-04; registrar limitacao; nao bloquear UI |
+| Credenciais DNS/VPS/GHCR/SMTP/n8n/Ollama/S3/alertas nao validadas | Staging, producao, integracoes ou DR reais | Nao bloqueiam local; validar no gate correspondente |
+| Worktree preexistente sujo | Criterio literal de Git limpo | Nao apropriar mudancas do usuario; commits usam pathspec apenas dos artefatos da implementacao |
+| Lacunas DEV-0001..DEV-0019 | Gates especificos | Resolver por precedencia e testes antes de declarar gate afetado |
