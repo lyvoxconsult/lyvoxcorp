@@ -19,40 +19,54 @@ Em conformidade com a identidade visual da **Lyvox**, a interface do **Lyvox Ger
 
 ## 2. Tokens de Design (Design Tokens)
 
-### 2.1 Paleta de Cores (Theme Tokens)
+### 2.1 Paleta de Cores Oficial (Theme Tokens) — USER_CONFIRMED
+
+A paleta de cores oficial do sistema é definida pelas seguintes variáveis e tokens institucionais:
+
+```css
+/* Paleta de Cores Fornecida (CSS Variables) */
+.color1 { color: #4180ab; } /* Azul Aço Principal / Brand Primary */
+.color2 { color: #ffffff; } /* Branco Puro / Contrast Text & Light Surface */
+.color3 { color: #8ab3cf; } /* Azul Suave / Brand Secondary & Hover */
+.color4 { color: #bdd1de; } /* Azul Gelo Claro / Bordas & Separadores */
+.color5 { color: #e4ebf0; } /* Off-White Azulado / Superfícies & Cards Claros */
+```
+
+#### Token Mapping JSON
 
 ```json
 {
   "color": {
+    "brand": {
+      "primary": "#4180ab",
+      "primary-hover": "#35698d",
+      "secondary": "#8ab3cf",
+      "light": "#bdd1de",
+      "surface-light": "#e4ebf0"
+    },
     "background": {
       "default": "#0B0F19",
       "paper": "#111827",
       "subtle": "#1F2937",
+      "light-card": "#e4ebf0",
       "overlay": "rgba(11, 15, 25, 0.8)"
     },
-    "brand": {
-      "gold": "#D97706",
-      "gold-hover": "#F59E0B",
-      "gold-light": "#FBBF24",
-      "amber": "#B45309",
-      "accent-blue": "#1E3A8A"
-    },
     "text": {
-      "primary": "#F9FAFB",
-      "secondary": "#9CA3AF",
-      "muted": "#6B7280",
-      "inverse": "#030712"
+      "primary": "#ffffff",
+      "secondary": "#bdd1de",
+      "muted": "#8ab3cf",
+      "dark-inverse": "#0B0F19"
     },
     "border": {
-      "default": "#1F2937",
-      "hover": "#374151",
-      "focus": "#D97706"
+      "default": "#bdd1de",
+      "hover": "#8ab3cf",
+      "focus": "#4180ab"
     },
     "status": {
       "success": "#10B981",
       "warning": "#F59E0B",
       "error": "#EF4444",
-      "info": "#3B82F6"
+      "info": "#4180ab"
     }
   }
 }
