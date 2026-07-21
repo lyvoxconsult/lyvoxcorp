@@ -18,4 +18,32 @@ Plataforma empresarial interna da Lyvox, implementada em modo clean greenfield a
 - Redis 7 e BullMQ.
 - Docker Compose v2 e Caddy.
 
-Comandos de desenvolvimento serao documentados quando o bootstrap do monorepo for aprovado no gate correspondente. Nao use este README como substituto dos documentos canonicos.
+## Bootstrap do workspace
+
+Requisitos: Node `20.20.2` e pnpm `10.34.5`. O projeto rejeita outro major de Node ou pnpm.
+
+```powershell
+node --version
+pnpm --version
+pnpm install --frozen-lockfile
+pnpm list --depth -1 -r
+```
+
+Os comandos de build, desenvolvimento, lint, teste e typecheck ja estao orquestrados no `package.json` raiz; cada app/pacote recebera sua implementacao nas fases seguintes. Nao use este README como substituto dos documentos canonicos.
+
+## Limites dos pacotes
+
+Pacotes nunca importam `apps/*`. Dependencias internas usam `workspace:*` e seguem apenas estas direcoes:
+
+| Pacote | Responsabilidade | Pode depender de |
+|---|---|---|
+| `config` | Contratos tipados de configuracao por ambiente | Nenhum pacote interno |
+| `shared` | Utilitarios puros, deterministas e sem regra de dominio | Nenhum pacote interno |
+| `validation` | Primitivas e schemas reutilizaveis de validacao | `shared` |
+| `contracts` | DTOs, eventos e contratos compartilhados | `validation`, `shared` |
+| `permissions` | Tipos e politicas puras de autorizacao | `contracts`, `shared` |
+| `auth` | Dominio e portas de identidade/sessao | `contracts`, `permissions`, `validation`, `shared` |
+| `observability` | Logging, metricas e tracing comuns | `config`, `shared` |
+| `database` | Schema, migrations e adaptadores PostgreSQL | `config`, `observability`, `shared` |
+
+Apps compoem esses pacotes. Novas arestas exigem justificativa tecnica, nao podem criar ciclo e devem manter regra de negocio fora de `shared`.

@@ -32,3 +32,22 @@ Nenhum teste de codigo, banco, API ou browser se aplica antes do bootstrap. Nenh
 | 2026-07-21 | `git fsck --connectivity-only` | Git 2.53.0 | PASS_WITH_DANGLING_STASH_OBJECTS | Conectividade valida; objetos dangling sao stashes temporarios ja restaurados/removidos |
 | 2026-07-21 | Varredura de atribuicoes de credenciais | PowerShell/rg | PASS | Nenhum segredo literal nos arquivos da fase |
 | 2026-07-21 | Revisao SPEC, qualidade e validacao final | Tres revisores independentes, somente leitura | PASS | `READY_TO_APPROVE`; nenhum HARD_BLOCKER atual |
+
+## PHASE-002
+
+| Data | Comando/checagem | Ambiente | Resultado | Evidencia |
+|---|---|---|---|---|
+| 2026-07-21 | `pnpm install` | pnpm 11.9.0 / Node 24.14.0 | DISCOVERY_ONLY | Estrutura reconhecida, mas runtime divergiu do Node 20 canonico; resultado substituido por DEV-0021 |
+| 2026-07-21 | `pnpm install --frozen-lockfile` | pnpm 11.9.0 / Node 24.14.0 | DISCOVERY_ONLY | Nao usado para o gate por incompatibilidade de runtime |
+| 2026-07-21 | `pnpm list --depth -1 -r` | pnpm 11.9.0 | PASS | Raiz, 3 apps e 8 pacotes privados listados |
+| 2026-07-21 | `pnpm exec turbo --version` e dry-run do build | Turborepo 2.10.5 | PASS | Monorepo reconhecido; 11 pacotes no grafo; scripts de app ainda inexistentes por fase |
+| 2026-07-21 | `pnpm audit --audit-level high` | Registry npm | PASS | Nenhuma vulnerabilidade conhecida |
+| 2026-07-21 | Parse de manifestos e unicidade | PowerShell | PASS | 11 manifestos; 11 nomes unicos |
+| 2026-07-21 | `pnpm build`, `lint`, `typecheck`, `test` | Turborepo 2.10.5 | PASS_WITH_NO_TASKS | Orquestracao raiz valida; zero tarefas executadas porque implementacoes iniciam na PHASE-003; nao conta como teste de produto |
+| 2026-07-21 | Inventario da estrutura exigida | PowerShell | PASS | 11/11 READMEs de placeholder em `infrastructure/` e `tests/`; nenhuma implementacao futura antecipada |
+| 2026-07-21 | Auditoria de arestas internas | PowerShell | PASS | Zero dependencia interna atual; contrato de imports e responsabilidades documentado; nenhum ciclo possivel no estado inicial |
+| 2026-07-21 | SHA-256 do runtime Node oficial | Node.js release archive | PASS | `node-v20.20.2-win-x64.zip` = `DC3700FDD57A63EEDB8FD7E3C7BAAA32E6A740A1B904167FF4204BC68ED8BF77` |
+| 2026-07-21 | `pnpm install` + frozen install | Node 20.20.2 / pnpm 10.34.5 | PASS | 12 workspaces; lockfile reproduzivel; `turbo@2.10.5` instalado |
+| 2026-07-21 | Workspace list, Turbo dry-run e audit | Node 20.20.2 / pnpm 10.34.5 | PASS | 11 pacotes no grafo, monorepo reconhecido e nenhuma vulnerabilidade conhecida |
+| 2026-07-21 | Teste negativo de runtime | Node 24.14.0 | PASS | Install rejeitado com `ERR_PNPM_UNSUPPORTED_ENGINE`; enforcement Node 20 comprovado |
+| 2026-07-21 | Revisao SPEC, qualidade e validacao final | Tres revisores independentes, somente leitura | PASS | `READY_TO_APPROVE`; 26/26 caminhos, 11 nomes unicos, zero ciclo, 0 vulnerabilidades conhecidas e nenhum `HARD_BLOCKER` |
