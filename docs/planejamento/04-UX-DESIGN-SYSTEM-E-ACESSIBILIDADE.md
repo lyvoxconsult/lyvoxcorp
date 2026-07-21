@@ -72,16 +72,67 @@ A paleta de cores oficial do sistema é definida pelas seguintes variáveis e to
 }
 ```
 
-### 2.2 Tipografia (Typography Tokens)
-- **Fonte Principal (Sans-serif):** `Inter`, system-ui, sans-serif.
-- **Fonte Monoespaçada (Monospace / Código / Valores):** `JetBrains Mono`, monospace.
-- **Escala Tipográfica:**
-  - Display (Headings grandes): 32px / Line Height: 1.2 / Weight: 700
-  - H1 (Títulos de Tela): 24px / Line Height: 1.3 / Weight: 600
-  - H2 (Seções): 20px / Line Height: 1.4 / Weight: 600
-  - H3 (Subseções): 16px / Line Height: 1.4 / Weight: 500
-  - Body Regular (Texto padrão): 14px / Line Height: 1.5 / Weight: 400
-  - Caption / Badges: 12px / Line Height: 1.4 / Weight: 500
+### 2.2 Tipografia (Typography Tokens) — USER_CONFIRMED
+
+A combinação tipográfica oficial do sistema adota uma estática editorial elegante baseada nas seguintes fontes (Google Fonts):
+
+- **Títulos Principais e Display (Headings H1):** `'Cormorant SC'`, serif (Small Caps sofisticado para títulos e chamadas principais).
+- **Subtítulos e Seções (Headings H2 / H3):** `'Alegreya SC'`, serif (Small Caps para subtítulos, cabeçalhos de cards e seções).
+- **Texto de Corpo e Leitura (Body / Parágrafos):** `'Rasa'`, serif (Fonte serifada de alta legibilidade para parágrafos, tabelas e formulários).
+- **Dados Numericos / Código (Monospace):** `'JetBrains Mono'`, monospace (Para IDs, valores numéricos de KPIs e códigos).
+
+#### Escala Tipográfica e Mapeamento
+
+```json
+{
+  "typography": {
+    "fontFamily": {
+      "display": "'Cormorant SC', serif",
+      "heading": "'Alegreya SC', serif",
+      "body": "'Rasa', serif",
+      "mono": "'JetBrains Mono', monospace"
+    },
+    "scale": {
+      "display": {
+        "fontSize": "32px",
+        "lineHeight": "1.2",
+        "fontWeight": "700",
+        "fontFamily": "display"
+      },
+      "h1": {
+        "fontSize": "24px",
+        "lineHeight": "1.3",
+        "fontWeight": "600",
+        "fontFamily": "display"
+      },
+      "h2": {
+        "fontSize": "20px",
+        "lineHeight": "1.4",
+        "fontWeight": "600",
+        "fontFamily": "heading"
+      },
+      "h3": {
+        "fontSize": "16px",
+        "lineHeight": "1.4",
+        "fontWeight": "500",
+        "fontFamily": "heading"
+      },
+      "body": {
+        "fontSize": "15px",
+        "lineHeight": "1.5",
+        "fontWeight": "400",
+        "fontFamily": "body"
+      },
+      "caption": {
+        "fontSize": "13px",
+        "lineHeight": "1.4",
+        "fontWeight": "400",
+        "fontFamily": "body"
+      }
+    }
+  }
+}
+```
 
 ### 2.3 Grid, Breakpoints e Espaçamento
 - **Escala de Espaçamento Base 4px:** `xs: 4px`, `sm: 8px`, `md: 16px`, `lg: 24px`, `xl: 32px`, `2xl: 48px`.
