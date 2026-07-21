@@ -51,3 +51,17 @@ Nenhum teste de codigo, banco, API ou browser se aplica antes do bootstrap. Nenh
 | 2026-07-21 | Workspace list, Turbo dry-run e audit | Node 20.20.2 / pnpm 10.34.5 | PASS | 11 pacotes no grafo, monorepo reconhecido e nenhuma vulnerabilidade conhecida |
 | 2026-07-21 | Teste negativo de runtime | Node 24.14.0 | PASS | Install rejeitado com `ERR_PNPM_UNSUPPORTED_ENGINE`; enforcement Node 20 comprovado |
 | 2026-07-21 | Revisao SPEC, qualidade e validacao final | Tres revisores independentes, somente leitura | PASS | `READY_TO_APPROVE`; 26/26 caminhos, 11 nomes unicos, zero ciclo, 0 vulnerabilidades conhecidas e nenhum `HARD_BLOCKER` |
+
+## PHASE-003
+
+| Data | Comando/checagem | Ambiente | Resultado | Evidencia |
+|---|---|---|---|---|
+| 2026-07-21 | Primeira execucao de `pnpm dev:verify` | Node 20.20.2; Corepack raiz; pnpm global 11 nos filhos | FAIL_RESOLVED | Turbo iniciou os tres jobs, mas o pnpm global incompativel falhou; causa e resolucao registradas em DEV-0022 |
+| 2026-07-21 | `pnpm install --frozen-lockfile` | Node 20.20.2 / pnpm 10.34.5 | PASS | 12 workspaces; lockfile permaneceu imutavel |
+| 2026-07-21 | `pnpm dev:verify` | Node 20.20.2 / pnpm 10.34.5 / Turbo 2.10.5 | PASS | `LYVOX_DEV_CONCURRENCY_OK workspaces=api,web,worker`; harness encerrou a arvore apos readiness dos tres processos |
+| 2026-07-21 | Turbo dry-run de `dev` | Node 20.20.2 / Turbo 2.10.5 | PASS | Tres tarefas persistentes de app presentes no grafo; concorrencia raiz configurada em 4 conforme requisito do Turbo |
+| 2026-07-21 | Role invalida em `dev-workspace.mjs` | Node 20.20.2 | PASS | Entrada fora da allowlist rejeitada com exit code 1 |
+| 2026-07-21 | Busca de processo Node com `dev-workspace.mjs` apos QA | WMI/PowerShell | PASS | Nenhum processo do harness permaneceu ativo |
+| 2026-07-21 | Revisao SPEC, qualidade e validacao final | Tres revisores independentes, somente leitura | PASS | `READY_TO_APPROVE`; cleanup/parsing revisados, zero secret, zero overreach e nenhum `HARD_BLOCKER` |
+
+Esta validacao prova apenas o ambiente de desenvolvimento concorrente da PHASE-003; nao declara web, API, worker, portas ou health checks funcionais.

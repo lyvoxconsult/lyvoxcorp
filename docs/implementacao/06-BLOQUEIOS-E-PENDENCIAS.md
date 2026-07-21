@@ -18,6 +18,6 @@ Nenhum para validacao documental ou desenvolvimento local.
 | Mobbin MCP indisponivel | Consulta de referencia visual real | Aplicar DOC-04; registrar limitacao; nao bloquear UI |
 | Credenciais DNS/VPS/GHCR/SMTP/n8n/Ollama/S3/alertas nao validadas | Staging, producao, integracoes ou DR reais | Nao bloqueiam local; validar no gate correspondente |
 | Worktree preexistente sujo | Criterio literal de Git limpo | Nao apropriar mudancas do usuario; commits usam pathspec apenas dos artefatos da implementacao |
-| Lacunas DEV-0001..DEV-0021 | Gates especificos | Resolver por precedencia e testes antes de declarar gate afetado |
+| Lacunas DEV-0001..DEV-0022 | Gates especificos | Resolver por precedencia e testes antes de declarar gate afetado |
 | Termos juridicos definitivos da licenca | Distribuicao externa do software | `LICENSE` nao concede licenca; titular deve aprovar termos antes de distribuicao |
 | Node 20 esta fora de manutencao em 2026 | Producao segura de longo prazo | Seguir DOC-07 nesta implementacao; upgrade de major exige ADR autorizado antes da operacao prolongada |

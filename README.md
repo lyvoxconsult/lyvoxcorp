@@ -27,9 +27,12 @@ node --version
 pnpm --version
 pnpm install --frozen-lockfile
 pnpm list --depth -1 -r
+pnpm dev
 ```
 
-Os comandos de build, desenvolvimento, lint, teste e typecheck ja estao orquestrados no `package.json` raiz; cada app/pacote recebera sua implementacao nas fases seguintes. Nao use este README como substituto dos documentos canonicos.
+`pnpm dev` inicia `web`, `api` e `worker` simultaneamente pelo Turborepo. Enquanto as aplicacoes ainda nao possuem codigo funcional, cada workspace mantem um processo de desenvolvimento explicitamente identificado como scaffold; o comando sera substituido pelo runtime real na fase proprietaria de cada app. Verifique a concorrencia de forma automatizada com `pnpm dev:verify`.
+
+Os comandos de build, lint, teste e typecheck tambem estao orquestrados no `package.json` raiz; cada app/pacote recebera sua implementacao nas fases seguintes. Nao use este README como substituto dos documentos canonicos.
 
 ## Limites dos pacotes
 

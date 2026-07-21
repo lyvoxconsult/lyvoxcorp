@@ -51,7 +51,20 @@ O DOC-21 descreve criacao de repositorio separado. O prompt mestre, de maior pre
 ## PHASE-003 - Configuracao do desenvolvimento local
 
 - Inicio: `2026-07-21`.
-- Estado: `IN_PROGRESS`.
-- Gate: `GATE-003 = PENDING_IMPLEMENTATION_VALIDATION`.
+- Conclusao: `2026-07-21`.
+- Estado: `APPROVED`.
+- Gate: `GATE-003 = APPROVED`.
 - Escopo: scripts unificados de desenvolvimento local e verificacao de execucao concorrente dos workspaces.
-- Proxima acao: consolidar DOC-18, configurar scripts reais e provar o comportamento concorrente.
+- Arquivos: `package.json`, manifests de `apps/*`, `scripts/dev-workspace.mjs`, `scripts/verify-dev-concurrency.mjs` e README raiz.
+- Implementacao: Turbo inicia tres processos persistentes, cross-platform e identificados como scaffold; nenhum servidor ou health check de produto e simulado.
+- Validacao: os tres workspaces emitiram readiness antes do teardown; role invalida foi rejeitada; nenhum processo Node do harness permaneceu ativo.
+- QA: conformidade SPEC aprovada; qualidade aprovada apos corrigir cleanup e parsing do harness; validacao final independente `READY_TO_APPROVE`.
+- Proxima acao: iniciar automaticamente PHASE-004.
+
+## PHASE-004 - Infraestrutura local
+
+- Inicio: `2026-07-21`.
+- Estado: `IN_PROGRESS`.
+- Gate: `GATE-004 = PENDING_IMPLEMENTATION_VALIDATION`.
+- Escopo: Docker Compose local com PostgreSQL 16, PgBouncer, Redis 7 e Mailpit, health checks, volumes nomeados e rede interna.
+- Proxima acao: consolidar DOC-14/DOC-18, implementar os manifests e provar saude e conectividade local.
