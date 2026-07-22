@@ -222,4 +222,17 @@ O DOC-21 descreve criacao de repositorio separado. O prompt mestre, de maior pre
 - Validacao: 136/136 testes no monorepo aprovados; typecheck, lint, build Vite/NestJS e suíte Vitest 100% verdes.
 - Proxima acao: iniciar automaticamente PHASE-015.
 
+## PHASE-015: Projetos e Tarefas
+
+- Inicio: `2026-07-22`.
+- Conclusao: `2026-07-22`.
+- Estado: `APPROVED`.
+- Gate: `GATE-015 = APPROVED`.
+- Escopo: módulo completo de Projetos e Tarefas operacionais (FR-070..FR-072) com suporte a prazos, responsáveis, orçamentos, subtarefas (`parent_task_id`), prioridades e as três visões de interface requeridas: Lista com subtarefas, Kanban drag-and-drop e gráfico de **Gantt** (`FR_071_GANTT = IN_SCOPE`). Conclusão completa da integração de itens de ação de reuniões em tarefas (FR-043).
+- API e seguranca: Endpoints REST `/api/v1/projetos` e `/api/v1/tarefas` com verificação RBAC (`projects.read/create/update`, `tasks.read/create/update`) e proteção de sessão CSRF.
+- Frontend: `ProjectsPage`, `ProjectDetailPage` com abas para Lista, Kanban e Gantt (`GanttChart`), formulário de tarefas com vinculo de subtarefa (`TaskFormDialog`) e atalho de navegação no menu lateral.
+- Validacao: 143/143 testes no monorepo aprovados; typecheck, lint, build Vite/NestJS e suíte Vitest 100% verdes.
+- Proxima acao: iniciar automaticamente PHASE-016.
+
+
 

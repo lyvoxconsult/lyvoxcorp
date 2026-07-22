@@ -1,4 +1,4 @@
-import { Calendar, Columns3, DollarSign, FileText, PanelLeftClose, PanelLeftOpen, Users, X } from "lucide-react";
+import { Calendar, Columns3, DollarSign, FileText, FolderKanban, PanelLeftClose, PanelLeftOpen, Users, X } from "lucide-react";
 import type { RefObject } from "react";
 import { NavLink } from "react-router-dom";
 import { Can } from "../../auth/Can";
@@ -73,6 +73,17 @@ export function Sidebar({ collapsed = false, mobile = false, onClose, onToggleCo
           >
             <FileText aria-hidden="true" className="h-5 w-5 shrink-0" />
             {(!collapsed || mobile) && <span>Propostas</span>}
+          </NavLink>
+        </Can>
+        <Can permission="projects.read">
+          <NavLink
+            to="/app/projetos"
+            aria-label="Projetos"
+            onClick={mobile ? onClose : undefined}
+            className={({ isActive }) => `mt-1 flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 font-semibold ${isActive ? "bg-brand-accessible text-white" : "text-brand-subtle hover:bg-surface-muted"}`}
+          >
+            <FolderKanban aria-hidden="true" className="h-5 w-5 shrink-0" />
+            {(!collapsed || mobile) && <span>Projetos</span>}
           </NavLink>
         </Can>
       </nav>

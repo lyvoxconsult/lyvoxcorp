@@ -11,6 +11,8 @@ import { MeetingsPage } from "../modules/meetings/MeetingsPage";
 import { ServicesPage } from "../modules/services/ServicesPage";
 import { ProposalsPage } from "../modules/proposals/ProposalsPage";
 import { ContractsPage } from "../modules/proposals/ContractsPage";
+import { ProjectsPage } from "../modules/projects/ProjectsPage";
+import { ProjectDetailPage } from "../modules/projects/ProjectDetailPage";
 
 
 export function AppRoutes() {
@@ -38,6 +40,10 @@ export function AppRoutes() {
         </Route>
         <Route element={<ProtectedRoute permission="contracts.read" />}>
           <Route path="contratos" element={<ContractsPage />} />
+        </Route>
+        <Route element={<ProtectedRoute permission="projects.read" />}>
+          <Route path="projetos" element={<ProjectsPage />} />
+          <Route path="projetos/:id" element={<ProjectDetailPage />} />
         </Route>
 
       </Route>
