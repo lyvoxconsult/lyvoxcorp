@@ -16,6 +16,7 @@ status: in-progress
 | Branch | `feature/greenfield-foundation` |
 | Commit-base | `01a28935f9328225d9bbfd08a7073b873fdab198` |
 | Servicos em execucao | Suporte local: PostgreSQL, PgBouncer, Redis e Mailpit healthy; nenhum servico do produto |
+
 | Migrations aplicadas | `0001_initial_schema.sql` a `0005_crm_domain.sql`; reaplicacao idempotente com `applied=0`, 35 tabelas e `drizzle-kit check` aprovado |
 | Testes aprovados | 93/93 na raiz (10 auth, 45 API, 4 permissions, 5 validation, 43 web); cobertura API 96,66% linhas e web 81,56% linhas; build, smoke HTTP/browser, frozen lock, typecheck e lint aprovados |
 | Testes falhando | Nenhum |
