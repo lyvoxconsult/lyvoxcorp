@@ -1,0 +1,9 @@
+{
+  "name": "@lyvox/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node ../../scripts/dev-workspace.mjs worker"
+  }
+}

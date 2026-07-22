@@ -1,0 +1,36 @@
+{
+  "name": "lyvox-gerenciamento",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Plataforma empresarial interna da Lyvox.",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@10.34.5",
+  "engines": {
+    "node": ">=20.0.0 <21",
+    "pnpm": ">=10.34.5 <11"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "api:verify": "node scripts/verify-api-foundation.mjs",
+    "dev": "turbo run dev --concurrency=4",
+    "dev:verify": "node scripts/verify-dev-concurrency.mjs",
+    "db:generate": "pnpm --filter @lyvox/database db:generate",
+    "db:migrate": "pnpm --filter @lyvox/database db:migrate",
+    "db:seed": "pnpm --filter @lyvox/database db:seed",
+    "db:seed:validate": "pnpm --filter @lyvox/database db:seed:validate",
+    "db:seed:verify": "pnpm --filter @lyvox/database db:seed:verify",
+    "db:verify": "pnpm --filter @lyvox/database db:verify",
+    "infra:config": "node scripts/infra-local.mjs config",
+    "infra:down": "node scripts/infra-local.mjs down",
+    "infra:health": "node scripts/infra-local.mjs health",
+    "infra:reset": "node scripts/infra-local.mjs reset",
+    "infra:up": "node scripts/infra-local.mjs up",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "turbo": "2.10.5",
+    "typescript": "7.0.2"
+  }
+}

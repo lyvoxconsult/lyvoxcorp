@@ -1,0 +1,95 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Lyvox Gerenciamento API", "version": "0.6.0" },
+  "servers": [{ "url": "/api/v1" }],
+  "tags": [{ "name": "Auth" }],
+  "paths": {
+    "/auth/login": { "$ref": "#/components/pathItems/login" },
+    "/auth/mfa/challenge": { "$ref": "#/components/pathItems/mfaChallenge" },
+    "/auth/mfa/enrollment": { "$ref": "#/components/pathItems/mfaEnrollment" },
+    "/auth/mfa/setup": { "$ref": "#/components/pathItems/mfaSetup" },
+    "/auth/mfa/activate": { "$ref": "#/components/pathItems/mfaActivate" },
+    "/auth/me": { "$ref": "#/components/pathItems/me" },
+    "/auth/csrf": { "$ref": "#/components/pathItems/csrf" },
+    "/auth/logout": { "$ref": "#/components/pathItems/logout" },
+    "/auth/logout-all": { "$ref": "#/components/pathItems/logoutAll" },
+    "/auth/sessions": { "$ref": "#/components/pathItems/sessions" },
+    "/auth/sessions/{id}": { "$ref": "#/components/pathItems/revokeSession" },
+    "/auth/password/forgot": { "$ref": "#/components/pathItems/forgotPassword" },
+    "/auth/password/reset": { "$ref": "#/components/pathItems/resetPassword" },
+    "/auth/password/change": { "$ref": "#/components/pathItems/changePassword" }
+  },
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": { "type": "apiKey", "in": "cookie", "name": "lyvox_session" },
+      "csrfHeader": { "type": "apiKey", "in": "header", "name": "X-CSRF-Token" }
+    },
+    "schemas": {
+      "Email": { "type": "string", "format": "email", "maxLength": 255 },
+      "Password": { "type": "string", "format": "password", "minLength": 1, "maxLength": 128, "writeOnly": true },
+      "OpaqueToken": { "type": "string", "minLength": 40, "maxLength": 256, "writeOnly": true },
+      "Problem": {
+        "type": "object", "required": ["type", "title", "status", "detail", "instance", "code", "correlationId", "timestamp"],
+        "properties": {
+          "type": { "type": "string", "format": "uri" }, "title": { "type": "string" },
+          "status": { "type": "integer" }, "detail": { "type": "string" },
+          "instance": { "type": "string" }, "code": { "type": "string" }, "correlationId": { "type": "string", "format": "uuid" }, "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Login": {
+        "type": "object", "additionalProperties": false, "required": ["email", "password"],
+        "properties": { "email": { "$ref": "#/components/schemas/Email" }, "password": { "$ref": "#/components/schemas/Password" } }
+      },
+      "Challenge": {
+        "type": "object", "additionalProperties": false, "required": ["challengeToken"],
+        "properties": { "challengeToken": { "$ref": "#/components/schemas/OpaqueToken" } }
+      },
+      "MfaProof": {
+        "type": "object", "additionalProperties": false, "required": ["challengeToken"],
+        "properties": { "challengeToken": { "$ref": "#/components/schemas/OpaqueToken" }, "code": { "type": "string", "pattern": "^[0-9]{6}$" }, "backupCode": { "type": "string", "minLength": 10, "maxLength": 40 } },
+        "oneOf": [{ "required": ["code"] }, { "required": ["backupCode"] }]
+      },
+      "MfaActivation": {
+        "type": "object", "additionalProperties": false, "required": ["challengeToken", "code"],
+        "properties": { "challengeToken": { "$ref": "#/components/schemas/OpaqueToken" }, "code": { "type": "string", "pattern": "^[0-9]{6}$" } }
+      },
+      "PasswordReset": {
+        "type": "object", "additionalProperties": false, "required": ["token", "newPassword"],
+        "properties": { "token": { "$ref": "#/components/schemas/OpaqueToken" }, "newPassword": { "$ref": "#/components/schemas/Password" } }
+      },
+      "PasswordChange": {
+        "type": "object", "additionalProperties": false, "required": ["currentPassword", "newPassword"],
+        "properties": { "currentPassword": { "$ref": "#/components/schemas/Password" }, "newPassword": { "$ref": "#/components/schemas/Password" } }
+      }
+    },
+    "responses": {
+      "Problem": { "description": "RFC 7807 error", "content": { "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } } } },
+      "NoContent": { "description": "Operation completed" }
+    },
+    "pathItems": {
+      "login": { "post": { "operationId": "login", "tags": ["Auth"], "requestBody": { "$ref": "#/components/requestBodies/login" }, "responses": { "200": { "description": "Authenticated session" }, "202": { "description": "MFA challenge required" }, "401": { "$ref": "#/components/responses/Problem" }, "429": { "$ref": "#/components/responses/Problem" } } } },
+      "mfaChallenge": { "post": { "operationId": "completeMfa", "tags": ["Auth"], "requestBody": { "$ref": "#/components/requestBodies/mfaProof" }, "responses": { "200": { "description": "Authenticated session" }, "401": { "$ref": "#/components/responses/Problem" } } } },
+      "mfaEnrollment": { "post": { "operationId": "beginMfaEnrollment", "tags": ["Auth"], "security": [{ "sessionCookie": [], "csrfHeader": [] }], "responses": { "201": { "description": "Enrollment challenge created" }, "401": { "$ref": "#/components/responses/Problem" }, "409": { "$ref": "#/components/responses/Problem" } } } },
+      "mfaSetup": { "post": { "operationId": "setupMfa", "tags": ["Auth"], "requestBody": { "$ref": "#/components/requestBodies/challenge" }, "responses": { "201": { "description": "TOTP enrollment material" }, "401": { "$ref": "#/components/responses/Problem" } } } },
+      "mfaActivate": { "post": { "operationId": "activateMfa", "tags": ["Auth"], "requestBody": { "$ref": "#/components/requestBodies/mfaActivation" }, "responses": { "201": { "description": "MFA enabled and backup codes returned once" }, "401": { "$ref": "#/components/responses/Problem" } } } },
+      "me": { "get": { "operationId": "getCurrentUser", "tags": ["Auth"], "security": [{ "sessionCookie": [] }], "responses": { "200": { "description": "Current user" }, "401": { "$ref": "#/components/responses/Problem" } } } },
+      "csrf": { "post": { "operationId": "rotateCsrf", "tags": ["Auth"], "security": [{ "sessionCookie": [], "csrfHeader": [] }], "responses": { "200": { "description": "Rotated CSRF token; response is not cacheable" }, "401": { "$ref": "#/components/responses/Problem" } } } },
+      "logout": { "post": { "operationId": "logout", "tags": ["Auth"], "security": [{ "sessionCookie": [], "csrfHeader": [] }], "responses": { "204": { "$ref": "#/components/responses/NoContent" }, "401": { "$ref": "#/components/responses/Problem" } } } },
+      "logoutAll": { "post": { "operationId": "logoutAll", "tags": ["Auth"], "security": [{ "sessionCookie": [], "csrfHeader": [] }], "responses": { "204": { "$ref": "#/components/responses/NoContent" }, "401": { "$ref": "#/components/responses/Problem" } } } },
+      "sessions": { "get": { "operationId": "listSessions", "tags": ["Auth"], "security": [{ "sessionCookie": [] }], "responses": { "200": { "description": "Active sessions" }, "401": { "$ref": "#/components/responses/Problem" } } } },
+      "revokeSession": { "delete": { "operationId": "revokeSession", "tags": ["Auth"], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }], "security": [{ "sessionCookie": [], "csrfHeader": [] }], "responses": { "204": { "$ref": "#/components/responses/NoContent" }, "401": { "$ref": "#/components/responses/Problem" } } } },
+      "forgotPassword": { "post": { "operationId": "forgotPassword", "tags": ["Auth"], "requestBody": { "$ref": "#/components/requestBodies/email" }, "responses": { "202": { "description": "Request accepted without account disclosure" } } } },
+      "resetPassword": { "post": { "operationId": "resetPassword", "tags": ["Auth"], "requestBody": { "$ref": "#/components/requestBodies/passwordReset" }, "responses": { "204": { "$ref": "#/components/responses/NoContent" }, "401": { "$ref": "#/components/responses/Problem" } } } },
+      "changePassword": { "post": { "operationId": "changePassword", "tags": ["Auth"], "requestBody": { "$ref": "#/components/requestBodies/passwordChange" }, "security": [{ "sessionCookie": [], "csrfHeader": [] }], "responses": { "204": { "$ref": "#/components/responses/NoContent" }, "401": { "$ref": "#/components/responses/Problem" }, "409": { "$ref": "#/components/responses/Problem" } } } }
+    },
+    "requestBodies": {
+      "login": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Login" } } } },
+      "challenge": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Challenge" } } } },
+      "mfaProof": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MfaProof" } } } },
+      "mfaActivation": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MfaActivation" } } } },
+      "email": { "required": true, "content": { "application/json": { "schema": { "type": "object", "additionalProperties": false, "required": ["email"], "properties": { "email": { "$ref": "#/components/schemas/Email" } } } } } },
+      "passwordReset": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PasswordReset" } } } },
+      "passwordChange": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PasswordChange" } } } }
+    }
+  }
+}
