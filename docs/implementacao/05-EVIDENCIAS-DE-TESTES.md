@@ -154,3 +154,19 @@ Nenhum seed, endpoint ou comportamento funcional foi declarado nesta fase. Os da
 | 2026-07-22 | Revisao SPEC/ARCH 1/3 | Diff staged + DOC-07/DOC-09 | PASS | Probes raiz, deny-by-default, timeout, correlation, RFC 7807, OpenAPI 3.1 e runtime compilado aprovados sem achados |
 | 2026-07-22 | Revisao SECURITY/QUALITY 2/3 inicial + repeticao | Diff staged + prova adversarial concorrente | FAIL_RESOLVED_PASS | Single-flight manteve uma chamada por dependencia em 60 requests; redaction real de CSRF e remocao de query em `instance` aprovadas; 12/12 focais e 43/43 API |
 | 2026-07-22 | Revisao QA final 3/3 inicial + repeticao | Diff staged + evidencias do gate | FAIL_RESOLVED_PASS | Codigo e criterios aprovados; contagens e registros foram alinhados a evidencia isolada, e a repeticao retornou `READY_TO_APPROVE` sem achados materiais |
+
+## PHASE-009
+
+| Data | Comando/checagem | Ambiente | Resultado | Evidencia |
+|---|---|---|---|---|
+| 2026-07-22 | Consulta dos canonicos e referencias | DOC-04/DOC-06, roadmap, Context7 e cookbook local | PASS_WITH_LIMITATION | Stack/tokens/fluxo confirmados; Mobbin indisponivel registrado em DEV-0057, sem uso de projeto legado |
+| 2026-07-22 | `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm lint`, `pnpm build` | Node 20.20.2 / pnpm 10.34.5 / Vite 8.1.5 | PASS | Lock reproduzivel; typecheck e lint sem erros; build produziu 1.849 modulos, JS 247,34 kB/78,50 kB gzip e CSS 15,67 kB/4,09 kB gzip |
+| 2026-07-22 | `pnpm test` | Quatro suites do monorepo | PASS | 67/67: 43 API, 10 auth, 4 permissions e 10 web; nenhum teste falhando |
+| 2026-07-22 | `pnpm --filter @lyvox/web test:coverage` | Vitest 4.1.10 / V8 | PASS | 84,21% linhas, 89,28% branches, 86,36% statements e 76,92% funcoes; 4 arquivos e 10 testes aprovados |
+| 2026-07-22 | `pnpm dev:verify` | Turbo + API/web/worker reais | PASS | `LYVOX_DEV_CONCURRENCY_OK workspaces=api,web,worker`; web Vite emite readiness somente apos escutar |
+| 2026-07-22 | Browser desktop/tablet/mobile | 1440x1000, 768x900 e 390x844 | PASS | Zero overflow/corte; console 0 erros/0 warnings; recursos relevantes, fontes e favicon HTTP 200; drawer e restauracao/trap de foco aprovados |
+| 2026-07-22 | Lighthouse mobile e desktop | Aplicacao interna local | PASS_WITH_EXPECTED_SEO | Accessibility 100 e Best Practices 100; SEO 63 apenas pelo bloqueio intencional de indexacao em DEV-0059 |
+| 2026-07-22 | `pnpm audit --audit-level=high` + Trivy filesystem | Registry npm / scanners vuln, secret e misconfig | PASS_WITH_MODERATE_FINDING | Zero high/critical e zero findings Trivy; uma moderada de tooling permanece controlada em DEV-0028 |
+| 2026-07-22 | Revisao SPEC/ARCH 1/3 inicial + repeticao | Diff staged + DOC-04/DOC-06 | FAIL_RESOLVED_PASS | Nome acessivel de navegacao colapsada e escala tipografica foram corrigidos; repeticao aprovou integralmente |
+| 2026-07-22 | Revisao SECURITY/QUALITY 2/3 inicial + repeticao | Diff staged + contrastes e ARIA | FAIL_RESOLVED_PASS | Danger, borda/placeholder de input e IDs do EmptyState corrigidos/testados; repeticao aprovou sem secrets, storage, XSS ou `VITE_*` |
+| 2026-07-22 | Revisao QA final 3/3 | Diff staged + suites + browser/Lighthouse | PASS | `READY_TO_APPROVE`; responsividade, acessibilidade, contratos da fundacao, preservacao dos prompts e nao alteracao dos canonicos confirmadas |

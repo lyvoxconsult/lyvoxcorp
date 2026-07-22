@@ -4,6 +4,42 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node ../../scripts/dev-workspace.mjs web"
+    "build": "tsc -b && vite build",
+    "dev": "node scripts/local-dev.mjs",
+    "lint": "oxlint src vite.config.ts vitest.config.ts",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "@fontsource/alegreya-sc": "5.3.0",
+    "@fontsource/cormorant-sc": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
+    "@fontsource/rasa": "5.3.0",
+    "@tanstack/react-query": "5.101.4",
+    "lucide-react": "1.25.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-router-dom": "6.30.4",
+    "zustand": "5.0.14"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
+    "@testing-library/user-event": "14.6.1",
+    "@types/node": "20.19.43",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.3",
+    "@vitest/coverage-v8": "4.1.10",
+    "autoprefixer": "10.5.4",
+    "jsdom": "29.1.1",
+    "oxlint": "1.75.0",
+    "postcss": "8.5.21",
+    "tailwindcss": "3.4.19",
+    "typescript": "7.0.2",
+    "vite": "8.1.5",
+    "vitest": "4.1.10"
   }
 }

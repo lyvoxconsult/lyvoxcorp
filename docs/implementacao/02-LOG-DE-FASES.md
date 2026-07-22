@@ -140,3 +140,19 @@ O DOC-21 descreve criacao de repositorio separado. O prompt mestre, de maior pre
 - Validacao: 57/57 testes na raiz, incluindo readiness positiva/negativa e concorrente, rotas raiz, prefixos negativos, IDs concorrentes, Swagger UI/spec e regressao auth/RBAC; cobertura API 96,28% linhas e 82,49% branches; frozen install, typecheck, lint, build, dev concorrente e audit sem high/critical aprovados. `pnpm api:verify`, executado em Node sobre os artefatos compilados, confirmou health/readiness/docs contra PgBouncer/PostgreSQL e Redis locais.
 - QA: SPEC/ARCH 1/3 aprovada sem achados. SECURITY/QUALITY 2/3 rejeitou inicialmente exaustao concorrente do pool, ausencia de redaction CSRF e query string em `instance`; single-flight, redaction serializada e sanitizacao foram implementados, testados e aprovados na repeticao. QA final 3/3 rejeitou somente contadores/evidencias obsoletos; apos alinhamento e cobertura isolada, a repeticao retornou `READY_TO_APPROVE`.
 - Proxima acao: iniciar automaticamente PHASE-009.
+
+## PHASE-009 - Frontend Foundation (React + Vite)
+
+- Inicio: `2026-07-22`.
+- Conclusao: `2026-07-22`.
+- Estado: `APPROVED`.
+- Gate: `GATE-009 = APPROVED`.
+- Escopo: fundacao React 19/Vite, tokens Tailwind, tipografia self-hosted, componentes UI basicos, feedback e shell responsivo com Sidebar/Header; nenhum dashboard funcional ou dado de negocio foi antecipado.
+- Inputs ativos: DOC-04, DOC-06, roadmap canonico, documentacao oficial atual consultada via Context7 e referencias locais do cookbook de frontend. Mobbin MCP permaneceu indisponivel conforme DEV-0057.
+- Implementacao: `QueryClientProvider`, React Router com flags futuras, estado de UI efemero em Zustand, skip link, landmarks, sidebar colapsavel, drawer mobile modal com trap/restauracao de foco, estados acessiveis e suporte a movimento reduzido.
+- Design system: paleta e escala canonicas materializadas; variantes semanticas de alto contraste aplicadas onde branco sobre as cores canonicas nao atendia WCAG AA. Cormorant SC, Alegreya SC, Rasa e JetBrains Mono foram empacotadas localmente conforme DEV-0058.
+- Validacao tecnica: frozen install, typecheck, lint, build Vite e `dev:verify` aprovados; 67/67 testes na raiz, sendo 10/10 web; cobertura web 84,21% linhas, 89,28% branches, 86,36% statements e 76,92% funcoes.
+- Validacao visual: desktop 1440x1000, tablet 768x900 e mobile 390x844 sem overflow/corte; console sem erros/warnings, recursos relevantes HTTP 200 e Lighthouse Accessibility 100/Best Practices 100 em mobile e desktop. A exclusao de indexacao e intencional conforme DEV-0059.
+- QA corretiva: SPEC detectou nome acessivel ausente no item colapsado e escala tipografica incompleta; SECURITY detectou contraste insuficiente em danger/input e ID ARIA duplicavel. Todos os achados foram corrigidos, cobertos por testes e aprovados nas repeticoes.
+- QA final: SPEC/ARCH, SECURITY/QUALITY e QA independente aprovaram; `READY_TO_APPROVE`, sem achados materiais. `FR-010..FR-012` permanecem `NOT_STARTED` porque a fase entregou somente a fundacao transversal.
+- Proxima acao: iniciar automaticamente PHASE-010.

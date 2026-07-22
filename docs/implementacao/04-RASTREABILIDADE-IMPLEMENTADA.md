@@ -1,7 +1,7 @@
 ---
 title: Rastreabilidade Implementada
 date: 2026-07-22
-phase: PHASE-009
+phase: PHASE-010
 ---
 
 # Rastreabilidade implementada
@@ -17,7 +17,7 @@ Nenhum FR foi implementado na PHASE-000. A matriz inicia o estado sem simular en
 | FR-005 | IMPLEMENTED | `setupMfa`, `activateMfa`, `completeMfa` | `/auth/mfa/*` | DB-001 + tabelas MFA | Desafio | TEST-001 | PHASE-006 | GATE-006 | TOTP 160-bit, anti-replay, oito backup codes e consumo unico testados |
 | FR-006 | PARTIAL_EXTERNAL_DEPENDENCY | `AuthorizationController.users` | `GET /users` | DB-001/DB-004 | `users.manage` | TEST-004 | PHASE-007 | GATE-007 | Listagem e fronteira admin funcionais; convite/lifecycle pendentes de JOB-001 conforme DEV-0045 |
 | FR-007 | IMPLEMENTED | `RbacGuard`, `AuthorizationService.createRole`, `packages/permissions` | `GET/POST /roles` | DB-004/DB-005 + migration 0003 | `roles.manage` | TEST-004 | PHASE-007 | GATE-007 | Cargo customizado com grants/scopes vivos, matriz 5/18/47, revogacao imediata e ownership aprovados no gate |
-| FR-010..FR-012 | NOT_STARTED | - | API-004 | Variadas | `dashboard.read` | TEST-007 | PHASE-009 | GATE-009 | DOC-22:32-34; DEV-0016 |
+| FR-010..FR-012 | NOT_STARTED | Fundacao transversal em `apps/web/src/*`, sem dashboard funcional | API-004 | Variadas | `dashboard.read` | TEST-007 | PHASE-009 | GATE-009 | Shell/UI base aprovados; nenhuma KPI, atividade, reuniao ou tarefa de negocio entregue; DOC-22:32-34; DEV-0016 |
 | FR-020..FR-023 | NOT_STARTED | - | API-010..API-013 | DB-020 | `clients.*` | TEST-003 | PHASE-010 | GATE-010 | DOC-22:35-38 |
 | FR-030..FR-033 | NOT_STARTED | - | API-021..API-022 | DB-020/DB-030 | `crm.*` | TEST-005 | PHASE-011 | GATE-011 | DOC-22:39-42 |
 | FR-040..FR-043 | NOT_STARTED | - | API-040/API-041/API-080 | DB-040/DB-070 | `meetings.*`/`tasks.create` | TEST-005/TEST-007 | PHASE-012 | GATE-012 | DOC-22:43-46 |
