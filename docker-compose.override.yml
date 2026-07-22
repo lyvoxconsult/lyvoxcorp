@@ -1,4 +1,11 @@
 services:
+  redis:
+    networks:
+      - lyvox_internal
+      - lyvox_loopback
+    ports:
+      - 127.0.0.1:${REDIS_HOST_PORT:-6380}:6379
+
   pgbouncer:
     networks:
       - lyvox_internal

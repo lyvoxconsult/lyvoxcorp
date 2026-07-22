@@ -2,5 +2,23 @@
   "name": "@lyvox/auth",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20.0.0 <21"
+  },
+  "dependencies": {
+    "hash-wasm": "4.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.43",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  }
 }

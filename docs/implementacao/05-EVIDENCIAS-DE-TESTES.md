@@ -105,3 +105,22 @@ O gate comprova apenas a infraestrutura de suporte local. Nenhuma aplicacao, mig
 | 2026-07-21 | Revisao sequencial SPEC, qualidade/seguranca e validacao final | Tres revisores independentes, somente leitura | PASS | SPEC aprovada; cinco achados operacionais corrigidos e revalidados; `READY_TO_APPROVE`, 20 arquivos staged e nenhum `HARD_BLOCKER` |
 
 Nenhum seed, endpoint ou comportamento funcional foi declarado nesta fase. Os dados temporarios dos testes foram executados dentro de transacao e revertidos.
+
+## PHASE-006
+
+| Data | Comando/checagem | Ambiente | Resultado | Evidencia |
+|---|---|---|---|---|
+| 2026-07-21 | `pnpm --filter @lyvox/auth test` | Node 20.20.2 / Vitest 4.1.10 | PASS | 10/10 testes: Argon2id, politica de senha, tokens, CSRF, TOTP/anti-replay, AES-GCM, backup codes e cookies |
+| 2026-07-21 | `pnpm --filter @lyvox/api test` | NestJS/Fastify + PostgreSQL 16 efemero/Redis local | PASS | 26/26 testes; oito cenarios isolados cobrem login, lockout, rotacao/CSRF, sessoes, MFA e concorrencia, reset/throttling, soft-delete, migration legada e fallback Redis |
+| 2026-07-21 | `vitest run --coverage` | V8 coverage | PASS | 97,00% linhas, 82,14% branches, 96,73% funcoes e 94,51% statements; thresholds de 80% ativos |
+| 2026-07-21 | OpenAPI contract test | OpenAPI 3.1 JSON | PASS | As 14 rotas implementadas correspondem exatamente aos path items documentados |
+| 2026-07-21 | Seed apply duas vezes + verify | PostgreSQL 16 via PgBouncer | PASS | 5 roles, 18 permissoes e 47 vinculos; primeira criou admin/credencial, segunda preservou senha; MFA pending |
+| 2026-07-21 | Seed com permissao extra e segundo e-mail administrativo | PostgreSQL 16 via PgBouncer | PASS | Reexecucao removeu o 48o vinculo nao canonico e restaurou matriz exata de 47; tentativa de criar segundo bootstrap admin foi recusada |
+| 2026-07-21 | `pnpm dev:verify` | Turbo + processo Nest/Fastify real | FAIL_RESOLVED | DI implicita falhou no `tsx watch`; `@Inject(AuthService)` resolveu e execucao final confirmou api, web e worker |
+| 2026-07-21 | `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm lint`, `pnpm build`, `pnpm test` | Node 20.20.2 / pnpm 10.34.5 | PASS | Lock reproduzivel; 3 typechecks, lint zero erro, build e suite final com 36/36 testes aprovados (10 primitives + 26 API) apos a QA corretiva |
+| 2026-07-21 | Revisao SPEC 1/3 inicial | Diff staged | FAIL_RESOLVED | MFA opcional inacessivel, tres consultas sem soft-delete e OpenAPI/status divergentes foram corrigidos; novos testes negativos e rota de enrollment aprovados |
+| 2026-07-21 | Revisao qualidade/seguranca 2/3 inicial | Diff staged | FAIL_RESOLVED | Sete achados tecnicos corrigidos: tentativa MFA atomica, proxy CIDR explicito, banco de teste efemero, throttling sensivel, CSRF POST/no-store, backfill da migration e matriz seed exata; Node EOL mantido como bloqueio de deploy |
+| 2026-07-21 | Revisao qualidade/seguranca 2/3 repetida | Diff staged | FAIL_RESOLVED | Ultimo P2 corrigido: contador e TTL do rate limit agora sao criados/avaliados atomicamente por Lua; suite concorrente e cobertura aprovadas |
+| 2026-07-21 | `pnpm audit --audit-level high` | Registry npm | PASS_WITH_MODERATE_FINDING | Zero high/critical; permanece uma moderada transitiva de tooling registrada em DEV-0028 |
+| 2026-07-21 | Reset controlado final + duas migrations + verify/check | PostgreSQL local descartavel | PASS | `applied=2`, depois `applied=0`; `LYVOX_DB_VERIFY_OK tables=26`; dados temporarios removidos |
+| 2026-07-21 | Revisoes sequenciais SPEC, qualidade/seguranca e auditoria final | Tres revisores independentes, somente leitura | PASS | Achados tecnicos e duas inconsistencias documentais foram corrigidos; repeticoes aprovaram e a auditoria final retornou `READY_TO_APPROVE` |

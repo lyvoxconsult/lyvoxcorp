@@ -93,7 +93,16 @@ O DOC-21 descreve criacao de repositorio separado. O prompt mestre, de maior pre
 ## PHASE-006 - Autenticacao e sessoes opacas server-side
 
 - Inicio: `2026-07-21`.
-- Estado: `IN_PROGRESS`.
-- Gate: `GATE-006 = PENDING_IMPLEMENTATION`.
+- Conclusao: `2026-07-21`.
+- Estado: `APPROVED`.
+- Gate: `GATE-006 = APPROVED`.
 - Escopo: login, logout, revogacao, cookies seguros, Argon2id e ativador MFA TOTP conforme DOC-10.
-- Proxima acao: consolidar contratos de autenticacao e criterios do gate antes da implementacao.
+- Arquivos: `apps/api/src/modules/auth/*`, fundacao HTTP minima em `apps/api/src/*`, `packages/auth/*`, migration `0002_auth_security.sql`, seed seguro e contrato `apps/api/openapi/auth.openapi.json`.
+- Implementacao: sessao opaca de 64 bytes com hash SHA-256 e PostgreSQL autoritativo; cookie HttpOnly/SameSite=Lax; CSRF vinculado a sessao; rotacao/revogacao; lockout e rate limit fail-closed; Argon2id 64 MiB/t=3/p=1; MFA TOTP RFC 6238, anti-replay e oito backup codes de uso unico; reset de senha por token unico de 15 minutos e outbox criptografada.
+- Persistencia: migration imutavel `0002_auth_security.sql`, SHA-256 `f0e792624d8bb8f2daf7b4c6840f6ae6d432e3b22c23281c10e6a669cf20d6b6`; 26 tabelas verificadas; sessoes preexistentes recebem backfill CSRF e sao revogadas; seed transacional/idempotente de cinco roles, 18 permissoes e 47 vinculos exatos, sem sobrescrever credencial.
+- Contratos: 14 rotas `/api/v1/auth/*` documentadas em OpenAPI 3.1; `FR-001`, `FR-002`, `FR-004` e `FR-005` concluidos; `FR-003` parcial ate JOB-001 entregar e-mail; `FR-006` preservado para RBAC na PHASE-007.
+- Validacao tecnica: 36 testes aprovados (10 primitives + 26 API), PostgreSQL efemero isolado/Redis real, cobertura 97,00% linhas e 82,14% branches, frozen lockfile, typecheck, lint, build, audit high, dev concorrente e migration idempotente aprovados.
+- QA corretiva: primeira revisao SPEC rejeitou MFA opcional inacessivel, soft-deletes aceitos e divergencias OpenAPI/status; os tres achados foram corrigidos e ganharam testes antes da repeticao da revisao.
+- QA corretiva operacional: segunda revisao rejeitou corrida de tentativas MFA, proxy IP, contaminacao do banco, throttling incompleto, GET mutativo de CSRF, migration sem backfill e matriz seed inexata; correcoes e provas foram adicionadas. A repeticao encontrou `INCR`/`EXPIRE` nao atomicos; um script Lua Redis unico resolveu o ultimo P2 antes da nova revisao. Node 20 EOL permanece bloqueio de staging/producao, nao do gate local, conforme DEV-0036.
+- QA final: revisao SPEC aprovada apos correcoes; revisao de qualidade/seguranca aprovada apos correcoes; auditoria final inicialmente rejeitou apenas contadores documentais obsoletos (`13` rotas e `35/35` testes), ambos alinhados a `14` e `36/36`, e retornou `READY_TO_APPROVE` na repeticao.
+- Proxima acao: iniciar automaticamente PHASE-007.

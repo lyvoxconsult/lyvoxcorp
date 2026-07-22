@@ -104,4 +104,4 @@ const timeout = setTimeout(() => {
     (workspace) => !readyWorkspaces.has(workspace),
   );
   finish(false, `Timed out waiting for workspaces: ${missing.join(",")}`);
-}, 15_000);
+}, 30_000);

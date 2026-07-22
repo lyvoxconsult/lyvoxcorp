@@ -41,13 +41,18 @@ function parseEnvironment(source) {
 function ensureEnvironment() {
   if (!existsSync(envPath)) {
     const password = randomBytes(32).toString("base64url");
+    const sessionSecret = randomBytes(48).toString("base64url");
+    const mfaEncryptionKey = randomBytes(32).toString("base64");
     const contents = [
       "COMPOSE_PROJECT_NAME=lyvox-gerenciamento-local",
       "LYVOX_ENV=development",
       "POSTGRES_DB=lyvox",
       "POSTGRES_USER=lyvox",
       `POSTGRES_PASSWORD=${password}`,
+      `API_SESSION_SECRET=${sessionSecret}`,
+      `AUTH_MFA_ENCRYPTION_KEY=${mfaEncryptionKey}`,
       "PGBOUNCER_HOST_PORT=6432",
+      "REDIS_HOST_PORT=6380",
       "MAILPIT_SMTP_HOST_PORT=1025",
       "MAILPIT_UI_HOST_PORT=8025",
       "",
@@ -61,11 +66,32 @@ function ensureEnvironment() {
     console.log("Created ignored .env with a generated local database password.");
   }
 
-  const environment = parseEnvironment(readFileSync(envPath, "utf8"));
+  let source = readFileSync(envPath, "utf8");
+  let environment = parseEnvironment(source);
+  const generatedEntries = [];
+  if (!environment.API_SESSION_SECRET) {
+    generatedEntries.push(`API_SESSION_SECRET=${randomBytes(48).toString("base64url")}`);
+  }
+  if (!environment.AUTH_MFA_ENCRYPTION_KEY) {
+    generatedEntries.push(`AUTH_MFA_ENCRYPTION_KEY=${randomBytes(32).toString("base64")}`);
+  }
+  if (generatedEntries.length > 0) {
+    source = `${source.trimEnd()}\n${generatedEntries.join("\n")}\n`;
+    writeFileSync(envPath, source, { encoding: "utf8", mode: 0o600 });
+    environment = parseEnvironment(source);
+    console.log("Added generated local authentication secrets to ignored .env.");
+  }
   const password = environment.POSTGRES_PASSWORD ?? "";
 
   if (password.length < 32 || password === "GENERATE_WITH_PNPM_INFRA_UP") {
     fail("POSTGRES_PASSWORD in .env must be a generated value of at least 32 characters.");
+  }
+  if ((environment.API_SESSION_SECRET ?? "").length < 64) {
+    fail("API_SESSION_SECRET in .env must contain at least 64 generated characters.");
+  }
+  const mfaKey = Buffer.from(environment.AUTH_MFA_ENCRYPTION_KEY ?? "", "base64");
+  if (mfaKey.length !== 32 || mfaKey.toString("base64") !== environment.AUTH_MFA_ENCRYPTION_KEY) {
+    fail("AUTH_MFA_ENCRYPTION_KEY in .env must be a canonical 32-byte base64 key.");
   }
 
   if (environment.COMPOSE_PROJECT_NAME !== "lyvox-gerenciamento-local") {
@@ -81,6 +107,7 @@ function ensureEnvironment() {
   }
   const ports = [
     "PGBOUNCER_HOST_PORT",
+    "REDIS_HOST_PORT",
     "MAILPIT_SMTP_HOST_PORT",
     "MAILPIT_UI_HOST_PORT",
   ].map((name) => Number(environment[name]));
@@ -137,6 +164,7 @@ function createDockerEnvironment(environment) {
     POSTGRES_USER: environment.POSTGRES_USER,
     POSTGRES_PASSWORD: environment.POSTGRES_PASSWORD,
     PGBOUNCER_HOST_PORT: environment.PGBOUNCER_HOST_PORT,
+    REDIS_HOST_PORT: environment.REDIS_HOST_PORT,
     MAILPIT_SMTP_HOST_PORT: environment.MAILPIT_SMTP_HOST_PORT,
     MAILPIT_UI_HOST_PORT: environment.MAILPIT_UI_HOST_PORT,
   };
@@ -276,9 +304,9 @@ async function health(environment) {
   assertLoopbackPort("mailpit", 1025);
   assertLoopbackPort("mailpit", 8025);
   assertNoPublishedPort("postgres", 5432);
-  assertNoPublishedPort("redis", 6379);
   await Promise.all([
     assertTcp("127.0.0.1", environment.PGBOUNCER_HOST_PORT, "PgBouncer"),
+    assertTcp("127.0.0.1", environment.REDIS_HOST_PORT, "Redis"),
     assertTcp("127.0.0.1", environment.MAILPIT_SMTP_HOST_PORT, "Mailpit SMTP"),
     assertTcp("127.0.0.1", environment.MAILPIT_UI_HOST_PORT, "Mailpit HTTP"),
   ]);

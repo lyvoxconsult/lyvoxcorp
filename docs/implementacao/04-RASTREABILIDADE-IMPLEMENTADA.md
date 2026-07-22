@@ -1,7 +1,7 @@
 ---
 title: Rastreabilidade Implementada
 date: 2026-07-21
-phase: PHASE-000
+phase: PHASE-007
 ---
 
 # Rastreabilidade implementada
@@ -10,7 +10,12 @@ Nenhum FR foi implementado na PHASE-000. A matriz inicia o estado sem simular en
 
 | FR | Status | Codigo | API | DB | Permissao | Testes | Fase | Gate | Evidencia |
 |---|---|---|---|---|---|---|---|---|---|
-| FR-001..FR-006 | NOT_STARTED | - | API-001..API-003 | DB-001..DB-003 | Publica/Logado/`users.manage` | TEST-001/TEST-004 | PHASE-006 | GATE-006 | DOC-22:25-30 |
+| FR-001 | IMPLEMENTED | `apps/api/src/modules/auth/*`, `packages/auth/*` | API-001 + subrotas MFA | DB-001..DB-003 + migration 0002 | Publica/desafio | TEST-001 | PHASE-006 | GATE-006 | Login, lockout, rotacao, MFA e integracao real aprovados |
+| FR-002 | IMPLEMENTED | `AuthController.logout`, `AuthService.logoutByToken` | API-002 | DB-003 | Logado + CSRF | TEST-001 | PHASE-006 | GATE-006 | Revogacao autoritativa e cookie expirado testados |
+| FR-003 | PARTIAL_EXTERNAL_DEPENDENCY | `forgotPassword`, `resetPassword` | `/auth/password/*` | DB-001 + reset/outbox | Publica | TEST-001/JOB-001 | PHASE-006 | GATE-006 | Token unico 15 min, outbox criptografada e revogacao testados; e-mail real pendente conforme DEV-0033 |
+| FR-004 | IMPLEMENTED | `listSessions`, `revokeSession`, `logoutAll` | `/auth/sessions*` | DB-003 | Logado + CSRF em mutacoes | TEST-001 | PHASE-006 | GATE-006 | Isolamento cross-user, revogacao individual/global e sessao atual testados |
+| FR-005 | IMPLEMENTED | `setupMfa`, `activateMfa`, `completeMfa` | `/auth/mfa/*` | DB-001 + tabelas MFA | Desafio | TEST-001 | PHASE-006 | GATE-006 | TOTP 160-bit, anti-replay, oito backup codes e consumo unico testados |
+| FR-006 | DEFERRED_TO_PHASE_007 | - | `/users` | DB-001/DB-004 | `users.manage` | TEST-004 | PHASE-007 | GATE-007 | DEV-0032: nao expor gestao antes do deny-by-default real |
 | FR-007 | NOT_STARTED | - | API-001 | DB-004 | `roles.manage` | TEST-004 | PHASE-007 | GATE-007 | DOC-22:31 |
 | FR-010..FR-012 | NOT_STARTED | - | API-004 | Variadas | `dashboard.read` | TEST-007 | PHASE-009 | GATE-009 | DOC-22:32-34; DEV-0016 |
 | FR-020..FR-023 | NOT_STARTED | - | API-010..API-013 | DB-020 | `clients.*` | TEST-003 | PHASE-010 | GATE-010 | DOC-22:35-38 |

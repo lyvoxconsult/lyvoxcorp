@@ -128,9 +128,10 @@ async function expectRejected(client, label, statement, parameters = []) {
 async function verifySchema() {
   const expectedTables = [
     "audit_logs", "clients", "contracts", "financial_transactions", "idempotency_keys",
-    "inbox_events", "leads", "meetings", "outbox_events", "password_credentials",
-    "permissions", "projects", "proposal_items", "proposals", "role_permissions", "roles",
-    "sessions", "task_attachments", "task_comments", "tasks", "user_roles", "users",
+    "inbox_events", "leads", "meetings", "mfa_backup_codes", "mfa_challenges", "mfa_factors",
+    "outbox_events", "password_credentials", "password_reset_tokens", "permissions", "projects",
+    "proposal_items", "proposals", "role_permissions", "roles", "sessions", "task_attachments",
+    "task_comments", "tasks", "user_roles", "users",
   ];
   const tablesResult = await pool.query(
     "select table_name from information_schema.tables where table_schema = 'public' order by table_name",
@@ -196,8 +197,14 @@ async function verifySchema() {
     await expectRejected(
       client,
       "sessions user FK",
-      "insert into sessions (user_id, token_hash, ip_address, user_agent, expires_at) values ($1, $2, '127.0.0.1', 'gate', now() + interval '1 hour')",
-      [randomUUID(), "a".repeat(64)],
+      "insert into sessions (user_id, token_hash, csrf_token_hash, ip_address, user_agent, expires_at) values ($1, $2, $3, '127.0.0.1', 'gate', now() + interval '1 hour')",
+      [randomUUID(), "a".repeat(64), "b".repeat(64)],
+    );
+    await expectRejected(
+      client,
+      "users email canonical unique",
+      "insert into users (email, full_name) values ($1, 'Case Duplicate')",
+      [email.toUpperCase()],
     );
     await expectRejected(
       client,
