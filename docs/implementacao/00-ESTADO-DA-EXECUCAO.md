@@ -11,8 +11,8 @@ status: in-progress
 | Campo | Estado |
 |---|---|
 | Fase atual | `PHASE-012` |
-| Ultima fase concluida | `PHASE-011` |
-| Gate atual | `GATE-012 = IN_PROGRESS` |
+| Ultima fase concluida | `PHASE-011` (`APPROVED`) |
+| Gate atual | `GATE-012 = IN_PROGRESS` (Gate anterior `GATE-011` `APPROVED`) |
 | Branch | `feature/greenfield-foundation` |
 | Commit-base | `01a28935f9328225d9bbfd08a7073b873fdab198` |
 | Servicos em execucao | Suporte local: PostgreSQL, PgBouncer, Redis e Mailpit healthy; nenhum servico do produto |
