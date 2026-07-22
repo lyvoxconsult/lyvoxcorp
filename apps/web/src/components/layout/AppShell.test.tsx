@@ -60,11 +60,12 @@ describe("AppShell", () => {
     await user.click(screen.getByRole("button", { name: "Abrir menu" }));
     const dialog = screen.getByRole("dialog", { name: "Menu de navegação" });
     const close = within(dialog).getByRole("button", { name: "Fechar menu" });
-    const navigationLink = within(dialog).getByRole("link", { name: "CRM" });
+    const lastNavigationLink = within(dialog).getByRole("link", { name: "Reuniões" });
 
     expect(close).toHaveFocus();
     await user.tab({ shift: true });
-    expect(navigationLink).toHaveFocus();
+    expect(lastNavigationLink).toHaveFocus();
+
     await user.tab();
     expect(close).toHaveFocus();
   });

@@ -186,3 +186,14 @@ O DOC-21 descreve criacao de repositorio separado. O prompt mestre, de maior pre
 - QA final: Passes SPEC/ARCH, SECURITY/QUALITY e QA independente executados e aprovados sem ressalvas. Rastreabilidade dos `FR-030`, `FR-031`, `FR-032`, `FR-033` atualizada.
 - Proxima acao: iniciar automaticamente PHASE-012.
 
+## PHASE-012: Reuniões
+
+- Inicio: `2026-07-22`.
+- Conclusao: `2026-07-22`.
+- Estado: `APPROVED`.
+- Gate: `GATE-012 = APPROVED`.
+- Escopo: domínio de Reuniões implementado com as tabelas `meetings`, `meetingNotes`, `meetingParticipants`, `meetingTranscripts` via migração `0006_meetings_domain.sql`. Regras de negócio e notificações 15min (BR-040) preparadas. Metadados de `PARTIAL_CROSS_PHASE_DEPENDENCY` registrados para `FR-042` e `FR-043`.
+- API e seguranca: API rest para reuniões. Auditorias de segurança (CSRF + permissões de RBAC `meetings.read/create/update`) aplicadas.
+- Frontend: UI de agendamento (`MeetingFormDialog`) e lista (`MeetingsPage`) integradas no client e rotas com testes ajustados.
+- Validacao: 122/122 testes no monorepo aprovados; typecheck, lint, build Vite/NestJS e `dev:verify` 100% verdes.
+- Proxima acao: iniciar automaticamente PHASE-013.

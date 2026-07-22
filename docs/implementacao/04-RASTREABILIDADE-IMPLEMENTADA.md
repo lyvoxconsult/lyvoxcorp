@@ -25,7 +25,10 @@ Nenhum FR foi implementado na PHASE-000. A matriz inicia o estado sem simular en
 | FR-031 | IMPLEMENTED | `CrmController.createLead`, `LeadForm` | API-021 (`POST /leads`, `POST /leads/import`) | DB-030 (`leads`) | `crm.create` | TEST-005 + vitest | PHASE-011 | GATE-011 | Cadastro individual e importação em lote via CSV aprovados |
 | FR-032 | IMPLEMENTED | `CrmController.addFollowup`, `FollowupsModal` | API-021 (`POST /followups`) | DB-030 (`lead_followups`) | `crm.update` | TEST-005 + vitest | PHASE-011 | GATE-011 | Registro de follow-ups com historização e próxima ação aprovados |
 | FR-033 | IMPLEMENTED | `CrmController.convertLead`, `LeadDetailsDrawer` | API-021 (`POST /leads/convert`) | DB-020/DB-030 | `crm.update` | TEST-005 + vitest | PHASE-011 | GATE-011 | Conversão de lead WON em cliente cadastrado aprovada |
-| FR-040..FR-043 | NOT_STARTED | - | API-040/API-041/API-080 | DB-040/DB-070 | `meetings.*`/`tasks.create` | TEST-005/TEST-007 | PHASE-012 | GATE-012 | DOC-22:43-46 |
+| FR-040 | IMPLEMENTED | `apps/api/src/modules/meetings/*` | API-040 | DB-040 | `meetings.create` | TEST-007 | PHASE-012 | GATE-012 | Agendamento implementado; BR-040 pendente de BullMQ |
+| FR-041 | IMPLEMENTED | `apps/api/src/modules/meetings/meetings.controller.ts` | API-041 | DB-040 | `meetings.update` | TEST-007 | PHASE-012 | GATE-012 | Anotações anexáveis a reuniões |
+| FR-042 | PARTIAL_CROSS_PHASE_DEPENDENCY | `apps/api/src/modules/meetings/meetings.service.ts` | API-041 | DB-040 | `meetings.update` | TEST-007 | PHASE-012 | GATE-012 | Transcrição salva, mas extração depende de PHASE-022 |
+| FR-043 | PARTIAL_CROSS_PHASE_DEPENDENCY | `apps/api/src/modules/meetings/meetings.service.ts` | API-080 | DB-070 | `tasks.create` | TEST-007 | PHASE-012 | GATE-012 | Ações automáticas dependem de PHASE-022 |
 | FR-050..FR-052 | NOT_STARTED | - | API-050 | DB-050 | `services.*` | TEST-003 | PHASE-013 | GATE-013 | DOC-22:47-49 |
 | FR-060..FR-061 | NOT_STARTED | - | API-030 | DB-060 | `proposals.*` | TEST-006 | PHASE-014 | GATE-014 | DOC-22:50-51 |
 | FR-062 | OUT_OF_SCOPE_INITIAL | - | - | - | - | TEST-062 | - | - | Prompt mestre secao 46; DOC-22:52 |

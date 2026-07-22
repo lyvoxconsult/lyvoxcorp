@@ -7,6 +7,8 @@ import { AppShell } from "../components/layout/AppShell";
 import { ClientDetailPage } from "../modules/clients/ClientDetailPage";
 import { ClientsPage } from "../modules/clients/ClientsPage";
 import { CrmPage } from "../modules/crm/CrmPage";
+import { MeetingsPage } from "../modules/meetings/MeetingsPage";
+
 
 export function AppRoutes() {
   return <Routes>
@@ -22,6 +24,10 @@ export function AppRoutes() {
         <Route element={<ProtectedRoute permission="crm.read" />}>
           <Route path="crm" element={<CrmPage />} />
         </Route>
+        <Route element={<ProtectedRoute permission="meetings.read" />}>
+          <Route path="reunioes" element={<MeetingsPage />} />
+        </Route>
+
       </Route>
     </Route>
     <Route path="/" element={<Navigate to="/app" replace />} />

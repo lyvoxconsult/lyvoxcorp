@@ -1,4 +1,4 @@
-import { Columns3, PanelLeftClose, PanelLeftOpen, Users, X } from "lucide-react";
+import { Calendar, Columns3, PanelLeftClose, PanelLeftOpen, Users, X } from "lucide-react";
 import type { RefObject } from "react";
 import { NavLink } from "react-router-dom";
 import { Can } from "../../auth/Can";
@@ -42,7 +42,19 @@ export function Sidebar({ collapsed = false, mobile = false, onClose, onToggleCo
             {(!collapsed || mobile) && <span>CRM</span>}
           </NavLink>
         </Can>
+        <Can permission="meetings.read">
+          <NavLink
+            to="/app/reunioes"
+            aria-label="Reuniões"
+            onClick={mobile ? onClose : undefined}
+            className={({ isActive }) => `mt-1 flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 font-semibold ${isActive ? "bg-brand-accessible text-white" : "text-brand-subtle hover:bg-surface-muted"}`}
+          >
+            <Calendar aria-hidden="true" className="h-5 w-5 shrink-0" />
+            {(!collapsed || mobile) && <span>Reuniões</span>}
+          </NavLink>
+        </Can>
       </nav>
+
       {!mobile && (
         <div className="border-t border-border-subtle p-3">
           <Button variant="ghost" className="w-full" onClick={onToggleCollapse} aria-label={collapsed ? "Expandir menu lateral" : "Recolher menu lateral"}>

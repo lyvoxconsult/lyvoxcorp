@@ -270,6 +270,59 @@ export const meetings = pgTable(
   ],
 );
 
+export const meetingNotes = pgTable(
+  "meeting_notes",
+  {
+    ...auditedColumns(),
+    meetingId: uuid("meeting_id").notNull().references(() => meetings.id),
+    notes: text("notes").notNull(),
+    summary: text("summary"),
+    actionItems: jsonb("action_items").default([]).notNull(),
+  },
+  (table) => [
+    index("meeting_notes_meeting_id_idx").on(table.meetingId),
+    index("meeting_notes_deleted_at_idx").on(table.deletedAt),
+    check("meeting_notes_notes_check", sql`length(trim(${table.notes})) > 0`),
+    check("meeting_notes_version_check", sql`${table.version} > 0`),
+  ],
+);
+
+export const meetingParticipants = pgTable(
+  "meeting_participants",
+  {
+    ...auditedColumns(),
+    meetingId: uuid("meeting_id").notNull().references(() => meetings.id),
+    userId: uuid("user_id").references(() => users.id),
+    type: varchar("type", { length: 20 }).default("INTERNAL").notNull(),
+  },
+  (table) => [
+    index("meeting_participants_meeting_id_idx").on(table.meetingId),
+    index("meeting_participants_user_id_idx").on(table.userId),
+    index("meeting_participants_deleted_at_idx").on(table.deletedAt),
+    check("meeting_participants_type_check", sql`${table.type} in ('CLIENT', 'LEAD', 'INTERNAL')`),
+    check("meeting_participants_version_check", sql`${table.version} > 0`),
+  ],
+);
+
+export const meetingTranscripts = pgTable(
+  "meeting_transcripts",
+  {
+    ...auditedColumns(),
+    meetingId: uuid("meeting_id").notNull().references(() => meetings.id),
+    rawTranscript: text("raw_transcript").notNull(),
+    summary: text("summary"),
+    actionItems: jsonb("action_items").default([]).notNull(),
+    source: varchar("source", { length: 100 }).default("MANUAL_UPLOAD").notNull(),
+  },
+  (table) => [
+    index("meeting_transcripts_meeting_id_idx").on(table.meetingId),
+    index("meeting_transcripts_deleted_at_idx").on(table.deletedAt),
+    check("meeting_transcripts_raw_check", sql`length(trim(${table.rawTranscript})) > 0`),
+    check("meeting_transcripts_version_check", sql`${table.version} > 0`),
+  ],
+);
+
+
 export const proposals = pgTable(
   "proposals",
   {
