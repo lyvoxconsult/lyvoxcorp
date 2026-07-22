@@ -8,7 +8,7 @@ import { AuthService } from '../auth/auth.service.js';
 
 type AuthorizedRequest = FastifyRequest & { [AUTHORIZATION_CONTEXT]?: AuthorizationContext };
 
-const createRoleSchema = z.object({
+export const createRoleSchema = z.object({
   name: z.string().trim().min(2).max(100),
   description: z.string().trim().min(1).max(2_000).optional(),
   permissions: z.array(z.object({

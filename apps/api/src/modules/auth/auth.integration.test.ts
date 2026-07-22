@@ -166,6 +166,14 @@ describe.sequential('opaque session authentication integration', () => {
     await clearTestRateLimits();
   });
 
+  it('reports readiness only when the isolated PostgreSQL path and Redis are live', async () => {
+    const health = await app.inject({ method: 'GET', url: '/health' });
+    expect(health.statusCode).toBe(200);
+    const readiness = await app.inject({ method: 'GET', url: '/readiness' });
+    expect(readiness.statusCode).toBe(200);
+    expect(readiness.json()).toEqual({ status: 'ready', checks: { database: 'up', redis: 'up' } });
+  });
+
   it('rejects cross-origin login and locks the fifth consecutive invalid attempt', async () => {
     const crossSite = await app.inject({ method: 'POST', url: '/api/v1/auth/login', headers: { origin: 'https://evil.invalid' }, payload: locked, remoteAddress: '127.0.0.10' });
     expect(crossSite.statusCode).toBe(403);

@@ -140,3 +140,17 @@ Nenhum seed, endpoint ou comportamento funcional foi declarado nesta fase. Os da
 | 2026-07-21 | Revisao SPEC 1/3 inicial + repeticao focal | Diff staged | FAIL_RESOLVED | Scope restrito em permissao sem ownership foi bloqueado em duas camadas; teste HTTP rejeita `users.manage/OWN` e suites focais permanecem verdes |
 | 2026-07-21 | Revisao SECURITY 2/3 inicial + repeticao apos correcao | Diff staged + PostgreSQL 16 efemero + runtime development | FAIL_RESOLVED_PASS | Scopes `OWN`/`ASSIGNED` atravessam guard/contexto e filtram no mesmo `WHERE`; HTTP prova own/cross-owner e assigned/cross-assignee; migration-only prova backfill sem seed; harness retorna 404 em `NODE_ENV=development`; repeticao aprovou sem bypass/regressao |
 | 2026-07-21 | Revisao QA final 3/3 inicial + repeticao documental | Diff staged + evidencias do gate | FAIL_RESOLVED_PASS | Primeira leitura rejeitou apenas cobertura/status fora do indice; apos staging, confirmou valores finais, zero marcadores obsoletos, escopo honesto e todos os criterios do GATE-007 |
+
+## PHASE-008
+
+| Data | Comando/checagem | Ambiente | Resultado | Evidencia |
+|---|---|---|---|---|
+| 2026-07-21 | `pnpm --filter @lyvox/api typecheck` + `lint` | Node 20.20.2 / TypeScript / Oxlint | PASS | Fundacao, tipos Swagger/Zod, hooks Fastify e modulos Nest aprovados; lint zero erros |
+| 2026-07-22 | `pnpm --filter @lyvox/api test` | NestJS/Fastify + PostgreSQL 16 efemero + Redis local | PASS | 43/43; `/health`, readiness live/degraded/single-flight, correlation UUID, RFC 7807, redaction CSRF, Swagger/OpenAPI, auth e RBAC |
+| 2026-07-22 | `vitest run --coverage` | API | PASS | 96,28% linhas, 82,49% branches, 93,23% statements e 93,78% funcoes; thresholds de 80% ativos; repeticao isolada sem concorrencia no diretorio `.tmp` |
+| 2026-07-21 | Revisao arquitetural PHASE-008 | Canonicos DOC-07/DOC-09 + codigo | PASS_WITH_IMPLEMENTED_ACTIONS | Root probes, public metadata explicita, timeout, RFC completo, Swagger real e validacao de correlation ID incorporados |
+| 2026-07-22 | frozen install, typecheck, lint, build, `pnpm test`, `dev:verify`, audit high | Node 20.20.2 / pnpm 10.34.5 | PASS | 57/57 testes; zero warnings/erros de lint; build e processo concorrente aprovados; zero high/critical e uma moderada de tooling em DEV-0028 |
+| 2026-07-21 | `pnpm build` + `pnpm api:verify` | Artefatos Node compilados, config local real, PgBouncer/PostgreSQL, Redis, Nest/Fastify | FAIL_RESOLVED_PASS | Falha inicial de exports TS levou a builds `dist` dos tres packages runtime; Node puro aprovou `health=200 readiness=200 docs=200 openapi=3.1.0`, sem imprimir configuracao sensivel |
+| 2026-07-22 | Revisao SPEC/ARCH 1/3 | Diff staged + DOC-07/DOC-09 | PASS | Probes raiz, deny-by-default, timeout, correlation, RFC 7807, OpenAPI 3.1 e runtime compilado aprovados sem achados |
+| 2026-07-22 | Revisao SECURITY/QUALITY 2/3 inicial + repeticao | Diff staged + prova adversarial concorrente | FAIL_RESOLVED_PASS | Single-flight manteve uma chamada por dependencia em 60 requests; redaction real de CSRF e remocao de query em `instance` aprovadas; 12/12 focais e 43/43 API |
+| 2026-07-22 | Revisao QA final 3/3 inicial + repeticao | Diff staged + evidencias do gate | FAIL_RESOLVED_PASS | Codigo e criterios aprovados; contagens e registros foram alinhados a evidencia isolada, e a repeticao retornou `READY_TO_APPROVE` sem achados materiais |

@@ -24,7 +24,7 @@ export class AuthModule {
         AuthorizationService,
         { provide: APP_GUARD, useClass: RbacGuard },
       ],
-      exports: [AuthService, DatabaseService, AuthorizationService],
+      exports: [AuthService, DatabaseService, AuthCacheService, AuthorizationService],
     };
   }
 }

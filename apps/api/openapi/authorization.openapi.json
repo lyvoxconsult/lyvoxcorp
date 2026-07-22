@@ -59,8 +59,8 @@
         }
       },
       "Problem": {
-        "type": "object", "required": ["type", "title", "status", "detail", "instance"],
-        "properties": { "type": { "type": "string", "format": "uri" }, "title": { "type": "string" }, "status": { "type": "integer" }, "detail": { "type": "string" }, "instance": { "type": "string" }, "traceId": { "type": "string" } }
+        "type": "object", "required": ["type", "title", "status", "detail", "instance", "code", "correlationId", "timestamp"],
+        "properties": { "type": { "type": "string", "format": "uri" }, "title": { "type": "string" }, "status": { "type": "integer" }, "detail": { "type": "string" }, "instance": { "type": "string" }, "code": { "type": "string" }, "correlationId": { "type": "string", "format": "uuid" }, "timestamp": { "type": "string", "format": "date-time" } }
       }
     },
     "responses": {

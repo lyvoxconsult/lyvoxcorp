@@ -23,6 +23,10 @@ export class DatabaseService implements OnModuleDestroy {
     this.db = drizzle(this.pool, { schema });
   }
 
+  async ping(): Promise<void> {
+    await this.pool.query('select 1');
+  }
+
   async onModuleDestroy(): Promise<void> {
     await this.pool.end();
   }
@@ -51,6 +55,11 @@ export class AuthCacheService implements OnModuleDestroy {
 
   private key(kind: string, value: string): string {
     return `lyvox:${this.environment.NODE_ENV}:auth:${kind}:${value}`;
+  }
+
+  async ping(): Promise<void> {
+    const client = await this.ready();
+    await client.ping();
   }
 
   async enforceLoginRateLimit(identityKey: string, ipKey: string): Promise<void> {

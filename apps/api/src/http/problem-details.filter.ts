@@ -7,7 +7,10 @@ export interface ProblemDetails {
   status: number;
   detail: string;
   instance: string;
-  traceId?: string;
+  code: string;
+  correlationId: string;
+  timestamp: string;
+  validationErrors?: readonly { field: string; message: string }[];
 }
 
 const TITLES: Partial<Record<number, string>> = {
@@ -19,7 +22,20 @@ const TITLES: Partial<Record<number, string>> = {
   422: 'Unprocessable Entity',
   429: 'Too Many Requests',
   500: 'Internal Server Error',
+  503: 'Service Unavailable',
 };
+
+function statusCode(status: number): string {
+  return `HTTP_${status}`;
+}
+
+function explicitCode(exception: unknown, status: number): string {
+  if (!(exception instanceof HttpException)) return statusCode(status);
+  const response = exception.getResponse();
+  if (typeof response !== 'object' || response === null) return statusCode(status);
+  const code = (response as { code?: unknown }).code;
+  return typeof code === 'string' && /^[A-Z][A-Z0-9_]{2,63}$/u.test(code) ? code : statusCode(status);
+}
 
 @Catch()
 export class ProblemDetailsFilter implements ExceptionFilter {
@@ -29,13 +45,17 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     const reply = http.getResponse<FastifyReply>();
     const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
     const title = TITLES[status] ?? 'Request Failed';
+    const code = explicitCode(exception, status);
+    const correlationId = request.id || 'unavailable';
     const problem: ProblemDetails = {
-      type: `https://httpstatuses.com/${status}`,
+      type: `https://api.lyvox.com/errors/${code}`,
       title,
       status,
       detail: status >= 500 ? 'An unexpected error occurred' : title,
-      instance: request.url,
-      ...(request.id ? { traceId: request.id } : {}),
+      instance: request.url.split('?', 1)[0] || '/',
+      code,
+      correlationId,
+      timestamp: new Date().toISOString(),
     };
 
     const retryAfter = (exception as { retryAfter?: unknown })?.retryAfter;

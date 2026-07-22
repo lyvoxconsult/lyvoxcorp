@@ -128,8 +128,15 @@ O DOC-21 descreve criacao de repositorio separado. O prompt mestre, de maior pre
 ## PHASE-008 - Backend Foundation (NestJS + Fastify)
 
 - Inicio: `2026-07-21`.
-- Estado: `IN_PROGRESS`.
-- Gate: `GATE-008 = IN_PROGRESS`.
+- Conclusao: `2026-07-22`.
+- Estado: `APPROVED`.
+- Gate: `GATE-008 = APPROVED`.
 - Escopo: correlation ID, envelope RFC 7807 completo, OpenAPI Swagger gerada em `/docs`, liveness `/health` e readiness `/readiness` para PostgreSQL/PgBouncer e Redis.
 - Inputs ativos: DOC-07, DOC-09 e documentacao atual do NestJS 11 consultada via Context7.
-- Proxima acao: consolidar a fundacao transversal existente sem afrouxar o guard deny-by-default da PHASE-007.
+- Implementacao: `HealthModule` compoe a fundacao sem duplicar o runtime Nest/Fastify; `/health` e `/readiness` sao rotas Nest publicas explicitas na raiz, enquanto `/api/v1/health|readiness` permanece ausente. Liveness nao toca dependencias; readiness reutiliza pool PostgreSQL via PgBouncer e cliente Redis, com probes limitados a 1,5 s, single-flight por dependencia e erro 503 sanitizado.
+- Correlation ID: `X-Correlation-ID` UUID valido e limitado e preservado; entrada ausente/invalida gera UUID v4; mesmo valor e emitido no header, RFC 7807 e `correlationId` dos logs Pino.
+- Erros: envelope `application/problem+json` inclui `type`, `title`, `status`, `detail`, `instance`, `code`, `correlationId` e `timestamp`; detalhes inesperados, query strings e falhas de dependencia nao sao expostos. O header `X-CSRF-Token` integra a redaction explicita do Pino.
+- OpenAPI: `@nestjs/swagger` 11.4.6 gera OpenAPI 3.1 em `/docs/openapi.json` e UI em `/docs`; schemas de request sao derivados dos Zod existentes, com schemes de sessao/CSRF, correlation header e response RFC 7807. Harness de ownership continua ausente fora de `NODE_ENV=test`.
+- Validacao: 57/57 testes na raiz, incluindo readiness positiva/negativa e concorrente, rotas raiz, prefixos negativos, IDs concorrentes, Swagger UI/spec e regressao auth/RBAC; cobertura API 96,28% linhas e 82,49% branches; frozen install, typecheck, lint, build, dev concorrente e audit sem high/critical aprovados. `pnpm api:verify`, executado em Node sobre os artefatos compilados, confirmou health/readiness/docs contra PgBouncer/PostgreSQL e Redis locais.
+- QA: SPEC/ARCH 1/3 aprovada sem achados. SECURITY/QUALITY 2/3 rejeitou inicialmente exaustao concorrente do pool, ausencia de redaction CSRF e query string em `instance`; single-flight, redaction serializada e sanitizacao foram implementados, testados e aprovados na repeticao. QA final 3/3 rejeitou somente contadores/evidencias obsoletos; apos alinhamento e cobertura isolada, a repeticao retornou `READY_TO_APPROVE`.
+- Proxima acao: iniciar automaticamente PHASE-009.

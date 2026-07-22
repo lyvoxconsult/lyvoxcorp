@@ -11,6 +11,7 @@
   },
   "scripts": {
     "build": "turbo run build",
+    "api:verify": "node scripts/verify-api-foundation.mjs",
     "dev": "turbo run dev --concurrency=4",
     "dev:verify": "node scripts/verify-dev-concurrency.mjs",
     "db:generate": "pnpm --filter @lyvox/database db:generate",

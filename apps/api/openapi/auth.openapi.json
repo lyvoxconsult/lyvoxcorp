@@ -29,11 +29,11 @@
       "Password": { "type": "string", "format": "password", "minLength": 1, "maxLength": 128, "writeOnly": true },
       "OpaqueToken": { "type": "string", "minLength": 40, "maxLength": 256, "writeOnly": true },
       "Problem": {
-        "type": "object", "required": ["type", "title", "status", "detail", "instance"],
+        "type": "object", "required": ["type", "title", "status", "detail", "instance", "code", "correlationId", "timestamp"],
         "properties": {
           "type": { "type": "string", "format": "uri" }, "title": { "type": "string" },
           "status": { "type": "integer" }, "detail": { "type": "string" },
-          "instance": { "type": "string" }, "traceId": { "type": "string" }
+          "instance": { "type": "string" }, "code": { "type": "string" }, "correlationId": { "type": "string", "format": "uuid" }, "timestamp": { "type": "string", "format": "date-time" }
         }
       },
       "Login": {

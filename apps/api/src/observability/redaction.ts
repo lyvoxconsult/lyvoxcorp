@@ -3,6 +3,7 @@ export const REDACTED_VALUE = '[REDACTED]';
 export const SENSITIVE_LOG_PATHS = Object.freeze([
   'req.headers.authorization',
   'req.headers.cookie',
+  'req.headers["x-csrf-token"]',
   'res.headers.set-cookie',
   'req.body.password',
   'req.body.currentPassword',
@@ -31,5 +32,6 @@ export function buildLoggerOptions(environment: string) {
       paths: Array.from(SENSITIVE_LOG_PATHS),
       censor: REDACTED_VALUE,
     },
+    customProps: (request: { id: string }) => ({ correlationId: request.id }),
   };
 }
