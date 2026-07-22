@@ -15,6 +15,7 @@ export class AuthModule {
   static register(environment: ApiEnvironment): DynamicModule {
     return {
       module: AuthModule,
+      global: true,
       controllers: [AuthController, AuthorizationController, ...(environment.NODE_ENV === 'test' ? [OwnershipVerificationController] : [])],
       providers: [
         { provide: AUTH_ENVIRONMENT, useValue: environment },

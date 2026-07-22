@@ -1,4 +1,4 @@
-import { useId, type InputHTMLAttributes } from "react";
+import { forwardRef, useId, type InputHTMLAttributes } from "react";
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
@@ -6,7 +6,7 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   error?: string;
 };
 
-export function Input({ label, helpText, error, id: providedId, className = "", ...props }: InputProps) {
+export const Input = forwardRef<HTMLInputElement, InputProps>(function Input({ label, helpText, error, id: providedId, className = "", ...props }, ref) {
   const generatedId = useId();
   const id = providedId ?? generatedId;
   const helpId = helpText ? `${id}-help` : undefined;
@@ -17,6 +17,7 @@ export function Input({ label, helpText, error, id: providedId, className = "", 
       <label className="font-semibold text-white" htmlFor={id}>{label}</label>
       <input
         id={id}
+        ref={ref}
         aria-describedby={describedBy}
         aria-invalid={error ? true : undefined}
         className={`min-h-11 rounded-lg border bg-surface-base px-3 py-2 text-white placeholder:text-brand-100 ${error ? "border-status-error" : "border-border"} ${className}`}
@@ -26,4 +27,4 @@ export function Input({ label, helpText, error, id: providedId, className = "", 
       {error && <p id={errorId} role="alert" className="text-sm text-red-300">{error}</p>}
     </div>
   );
-}
+});

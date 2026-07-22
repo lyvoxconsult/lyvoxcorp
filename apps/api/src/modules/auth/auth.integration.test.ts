@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { Pool } from 'pg';
 import { generateCsrfToken, generateOpaqueToken, generateTotpCode, hashCsrfToken, hashOpaqueToken, hashPassword } from '@lyvox/auth';
+import { clientDetailResponseSchema } from '@lyvox/validation';
 import { createApp } from '../../create-app.js';
 import { AuthorizationService } from '../../core/authorization/authorization.service.js';
 
@@ -95,17 +96,17 @@ describe.sequential('opaque session authentication integration', () => {
     isolatedUrl.port = port; isolatedUrl.username = localEntries.POSTGRES_USER!; isolatedUrl.password = localEntries.POSTGRES_PASSWORD!; isolatedUrl.pathname = `/${localEntries.POSTGRES_DB}`;
     environment.DATABASE_URL = isolatedUrl.toString();
     pool = new Pool({ connectionString: environment.DATABASE_URL });
-    for (let attempt = 0; attempt < 30; attempt += 1) {
+    for (let attempt = 0; attempt < 60; attempt += 1) {
       try { await pool.query('select 1'); break; }
       catch (error) {
-        if (attempt === 29) throw error;
-        await new Promise((resolve) => setTimeout(resolve, 250));
+        if (attempt === 59) throw error;
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
     const migrationClient = await pool.connect();
     try {
       let legacyUserId = '';
-      for (const name of ['0001_initial_schema.sql', '0002_auth_security.sql', '0003_rbac_scopes.sql']) {
+      for (const name of ['0001_initial_schema.sql', '0002_auth_security.sql', '0003_rbac_scopes.sql', '0004_clients_domain.sql']) {
         const sql = readFileSync(new URL(`../../../../../migrations/${name}`, import.meta.url), 'utf8');
         for (const statement of sql.split('--> statement-breakpoint').map((value) => value.trim()).filter(Boolean)) {
           await migrationClient.query(statement);
@@ -203,11 +204,16 @@ describe.sequential('opaque session authentication integration', () => {
     const optionalSetup = await app.inject({ method: 'POST', url: '/api/v1/auth/mfa/setup', headers: { origin: environment.TRUSTED_ORIGINS }, payload: { challengeToken: enrollment.json().challengeToken } });
     expect(optionalSetup.statusCode).toBe(201); expect(optionalSetup.json().secret).toMatch(/^[A-Z2-7]{32}$/u);
     expect((await app.inject({ method: 'GET', url: '/api/v1/auth/me', headers: { cookie: firstCookie } })).statusCode).toBe(401);
-    expect((await app.inject({ method: 'GET', url: '/api/v1/auth/me', headers: { cookie: secondCookie } })).statusCode).toBe(200);
+    const me = await app.inject({ method: 'GET', url: '/api/v1/auth/me', headers: { cookie: secondCookie } });
+    expect(me.statusCode).toBe(200); expect(me.json().grants).toEqual(expect.any(Array)); expect(me.json()).not.toHaveProperty('csrfToken');
     const listed = await app.inject({ method: 'GET', url: '/api/v1/auth/sessions', headers: { cookie: secondCookie } });
     expect(listed.json().items).toHaveLength(1); expect(listed.json().items[0].current).toBe(true);
-    const csrfRotation = await app.inject({ method: 'POST', url: '/api/v1/auth/csrf', headers: { origin: environment.TRUSTED_ORIGINS, cookie: secondCookie, 'x-csrf-token': secondBody.csrfToken } });
-    expect(csrfRotation.statusCode).toBe(200); expect(csrfRotation.headers['cache-control']).toBe('no-store');
+    const [csrfRotation, csrfConcurrent] = await Promise.all([
+      app.inject({ method: 'POST', url: '/api/v1/auth/csrf', headers: { origin: environment.TRUSTED_ORIGINS, cookie: secondCookie } }),
+      app.inject({ method: 'POST', url: '/api/v1/auth/csrf', headers: { origin: environment.TRUSTED_ORIGINS, cookie: secondCookie } }),
+    ]);
+    expect(csrfRotation.statusCode).toBe(200); expect(csrfRotation.headers['cache-control']).toBe('no-store, private'); expect(csrfRotation.headers.pragma).toBe('no-cache');
+    expect(csrfRotation.json().csrfToken).toBe(secondBody.csrfToken); expect(csrfConcurrent.json().csrfToken).toBe(secondBody.csrfToken);
     const wrongCsrf = await app.inject({ method: 'POST', url: '/api/v1/auth/logout', headers: { origin: environment.TRUSTED_ORIGINS, cookie: secondCookie, 'x-csrf-token': firstBody.csrfToken } });
     expect(wrongCsrf.statusCode).toBe(401);
     const logout = await app.inject({ method: 'POST', url: '/api/v1/auth/logout', headers: { origin: environment.TRUSTED_ORIGINS, cookie: secondCookie, 'x-csrf-token': csrfRotation.json().csrfToken } });
@@ -300,9 +306,8 @@ describe.sequential('opaque session authentication integration', () => {
     expect(await authorization.canAccessResource(operational.id, 'projects.read', { assigneeIds: [operational.id] })).toBe(true);
     expect(await authorization.canAccessResource(operational.id, 'projects.read', { assigneeIds: [commercial.id] })).toBe(false);
     expect(await authorization.canAccessResource(commercial.id, 'clients.read', { ownerId: operational.id })).toBe(true);
-    const documentSuffix = suffix.slice(0, 8);
-    const ownClient = await pool.query("insert into clients (type, name, document, email, created_by_id) values ('PJ', 'Own Client', $1, $2, $3) returning id", [`own-${documentSuffix}`, `own-${suffix}@example.invalid`, operational.id]);
-    const otherClient = await pool.query("insert into clients (type, name, document, email, created_by_id) values ('PJ', 'Other Client', $1, $2, $3) returning id", [`other-${documentSuffix}`, `other-${suffix}@example.invalid`, commercial.id]);
+    const ownClient = await pool.query("insert into clients (type, name, document, email, created_by_id) values ('PF', 'Own Client', $1, $2, $3) returning id", ['52998224725', `own-${suffix}@example.invalid`, operational.id]);
+    const otherClient = await pool.query("insert into clients (type, name, document, email, created_by_id) values ('PJ', 'Other Client', $1, $2, $3) returning id", ['04252011000110', `other-${suffix}@example.invalid`, commercial.id]);
     expect((await app.inject({ method: 'GET', url: `/api/v1/__test/authorization/clients/${ownClient.rows[0].id}`, headers: { cookie: operational.cookie } })).statusCode).toBe(200);
     expect((await app.inject({ method: 'GET', url: `/api/v1/__test/authorization/clients/${otherClient.rows[0].id}`, headers: { cookie: operational.cookie } })).statusCode).toBe(404);
     expect((await app.inject({ method: 'GET', url: `/api/v1/__test/authorization/clients/${otherClient.rows[0].id}`, headers: { cookie: commercial.cookie } })).statusCode).toBe(200);
@@ -364,6 +369,105 @@ describe.sequential('opaque session authentication integration', () => {
     expect(changed.statusCode).toBe(204); expect((await app.inject({ method: 'GET', url: '/api/v1/auth/me', headers: { cookie: fourCookie } })).statusCode).toBe(401);
     normal.password = 'NewestStrongPassword1!';
     expect(twoBody.csrfToken).toBeTypeOf('string');
+  }, 60_000);
+
+  it('implements scoped client CRUD, search, idempotency, optimistic locking and soft archive', async () => {
+    const management = roleUsers.get('Gestão')!;
+    const operational = roleUsers.get('Operacional')!;
+    const origin = environment.TRUSTED_ORIGINS;
+    const csrfResponse = await app.inject({ method: 'POST', url: '/api/v1/auth/csrf', headers: { origin, cookie: management.cookie } });
+    expect(csrfResponse.statusCode).toBe(200);
+    const csrf = csrfResponse.json().csrfToken as string;
+    expect((await app.inject({ method: 'POST', url: '/api/v1/auth/csrf', headers: { cookie: management.cookie } })).statusCode).toBe(403);
+    const payload = {
+      type: 'PJ', name: 'Cliente Fase Dez', tradeName: 'Fantasia Exclusiva', document: '11.444.777/0001-61',
+      email: `client-${suffix}@example.invalid`, status: 'ACTIVE',
+      address: { postalCode: '01310-100', street: 'Avenida Paulista', number: '1000', district: 'Bela Vista', city: 'São Paulo', state: 'sp' },
+      contacts: [{ type: 'PHONE', value: '+5511999999999', isPrimary: true }],
+      tags: ['Enterprise', 'Prioridade'], responsibleIds: [operational.id],
+    };
+    const key = randomUUID();
+    const expiredKey = randomUUID();
+    await pool.query("insert into idempotency_keys (scope, key, request_hash, expires_at) values ('unrelated-expired', $1, repeat('0', 64), now() - interval '1 minute')", [expiredKey]);
+    const wrongCsrf = await app.inject({ method: 'POST', url: '/api/v1/clientes', headers: { origin, cookie: management.cookie, 'x-csrf-token': 'wrong', 'idempotency-key': key }, payload });
+    expect(wrongCsrf.statusCode).toBe(401);
+    expect((await pool.query('select count(*)::int as count from idempotency_keys where key = $1', [expiredKey])).rows[0].count).toBe(1);
+    const [created, replay] = await Promise.all([
+      app.inject({ method: 'POST', url: '/api/v1/clientes', headers: { origin, cookie: management.cookie, 'x-csrf-token': csrf, 'idempotency-key': key }, payload }),
+      app.inject({ method: 'POST', url: '/api/v1/clientes', headers: { origin, cookie: management.cookie, 'x-csrf-token': csrf, 'idempotency-key': key }, payload }),
+    ]);
+    expect(created.statusCode).toBe(201); expect(replay.statusCode).toBe(201); expect(created.json().id).toBe(replay.json().id);
+    expect(Object.keys(created.json()).sort()).toEqual(['id', 'version']);
+    expect(new Set([created.headers['idempotency-replayed'], replay.headers['idempotency-replayed']])).toEqual(new Set(['true', 'false']));
+    const clientId = created.json().id as string;
+    const persisted = await pool.query('select count(*)::int as count from clients where document = $1', ['11444777000161']);
+    expect(persisted.rows[0].count).toBe(1);
+    expect((await pool.query('select count(*)::int as count from idempotency_keys where key = $1', [expiredKey])).rows[0].count).toBe(0);
+    const changedReplay = await app.inject({ method: 'POST', url: '/api/v1/clientes', headers: { origin, cookie: management.cookie, 'x-csrf-token': csrf, 'idempotency-key': key }, payload: { ...payload, name: 'Corpo diferente' } });
+    expect(changedReplay.statusCode).toBe(409); expect(changedReplay.json().code).toBe('IDEMPOTENCY_KEY_REUSED');
+
+    const duplicate = await app.inject({ method: 'POST', url: '/api/v1/clientes', headers: { origin, cookie: management.cookie, 'x-csrf-token': csrf, 'idempotency-key': randomUUID() }, payload: { ...payload, email: `duplicate-${suffix}@example.invalid` } });
+    expect(duplicate.statusCode).toBe(422); expect(duplicate.json().code).toBe('CLIENT_DOCUMENT_DUPLICATED');
+    const invalid = await app.inject({ method: 'POST', url: '/api/v1/clientes', headers: { origin, cookie: management.cookie, 'x-csrf-token': csrf, 'idempotency-key': randomUUID() }, payload: { ...payload, document: '11.444.777/0001-62' } });
+    expect(invalid.statusCode).toBe(400);
+    const cpfAsCompany = await app.inject({ method: 'POST', url: '/api/v1/clientes', headers: { origin, cookie: management.cookie, 'x-csrf-token': csrf, 'idempotency-key': randomUUID() }, payload: { ...payload, document: '111.444.777-35' } });
+    expect(cpfAsCompany.statusCode).toBe(400);
+    const cnpjAsPerson = await app.inject({ method: 'POST', url: '/api/v1/clientes', headers: { origin, cookie: management.cookie, 'x-csrf-token': csrf, 'idempotency-key': randomUUID() }, payload: { ...payload, type: 'PF' } });
+    expect(cnpjAsPerson.statusCode).toBe(400);
+
+    const privatePayload = { ...payload, type: 'PF', name: 'Cliente sem responsavel', tradeName: undefined, document: '111.444.777-35', email: `private-${suffix}@example.invalid`, tags: ['Privado'], responsibleIds: [] };
+    const privateCreated = await app.inject({ method: 'POST', url: '/api/v1/clientes', headers: { origin, cookie: management.cookie, 'x-csrf-token': csrf, 'idempotency-key': randomUUID() }, payload: privatePayload });
+    expect(privateCreated.statusCode).toBe(201);
+    expect((await app.inject({ method: 'GET', url: `/api/v1/clientes/${privateCreated.json().id}`, headers: { cookie: operational.cookie } })).statusCode).toBe(404);
+
+    const listed = await app.inject({ method: 'GET', url: '/api/v1/clientes?search=Fantasia%20Exclusiva&tag=enterprise', headers: { cookie: management.cookie } });
+    expect(listed.statusCode).toBe(200); expect(listed.json().data).toEqual(expect.arrayContaining([expect.objectContaining({ id: clientId, tags: expect.arrayContaining(['Enterprise']), responsibles: [expect.objectContaining({ id: operational.id })] })]));
+    const injectionSearch = await app.inject({ method: 'GET', url: `/api/v1/clientes?search=${encodeURIComponent("' OR 1=1 --")}`, headers: { cookie: management.cookie } });
+    expect(injectionSearch.statusCode).toBe(200); expect(injectionSearch.json().data).toEqual([]);
+    const firstPage = await app.inject({ method: 'GET', url: '/api/v1/clientes?pageSize=1', headers: { cookie: management.cookie } });
+    expect(firstPage.statusCode).toBe(200); expect(firstPage.json().meta.hasMore).toBe(true);
+    const secondPage = await app.inject({ method: 'GET', url: `/api/v1/clientes?pageSize=1&cursor=${encodeURIComponent(firstPage.json().meta.nextCursor)}`, headers: { cookie: management.cookie } });
+    expect(secondPage.statusCode).toBe(200); expect(secondPage.json().data).toHaveLength(1); expect(secondPage.json().data[0].id).not.toBe(firstPage.json().data[0].id);
+    const invalidListCursor = Buffer.from(JSON.stringify({ createdAt: new Date().toISOString(), id: 'not-a-uuid' })).toString('base64url');
+    const invalidList = await app.inject({ method: 'GET', url: `/api/v1/clientes?cursor=${invalidListCursor}`, headers: { cookie: management.cookie } });
+    expect(invalidList.statusCode).toBe(409); expect(invalidList.json().code).toBe('CLIENT_CURSOR_INVALID');
+    expect((await app.inject({ method: 'GET', url: '/api/v1/clientes/responsaveis', headers: { cookie: operational.cookie } })).statusCode).toBe(403);
+    const people = await app.inject({ method: 'GET', url: '/api/v1/clientes/responsaveis?search=Operacional', headers: { cookie: management.cookie } });
+    expect(people.statusCode).toBe(200); expect(people.json().items).toEqual([expect.objectContaining({ id: operational.id, fullName: 'Operacional' })]);
+    expect(JSON.stringify(people.json())).not.toContain('@');
+
+    const ownDetail = await app.inject({ method: 'GET', url: `/api/v1/clientes/${clientId}?timelinePageSize=1`, headers: { cookie: operational.cookie } });
+    expect(ownDetail.statusCode).toBe(200); expect(ownDetail.json()).toEqual(expect.objectContaining({ client: expect.objectContaining({ id: clientId, address: expect.objectContaining({ postalCode: '01310100' }), tags: expect.arrayContaining(['Enterprise']) }), timeline: { data: [expect.objectContaining({ eventType: 'CLIENT_CREATED' })], meta: { pageSize: 1, hasMore: false, nextCursor: null } } }));
+    expect(() => clientDetailResponseSchema.parse(ownDetail.json())).not.toThrow();
+    const invalidTimelineCursor = Buffer.from(JSON.stringify({ occurredAt: new Date().toISOString(), id: 'not-a-uuid' })).toString('base64url');
+    const invalidTimeline = await app.inject({ method: 'GET', url: `/api/v1/clientes/${clientId}?timelineCursor=${invalidTimelineCursor}`, headers: { cookie: operational.cookie } });
+    expect(invalidTimeline.statusCode).toBe(409); expect(invalidTimeline.json().code).toBe('CLIENT_TIMELINE_CURSOR_INVALID');
+
+    const staleKey = randomUUID();
+    const stale = await app.inject({ method: 'PUT', url: `/api/v1/clientes/${clientId}`, headers: { origin, cookie: management.cookie, 'x-csrf-token': csrf, 'idempotency-key': staleKey }, payload: { ...payload, version: 99 } });
+    expect(stale.statusCode).toBe(409); expect(stale.json().code).toBe('CLIENT_VERSION_CONFLICT');
+    const updated = await app.inject({ method: 'PUT', url: `/api/v1/clientes/${clientId}`, headers: { origin, cookie: management.cookie, 'x-csrf-token': csrf, 'idempotency-key': staleKey }, payload: { ...payload, name: 'Cliente Atualizado', version: 1 } });
+    expect(updated.statusCode).toBe(200); expect(updated.json()).toEqual({ id: clientId, version: 2 });
+
+    const [concurrentA, concurrentB] = await Promise.all([
+      app.inject({ method: 'PUT', url: `/api/v1/clientes/${clientId}`, headers: { origin, cookie: management.cookie, 'x-csrf-token': csrf, 'idempotency-key': randomUUID() }, payload: { ...payload, name: 'Concorrente A', version: 2 } }),
+      app.inject({ method: 'PUT', url: `/api/v1/clientes/${clientId}`, headers: { origin, cookie: management.cookie, 'x-csrf-token': csrf, 'idempotency-key': randomUUID() }, payload: { ...payload, name: 'Concorrente B', version: 2 } }),
+    ]);
+    expect([concurrentA.statusCode, concurrentB.statusCode].sort()).toEqual([200, 409]);
+    const timelinePageOne = await app.inject({ method: 'GET', url: `/api/v1/clientes/${clientId}?timelinePageSize=1`, headers: { cookie: management.cookie } });
+    expect(timelinePageOne.statusCode).toBe(200); expect(timelinePageOne.json().timeline.meta.hasMore).toBe(true);
+    const timelinePageTwo = await app.inject({ method: 'GET', url: `/api/v1/clientes/${clientId}?timelinePageSize=1&timelineCursor=${encodeURIComponent(timelinePageOne.json().timeline.meta.nextCursor)}`, headers: { cookie: management.cookie } });
+    expect(timelinePageTwo.statusCode).toBe(200); expect(timelinePageTwo.json().timeline.data[0].id).not.toBe(timelinePageOne.json().timeline.data[0].id);
+
+    const archived = await app.inject({ method: 'DELETE', url: `/api/v1/clientes/${clientId}`, headers: { origin, cookie: management.cookie, 'x-csrf-token': csrf, 'idempotency-key': randomUUID(), 'if-match': '3' } });
+    expect(archived.statusCode).toBe(204);
+    expect((await app.inject({ method: 'GET', url: `/api/v1/clientes/${clientId}`, headers: { cookie: management.cookie } })).statusCode).toBe(404);
+    const archivedRow = await pool.query('select status, deleted_at is not null as archived from clients where id = $1', [clientId]);
+    expect(archivedRow.rows[0]).toEqual({ status: 'INACTIVE', archived: true });
+    const emitted = await pool.query('select payload::text from outbox_events where aggregate_id = $1 order by created_at', [clientId]);
+    expect(emitted.rows).toHaveLength(4); expect(JSON.stringify(emitted.rows)).not.toContain(payload.document); expect(JSON.stringify(emitted.rows)).not.toContain(payload.email);
+    const recreated = await app.inject({ method: 'POST', url: '/api/v1/clientes', headers: { origin, cookie: management.cookie, 'x-csrf-token': csrf, 'idempotency-key': randomUUID() }, payload: { ...payload, email: `recreated-${suffix}@example.invalid` } });
+    expect(recreated.statusCode).toBe(201); expect(recreated.json().id).not.toBe(clientId);
   }, 60_000);
 
   it('authenticates an active DB session when Redis is unavailable', async () => {

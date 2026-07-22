@@ -156,3 +156,18 @@ O DOC-21 descreve criacao de repositorio separado. O prompt mestre, de maior pre
 - QA corretiva: SPEC detectou nome acessivel ausente no item colapsado e escala tipografica incompleta; SECURITY detectou contraste insuficiente em danger/input e ID ARIA duplicavel. Todos os achados foram corrigidos, cobertos por testes e aprovados nas repeticoes.
 - QA final: SPEC/ARCH, SECURITY/QUALITY e QA independente aprovaram; `READY_TO_APPROVE`, sem achados materiais. `FR-010..FR-012` permanecem `NOT_STARTED` porque a fase entregou somente a fundacao transversal.
 - Proxima acao: iniciar automaticamente PHASE-010.
+
+## PHASE-010 - Clientes
+
+- Inicio: `2026-07-22`.
+- Conclusao: `2026-07-22`.
+- Estado: `APPROVED`.
+- Gate: `GATE-010 = APPROVED`.
+- Escopo: cadastro PF/PJ com CPF/CNPJ validado, endereco, contatos, tags, multiplos responsaveis, busca/filtros, detalhe, timeline e arquivamento logico.
+- Persistencia: migration `0004_clients_domain.sql`, sete tabelas especializadas e 32 tabelas verificadas; unicidade parcial de documento ativo, soft delete e cursores estaveis.
+- API e seguranca: API-010..API-014, OpenAPI com requests/respostas/query params, ownership no SQL, CSRF por sessao, idempotencia transacional, optimistic locking, respostas cacheadas sem PII e diretorio de responsaveis restrito a grant `ALL`.
+- Frontend: login/MFA, sessao e grants em memoria, guards de rota, lista/filtros/paginacao, formulario PF/PJ, detalhe, timeline e archive dialog; contratos derivados de `@lyvox/validation`.
+- Limite honesto: `FR-021` permanece `PARTIAL_EXTERNAL_DEPENDENCY`; o read model e o contrato sanitizado existem, mas reunioes, propostas, contratos, projetos, tarefas e financeiro contribuirao eventos somente nas fases proprietarias.
+- Validacao: 93/93 testes na raiz; API 96,66% linhas/83,06% branches; web 81,56% linhas/70,80% branches; migration idempotente, schema, build, smoke HTTP/browser e tres auditorias independentes aprovados.
+- QA corretiva: drift de contrato API/web e achados de enumeracao de colaboradores, retencao de PII idempotente e cursores permissivos foram corrigidos e revalidados antes da aprovacao.
+- Proxima acao: iniciar automaticamente PHASE-011.

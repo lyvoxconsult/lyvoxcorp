@@ -5,7 +5,9 @@ import {
   check,
   date,
   index,
+  jsonb,
   numeric,
+  primaryKey,
   pgTable,
   text,
   timestamp,
@@ -21,12 +23,14 @@ export const clients = pgTable(
     ...auditedColumns(),
     type: varchar("type", { length: 10 }).notNull(),
     name: varchar("name", { length: 255 }).notNull(),
+    tradeName: varchar("trade_name", { length: 255 }),
     document: varchar("document", { length: 20 }).notNull(),
     email: varchar("email", { length: 255 }).notNull(),
     status: varchar("status", { length: 20 }).default("ACTIVE").notNull(),
   },
   (table) => [
     check("clients_type_check", sql`${table.type} in ('PJ', 'PF')`),
+    check("clients_document_check", sql`(${table.type} = 'PF' and ${table.document} ~ '^[0-9]{11}$') or (${table.type} = 'PJ' and ${table.document} ~ '^[0-9]{14}$')`),
     check("clients_status_check", sql`${table.status} in ('ACTIVE', 'INACTIVE', 'CHURNED')`),
     check("clients_version_check", sql`${table.version} > 0`),
     uniqueIndex("clients_document_active_uidx").on(table.document).where(sql`${table.deletedAt} is null`),
@@ -35,6 +39,116 @@ export const clients = pgTable(
     index("clients_active_idx").on(table.name).where(sql`${table.deletedAt} is null`),
     index("clients_name_trgm_idx").using("gin", table.name.op("gin_trgm_ops")),
     index("clients_email_trgm_idx").using("gin", table.email.op("gin_trgm_ops")),
+  ],
+);
+
+export const clientAddresses = pgTable(
+  "client_addresses",
+  {
+    ...auditedColumns(),
+    clientId: uuid("client_id").notNull().references(() => clients.id),
+    label: varchar("label", { length: 50 }).default("PRIMARY").notNull(),
+    postalCode: varchar("postal_code", { length: 8 }).notNull(),
+    street: varchar("street", { length: 255 }).notNull(),
+    number: varchar("number", { length: 30 }).notNull(),
+    complement: varchar("complement", { length: 255 }),
+    district: varchar("district", { length: 120 }).notNull(),
+    city: varchar("city", { length: 120 }).notNull(),
+    state: varchar("state", { length: 2 }).notNull(),
+    country: varchar("country", { length: 2 }).default("BR").notNull(),
+  },
+  (table) => [
+    index("client_addresses_client_id_idx").on(table.clientId),
+    index("client_addresses_deleted_at_idx").on(table.deletedAt),
+    check("client_addresses_postal_code_check", sql`${table.postalCode} ~ '^[0-9]{8}$'`),
+    check("client_addresses_state_check", sql`${table.state} ~ '^[A-Z]{2}$'`),
+    check("client_addresses_country_check", sql`${table.country} ~ '^[A-Z]{2}$'`),
+    check("client_addresses_version_check", sql`${table.version} > 0`),
+  ],
+);
+
+export const clientContacts = pgTable(
+  "client_contacts",
+  {
+    ...auditedColumns(),
+    clientId: uuid("client_id").notNull().references(() => clients.id),
+    type: varchar("type", { length: 20 }).notNull(),
+    label: varchar("label", { length: 50 }),
+    value: varchar("value", { length: 255 }).notNull(),
+    isPrimary: boolean("is_primary").default(false).notNull(),
+  },
+  (table) => [
+    index("client_contacts_client_id_idx").on(table.clientId),
+    index("client_contacts_deleted_at_idx").on(table.deletedAt),
+    check("client_contacts_type_check", sql`${table.type} in ('EMAIL', 'PHONE', 'WHATSAPP', 'OTHER')`),
+    check("client_contacts_value_check", sql`length(trim(${table.value})) > 0`),
+    check("client_contacts_version_check", sql`${table.version} > 0`),
+  ],
+);
+
+export const clientTags = pgTable(
+  "client_tags",
+  {
+    ...auditedColumns(),
+    name: varchar("name", { length: 50 }).notNull(),
+    normalizedName: varchar("normalized_name", { length: 50 }).notNull(),
+  },
+  (table) => [
+    uniqueIndex("client_tags_normalized_name_uidx").on(table.normalizedName),
+    index("client_tags_name_trgm_idx").using("gin", table.name.op("gin_trgm_ops")),
+    index("client_tags_deleted_at_idx").on(table.deletedAt),
+    check("client_tags_name_check", sql`length(trim(${table.name})) > 0`),
+    check("client_tags_version_check", sql`${table.version} > 0`),
+  ],
+);
+
+export const clientTagAssignments = pgTable(
+  "client_tag_assignments",
+  {
+    clientId: uuid("client_id").notNull().references(() => clients.id),
+    tagId: uuid("tag_id").notNull().references(() => clientTags.id),
+    assignedAt: timestamp("assigned_at", { withTimezone: true }).defaultNow().notNull(),
+    assignedById: uuid("assigned_by_id").references(() => users.id),
+  },
+  (table) => [
+    primaryKey({ name: "client_tag_assignments_pk", columns: [table.clientId, table.tagId] }),
+    index("client_tag_assignments_tag_id_idx").on(table.tagId),
+  ],
+);
+
+export const clientResponsibles = pgTable(
+  "client_responsibles",
+  {
+    clientId: uuid("client_id").notNull().references(() => clients.id),
+    userId: uuid("user_id").notNull().references(() => users.id),
+    assignedAt: timestamp("assigned_at", { withTimezone: true }).defaultNow().notNull(),
+    assignedById: uuid("assigned_by_id").references(() => users.id),
+  },
+  (table) => [
+    primaryKey({ name: "client_responsibles_pk", columns: [table.clientId, table.userId] }),
+    index("client_responsibles_user_id_idx").on(table.userId),
+  ],
+);
+
+export const clientTimelineEvents = pgTable(
+  "client_timeline_events",
+  {
+    ...auditedColumns(),
+    clientId: uuid("client_id").notNull().references(() => clients.id),
+    eventType: varchar("event_type", { length: 100 }).notNull(),
+    sourceModule: varchar("source_module", { length: 100 }).notNull(),
+    sourceEntityType: varchar("source_entity_type", { length: 100 }).notNull(),
+    sourceEntityId: uuid("source_entity_id"),
+    summary: varchar("summary", { length: 255 }).notNull(),
+    metadata: jsonb("metadata").default({}).notNull(),
+    occurredAt: timestamp("occurred_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("client_timeline_client_occurred_idx").on(table.clientId, table.occurredAt, table.id),
+    index("client_timeline_source_idx").on(table.sourceModule, table.sourceEntityType, table.sourceEntityId),
+    index("client_timeline_deleted_at_idx").on(table.deletedAt),
+    check("client_timeline_event_type_check", sql`length(trim(${table.eventType})) > 0`),
+    check("client_timeline_version_check", sql`${table.version} > 0`),
   ],
 );
 

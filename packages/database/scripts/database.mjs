@@ -127,7 +127,8 @@ async function expectRejected(client, label, statement, parameters = []) {
 
 async function verifySchema() {
   const expectedTables = [
-    "audit_logs", "clients", "contracts", "financial_transactions", "idempotency_keys",
+    "audit_logs", "client_addresses", "client_contacts", "client_responsibles", "client_tag_assignments",
+    "client_tags", "client_timeline_events", "clients", "contracts", "financial_transactions", "idempotency_keys",
     "inbox_events", "leads", "meetings", "mfa_backup_codes", "mfa_challenges", "mfa_factors",
     "outbox_events", "password_credentials", "password_reset_tokens", "permissions", "projects",
     "proposal_items", "proposals", "role_permissions", "roles", "sessions", "task_attachments",
@@ -146,6 +147,9 @@ async function verifySchema() {
   if (extension.rowCount !== 1) throw new Error("pg_trgm extension is missing");
 
   const requiredIndexes = [
+    "client_responsibles_user_id_idx",
+    "client_tags_normalized_name_uidx",
+    "client_timeline_client_occurred_idx",
     "clients_active_idx",
     "clients_document_active_uidx",
     "clients_email_trgm_idx",
@@ -169,7 +173,7 @@ async function verifySchema() {
     "id", "created_at", "updated_at", "deleted_at", "version", "created_by_id", "updated_by_id",
   ];
   const baseTables = expectedTables.filter(
-    (table) => !new Set(["audit_logs", "role_permissions", "user_roles"]).has(table),
+    (table) => !new Set(["audit_logs", "client_responsibles", "client_tag_assignments", "role_permissions", "user_roles"]).has(table),
   );
   const columns = await pool.query(
     "select table_name, column_name from information_schema.columns where table_schema = 'public'",
@@ -210,9 +214,9 @@ async function verifySchema() {
       client,
       "clients type check",
       "insert into clients (type, name, document, email) values ('INVALID', 'Invalid', $1, 'invalid@example.invalid')",
-      [randomUUID().replaceAll("-", "").slice(0, 20)],
+      ["52998224725"],
     );
-    const document = randomUUID().replaceAll("-", "").slice(0, 20);
+    const document = "52998224725";
     const firstClient = await client.query(
       "insert into clients (type, name, document, email) values ('PF', 'First', $1, 'first@example.invalid') returning id",
       [document],

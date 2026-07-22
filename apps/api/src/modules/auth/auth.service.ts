@@ -12,7 +12,7 @@ import {
   encryptSecret,
   evaluatePasswordPolicy,
   generateBackupCodes,
-  generateCsrfToken,
+  deriveCsrfToken,
   generateOpaqueToken,
   generateTotpSecret,
   hashCsrfToken,
@@ -112,7 +112,7 @@ export class AuthService {
 
   private async createSession(userId: string, metadata: ClientMetadata, mfaVerified: boolean): Promise<SessionResult> {
     const token = generateOpaqueToken();
-    const csrfToken = generateCsrfToken();
+    const csrfToken = deriveCsrfToken(token, this.environment.SESSION_SECRET);
     const tokenHash = hashOpaqueToken(token);
     const expiresAt = new Date(Date.now() + this.environment.SESSION_TTL_SECONDS * 1_000);
     await this.database.db.insert(sessions).values({
@@ -214,10 +214,13 @@ export class AuthService {
     if (!csrfToken || !verifyCsrfToken(csrfToken, session.csrfTokenHash)) throw new UnauthorizedException('Invalid CSRF token');
   }
 
-  async rotateCsrf(session: AuthenticatedSession): Promise<string> {
-    const csrfToken = generateCsrfToken();
-    await this.database.db.update(sessions).set({ csrfTokenHash: hashCsrfToken(csrfToken), updatedAt: new Date() })
-      .where(eq(sessions.id, session.sessionId));
+  async bootstrapCsrf(session: AuthenticatedSession, rawSessionToken: string): Promise<string> {
+    const csrfToken = deriveCsrfToken(rawSessionToken, this.environment.SESSION_SECRET);
+    const expectedHash = hashCsrfToken(csrfToken);
+    if (session.csrfTokenHash !== expectedHash) {
+      await this.database.db.update(sessions).set({ csrfTokenHash: expectedHash, updatedAt: new Date() })
+        .where(and(eq(sessions.id, session.sessionId), eq(sessions.tokenHash, hashOpaqueToken(rawSessionToken))));
+    }
     return csrfToken;
   }
 

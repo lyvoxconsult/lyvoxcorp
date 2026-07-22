@@ -22,6 +22,13 @@
       "when": 1784685800092,
       "tag": "0003_rbac_scopes",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784694747143,
+      "tag": "0004_clients_domain",
+      "breakpoints": true
     }
   ]
 }

@@ -11,6 +11,7 @@ import {
 import { Inject } from '@nestjs/common';
 import { AUTH_ENVIRONMENT } from './auth.tokens.js';
 import { AuthenticatedAccess, PublicAccess } from '../../core/authorization/access-policy.js';
+import { AuthorizationService } from '../../core/authorization/authorization.service.js';
 
 function parsed<T>(schema: ZodType<T>, value: unknown): T {
   try { return schema.parse(value); }
@@ -25,6 +26,7 @@ export class AuthController {
   constructor(
     @Inject(AuthService) private readonly auth: AuthService,
     @Inject(AUTH_ENVIRONMENT) private readonly environment: ApiEnvironment,
+    @Inject(AuthorizationService) private readonly authorization: AuthorizationService,
   ) {}
 
   private metadata(request: FastifyRequest) {
@@ -94,16 +96,23 @@ export class AuthController {
   @AuthenticatedAccess()
   async me(@Req() request: FastifyRequest) {
     const session = await this.session(request);
-    return { id: session.userId, email: session.email, fullName: session.fullName, passwordChangeRequired: session.passwordChangeRequired, mfaVerified: session.mfaVerified };
+    return {
+      id: session.userId,
+      email: session.email,
+      fullName: session.fullName,
+      passwordChangeRequired: session.passwordChangeRequired,
+      mfaVerified: session.mfaVerified,
+      grants: await this.authorization.grantsFor(session.userId),
+    };
   }
 
   @Post('csrf')
   @AuthenticatedAccess()
   @HttpCode(200)
-  async csrf(@Req() request: FastifyRequest, @Headers('x-csrf-token') csrf: string | undefined, @Res({ passthrough: true }) reply: FastifyReply) {
-    const session = await this.session(request); this.auth.verifyCsrf(session, csrf);
-    reply.header('Cache-Control', 'no-store');
-    return { csrfToken: await this.auth.rotateCsrf(session) };
+  async csrf(@Req() request: FastifyRequest, @Res({ passthrough: true }) reply: FastifyReply) {
+    const session = await this.session(request);
+    reply.header('Cache-Control', 'no-store, private').header('Pragma', 'no-cache');
+    return { csrfToken: await this.auth.bootstrapCsrf(session, this.token(request)!) };
   }
 
   @Post('logout')

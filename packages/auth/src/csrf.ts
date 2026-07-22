@@ -1,9 +1,17 @@
-import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 export const CSRF_TOKEN_BYTES = 32;
 
 export function generateCsrfToken(): string {
   return randomBytes(CSRF_TOKEN_BYTES).toString("base64url");
+}
+
+export function deriveCsrfToken(sessionToken: string, secret: string): string {
+  if (!sessionToken || !secret) throw new Error("CSRF derivation inputs must not be empty");
+  return createHmac("sha256", secret)
+    .update("lyvox:csrf:v1\0", "utf8")
+    .update(sessionToken, "utf8")
+    .digest("base64url");
 }
 
 export function hashCsrfToken(token: string): string {

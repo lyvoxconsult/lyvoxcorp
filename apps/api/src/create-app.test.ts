@@ -68,8 +68,29 @@ describe('createApp', () => {
     expect(document.paths).toHaveProperty('/readiness');
     expect(document.paths).toHaveProperty('/api/v1/auth/login');
     expect(document.paths).toHaveProperty('/api/v1/roles');
+    expect(document.paths).toHaveProperty('/api/v1/clientes');
+    expect(document.paths).toHaveProperty('/api/v1/clientes/responsaveis');
+    expect(document.paths).toHaveProperty('/api/v1/clientes/{id}');
     expect(document.paths).not.toHaveProperty('/api/v1/__test/authorization/clients/{id}');
     expect(document.paths['/api/v1/auth/login'].post.requestBody.content['application/json'].schema.properties).toHaveProperty('email');
+    expect(document.paths['/api/v1/clientes'].post.requestBody.content['application/json'].schema.properties).toHaveProperty('document');
+    expect(document.paths['/api/v1/clientes'].post.parameters).toEqual(expect.arrayContaining([expect.objectContaining({ name: 'Idempotency-Key', required: true })]));
+    expect(document.paths['/api/v1/clientes'].get.parameters).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: 'search', in: 'query' }), expect.objectContaining({ name: 'status', in: 'query' }),
+      expect.objectContaining({ name: 'tag', in: 'query' }), expect.objectContaining({ name: 'cursor', in: 'query' }),
+      expect.objectContaining({ name: 'pageSize', in: 'query' }),
+    ]));
+    expect(document.paths['/api/v1/clientes/{id}'].get.parameters).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: 'timelineCursor', in: 'query' }), expect.objectContaining({ name: 'timelinePageSize', in: 'query' }),
+    ]));
+    expect(document.paths['/api/v1/clientes/responsaveis'].get.parameters).toEqual(expect.arrayContaining([expect.objectContaining({ name: 'search', in: 'query' })]));
+    expect(document.paths['/api/v1/clientes/{id}'].delete.parameters).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: 'If-Match', schema: expect.objectContaining({ type: 'string' }) }),
+    ]));
+    expect(document.paths['/api/v1/clientes'].get.responses['200'].content['application/json'].schema.properties).toHaveProperty('meta');
+    expect(document.paths['/api/v1/clientes'].post.responses['201'].content['application/json'].schema.required).toEqual(expect.arrayContaining(['id', 'version']));
+    expect(document.paths['/api/v1/clientes/{id}'].get.responses['200'].content['application/json'].schema.properties).toEqual(expect.objectContaining({ client: expect.any(Object), timeline: expect.any(Object) }));
+    expect(document.paths['/api/v1/clientes/{id}'].delete.responses['204']).not.toHaveProperty('content');
     expect(document.components.schemas.ProblemDetails.required).toContain('correlationId');
     expect((await app.inject({ method: 'GET', url: '/api/v1/docs' })).statusCode).toBe(404);
   });

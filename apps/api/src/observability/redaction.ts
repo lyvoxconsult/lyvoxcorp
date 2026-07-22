@@ -32,6 +32,14 @@ export function buildLoggerOptions(environment: string) {
       paths: Array.from(SENSITIVE_LOG_PATHS),
       censor: REDACTED_VALUE,
     },
+    serializers: {
+      req: (request: { method?: string; url?: string; hostname?: string; remoteAddress?: string }) => ({
+        method: request.method,
+        url: request.url?.split('?', 1)[0],
+        hostname: request.hostname,
+        remoteAddress: request.remoteAddress,
+      }),
+    },
     customProps: (request: { id: string }) => ({ correlationId: request.id }),
   };
 }

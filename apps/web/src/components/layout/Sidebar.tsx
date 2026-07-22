@@ -1,4 +1,4 @@
-import { Layers3, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, Users, X } from "lucide-react";
 import type { RefObject } from "react";
 import { NavLink } from "react-router-dom";
 import { Button } from "../ui/Button";
@@ -22,14 +22,13 @@ export function Sidebar({ collapsed = false, mobile = false, onClose, onToggleCo
       </div>
       <nav className="flex-1 p-3" aria-label="Seções">
         <NavLink
-          to="/"
-          end
-          aria-label="Fundação"
+          to="/app/clientes"
+          aria-label="Clientes"
           onClick={mobile ? onClose : undefined}
           className={({ isActive }) => `flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 font-semibold ${isActive ? "bg-brand-accessible text-white" : "text-brand-subtle hover:bg-surface-muted"}`}
         >
-          <Layers3 aria-hidden="true" className="h-5 w-5 shrink-0" />
-          {(!collapsed || mobile) && <span>Fundação</span>}
+          <Users aria-hidden="true" className="h-5 w-5 shrink-0" />
+          {(!collapsed || mobile) && <span>Clientes</span>}
         </NavLink>
       </nav>
       {!mobile && (

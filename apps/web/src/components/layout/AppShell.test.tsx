@@ -25,7 +25,7 @@ describe("AppShell", () => {
     renderShell();
     await user.click(screen.getByRole("button", { name: "Recolher menu lateral" }));
     expect(screen.getByRole("button", { name: "Expandir menu lateral" })).toBeVisible();
-    expect(screen.getByRole("link", { name: "Fundação" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Clientes" })).toBeVisible();
   });
 
   it("opens mobile navigation and closes it with Escape, restoring focus", async () => {
@@ -50,7 +50,7 @@ describe("AppShell", () => {
     await user.click(screen.getByRole("button", { name: "Abrir menu" }));
     const dialog = screen.getByRole("dialog", { name: "Menu de navegação" });
     const close = within(dialog).getByRole("button", { name: "Fechar menu" });
-    const navigationLink = within(dialog).getByRole("link", { name: "Fundação" });
+    const navigationLink = within(dialog).getByRole("link", { name: "Clientes" });
 
     expect(close).toHaveFocus();
     await user.tab({ shift: true });

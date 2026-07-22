@@ -37,6 +37,25 @@ function explicitCode(exception: unknown, status: number): string {
   return typeof code === 'string' && /^[A-Z][A-Z0-9_]{2,63}$/u.test(code) ? code : statusCode(status);
 }
 
+function explicitSafePayload(exception: unknown): { detail?: string; validationErrors?: Array<{ field: string; message: string }> } {
+  if (!(exception instanceof HttpException)) return {};
+  const response = exception.getResponse();
+  if (typeof response !== 'object' || response === null) return {};
+  const payload = response as { code?: unknown; detail?: unknown; validationErrors?: unknown };
+  if (typeof payload.code !== 'string' || !/^[A-Z][A-Z0-9_]{2,63}$/u.test(payload.code)) return {};
+  const detail = typeof payload.detail === 'string' && payload.detail.length <= 300 && !/[\r\n\t]/u.test(payload.detail)
+    ? payload.detail : undefined;
+  const validationErrors = Array.isArray(payload.validationErrors)
+    ? payload.validationErrors.slice(0, 20).flatMap((item) => {
+      if (typeof item !== 'object' || item === null) return [];
+      const value = item as { field?: unknown; message?: unknown };
+      if (typeof value.field !== 'string' || typeof value.message !== 'string') return [];
+      if (!/^[a-zA-Z0-9_.-]{1,120}$/u.test(value.field) || value.message.length > 160 || /[\r\n\t]/u.test(value.message)) return [];
+      return [{ field: value.field, message: value.message }];
+    }) : undefined;
+  return { ...(detail ? { detail } : {}), ...(validationErrors?.length ? { validationErrors } : {}) };
+}
+
 @Catch()
 export class ProblemDetailsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
@@ -47,15 +66,17 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     const title = TITLES[status] ?? 'Request Failed';
     const code = explicitCode(exception, status);
     const correlationId = request.id || 'unavailable';
+    const safePayload = status < 500 ? explicitSafePayload(exception) : {};
     const problem: ProblemDetails = {
       type: `https://api.lyvox.com/errors/${code}`,
       title,
       status,
-      detail: status >= 500 ? 'An unexpected error occurred' : title,
+      detail: status >= 500 ? 'An unexpected error occurred' : safePayload.detail ?? title,
       instance: request.url.split('?', 1)[0] || '/',
       code,
       correlationId,
       timestamp: new Date().toISOString(),
+      ...(safePayload.validationErrors ? { validationErrors: safePayload.validationErrors } : {}),
     };
 
     const retryAfter = (exception as { retryAfter?: unknown })?.retryAfter;

@@ -1,16 +1,23 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { ForbiddenPage } from "../auth/ForbiddenPage";
+import { LoginPage } from "../auth/LoginPage";
+import { ProtectedRoute } from "../auth/ProtectedRoute";
 import { AppShell } from "../components/layout/AppShell";
-
-function FoundationPage() {
-  return (
-    <section aria-labelledby="foundation-title" className="max-w-3xl rounded-2xl border border-border-subtle bg-surface-raised p-6 shadow-xl shadow-black/20 md:p-8">
-      <p className="mb-2 font-mono text-caption uppercase tracking-[0.2em] text-brand-100">Interface base</p>
-      <h1 id="foundation-title" className="text-h1 text-white">Fundação da interface</h1>
-      <p className="mt-4 max-w-2xl text-brand-50">Estrutura visual, navegação e componentes essenciais preparados para as próximas fases.</p>
-    </section>
-  );
-}
+import { ClientDetailPage } from "../modules/clients/ClientDetailPage";
+import { ClientsPage } from "../modules/clients/ClientsPage";
 
 export function AppRoutes() {
-  return <Routes><Route element={<AppShell />}><Route index element={<FoundationPage />} /></Route></Routes>;
+  return <Routes>
+    <Route path="/login" element={<LoginPage />} />
+    <Route path="/403-forbidden" element={<ForbiddenPage />} />
+    <Route element={<ProtectedRoute permission="clients.read" />}>
+      <Route path="/app" element={<AppShell />}>
+        <Route index element={<Navigate to="clientes" replace />} />
+        <Route path="clientes" element={<ClientsPage />} />
+        <Route path="clientes/:id" element={<ClientDetailPage />} />
+      </Route>
+    </Route>
+    <Route path="/" element={<Navigate to="/app/clientes" replace />} />
+    <Route path="*" element={<Navigate to="/app/clientes" replace />} />
+  </Routes>;
 }

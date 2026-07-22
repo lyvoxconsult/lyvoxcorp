@@ -33,6 +33,20 @@ describe('ProblemDetailsFilter', () => {
     expect(JSON.stringify(send.mock.calls[0]?.[0])).not.toContain('database password leaked');
   });
 
+  it('exposes only allowlisted domain validation details without request values', () => {
+    const { host, send } = createHost(undefined, '/api/v1/clientes?search=52998224725');
+    new ProblemDetailsFilter().catch(new BadRequestException({
+      code: 'REQUEST_VALIDATION_FAILED',
+      detail: 'Request validation failed',
+      validationErrors: [{ field: 'document', message: 'Invalid CNPJ' }],
+      stack: 'sensitive stack', value: '52998224725',
+    }), host as never);
+    const body = send.mock.calls[0]?.[0];
+    expect(body).toEqual(expect.objectContaining({ code: 'REQUEST_VALIDATION_FAILED', detail: 'Request validation failed', validationErrors: [{ field: 'document', message: 'Invalid CNPJ' }] }));
+    expect(JSON.stringify(body)).not.toContain('52998224725');
+    expect(JSON.stringify(body)).not.toContain('sensitive stack');
+  });
+
   it('uses the generic title for unmapped HTTP statuses', () => {
     const { host, send } = createHost('');
     new ProblemDetailsFilter().catch(new HttpException('hidden', HttpStatus.I_AM_A_TEAPOT), host as never);

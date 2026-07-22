@@ -12,6 +12,9 @@ describe('buildLoggerOptions', () => {
     expect(SENSITIVE_LOG_PATHS).toContain('req.body.password');
     expect(SENSITIVE_LOG_PATHS).toContain('req.body.totpSecret');
     expect(options.customProps({ id: 'correlation-1' })).toEqual({ correlationId: 'correlation-1' });
+    expect(options.serializers.req({ method: 'GET', url: '/api/v1/clientes?search=52998224725' })).toEqual({
+      method: 'GET', url: '/api/v1/clientes', hostname: undefined, remoteAddress: undefined,
+    });
   });
 
   it('uses debug logging outside production', () => {
