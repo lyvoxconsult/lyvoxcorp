@@ -124,3 +124,19 @@ Nenhum seed, endpoint ou comportamento funcional foi declarado nesta fase. Os da
 | 2026-07-21 | `pnpm audit --audit-level high` | Registry npm | PASS_WITH_MODERATE_FINDING | Zero high/critical; permanece uma moderada transitiva de tooling registrada em DEV-0028 |
 | 2026-07-21 | Reset controlado final + duas migrations + verify/check | PostgreSQL local descartavel | PASS | `applied=2`, depois `applied=0`; `LYVOX_DB_VERIFY_OK tables=26`; dados temporarios removidos |
 | 2026-07-21 | Revisoes sequenciais SPEC, qualidade/seguranca e auditoria final | Tres revisores independentes, somente leitura | PASS | Achados tecnicos e duas inconsistencias documentais foram corrigidos; repeticoes aprovaram e a auditoria final retornou `READY_TO_APPROVE` |
+
+## PHASE-007
+
+| Data | Comando/checagem | Ambiente | Resultado | Evidencia |
+|---|---|---|---|---|
+| 2026-07-21 | `pnpm --filter @lyvox/permissions test` | Node 20.20.2 / Vitest 4.1.10 | PASS | 4/4 testes de chave, deny-by-default, ownership, assignment, uniao de scopes e matriz operacional |
+| 2026-07-21 | `pnpm --filter @lyvox/api test` | NestJS/Fastify + PostgreSQL 16 efemero/Redis local | PASS | 33/33 testes; matriz completa dos cinco cargos, TEST-004 HTTP 403, custom role, revogacao viva, soft-delete, MFA administrativo e ownership incluidos |
+| 2026-07-21 | `vitest run --coverage` | API e pacote permissions | PASS | API 95,67% linhas/81,00% branches; permissions 94,73% linhas/88,88% branches; thresholds 80% ativos |
+| 2026-07-21 | Migration 0003 duas vezes + `db:verify` | PostgreSQL 16 local via PgBouncer | PASS | Primeira `applied=1`, segunda `applied=0`; `LYVOX_DB_VERIFY_OK tables=26`; SHA-256 da migration 0003 `384bbe4374b8618c300fcf1524cfb526173055e367ea5e8ae18452644bdf23f0` |
+| 2026-07-21 | `db:seed` + `db:seed:verify` | PostgreSQL 16 local | PASS | Cinco cargos, 18 permissoes, 47 vinculos e scopes canonicos verificados sem expor credencial temporaria |
+| 2026-07-21 | frozen install, typecheck, lint, build e suite raiz | Node 20.20.2 / pnpm 10.34.5 | PASS | 47/47 testes; lint final zero warnings/erros e build/typecheck aprovados |
+| 2026-07-21 | `pnpm dev:verify` | Turbo + Nest/Fastify real | FAIL_RESOLVED | Metadata implicita de `Reflector` falhou no `tsx`; `@Inject(Reflector)` explicito corrigiu e repeticao confirmou api/web/worker |
+| 2026-07-21 | `pnpm audit --audit-level high` | Registry npm | PASS_WITH_MODERATE_FINDING | Zero high/critical; uma moderada transitiva de tooling permanece em DEV-0028 |
+| 2026-07-21 | Revisao SPEC 1/3 inicial + repeticao focal | Diff staged | FAIL_RESOLVED | Scope restrito em permissao sem ownership foi bloqueado em duas camadas; teste HTTP rejeita `users.manage/OWN` e suites focais permanecem verdes |
+| 2026-07-21 | Revisao SECURITY 2/3 inicial + repeticao apos correcao | Diff staged + PostgreSQL 16 efemero + runtime development | FAIL_RESOLVED_PASS | Scopes `OWN`/`ASSIGNED` atravessam guard/contexto e filtram no mesmo `WHERE`; HTTP prova own/cross-owner e assigned/cross-assignee; migration-only prova backfill sem seed; harness retorna 404 em `NODE_ENV=development`; repeticao aprovou sem bypass/regressao |
+| 2026-07-21 | Revisao QA final 3/3 inicial + repeticao documental | Diff staged + evidencias do gate | FAIL_RESOLVED_PASS | Primeira leitura rejeitou apenas cobertura/status fora do indice; apos staging, confirmou valores finais, zero marcadores obsoletos, escopo honesto e todos os criterios do GATE-007 |

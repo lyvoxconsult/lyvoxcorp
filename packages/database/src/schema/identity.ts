@@ -262,9 +262,11 @@ export const rolePermissions = pgTable(
   {
     roleId: uuid("role_id").notNull().references(() => roles.id),
     permissionId: uuid("permission_id").notNull().references(() => permissions.id),
+    scope: varchar("scope", { length: 20 }).default("ALL").notNull(),
   },
   (table) => [
     primaryKey({ name: "role_permissions_pk", columns: [table.roleId, table.permissionId] }),
     index("role_permissions_permission_id_idx").on(table.permissionId),
+    check("role_permissions_scope_check", sql`${table.scope} in ('ALL', 'OWN', 'ASSIGNED')`),
   ],
 );

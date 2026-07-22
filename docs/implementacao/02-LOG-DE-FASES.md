@@ -106,3 +106,30 @@ O DOC-21 descreve criacao de repositorio separado. O prompt mestre, de maior pre
 - QA corretiva operacional: segunda revisao rejeitou corrida de tentativas MFA, proxy IP, contaminacao do banco, throttling incompleto, GET mutativo de CSRF, migration sem backfill e matriz seed inexata; correcoes e provas foram adicionadas. A repeticao encontrou `INCR`/`EXPIRE` nao atomicos; um script Lua Redis unico resolveu o ultimo P2 antes da nova revisao. Node 20 EOL permanece bloqueio de staging/producao, nao do gate local, conforme DEV-0036.
 - QA final: revisao SPEC aprovada apos correcoes; revisao de qualidade/seguranca aprovada apos correcoes; auditoria final inicialmente rejeitou apenas contadores documentais obsoletos (`13` rotas e `35/35` testes), ambos alinhados a `14` e `36/36`, e retornou `READY_TO_APPROVE` na repeticao.
 - Proxima acao: iniciar automaticamente PHASE-007.
+
+## PHASE-007 - Autorizacao RBAC e scope ownership
+
+- Inicio: `2026-07-21`.
+- Conclusao: `2026-07-21`.
+- Estado: `APPROVED`.
+- Gate: `GATE-007 = APPROVED`.
+- Escopo: guard global com DI, politicas explicitas publica/autenticada/permissao, matriz viva no PostgreSQL e ownership persistido.
+- Arquivos: `apps/api/src/core/authorization/*`, `apps/api/src/core/guards/rbac.guard.ts`, `apps/api/src/modules/authorization/*`, `packages/permissions/*`, migration `0003_rbac_scopes.sql`, seed e contratos OpenAPI.
+- Implementacao: deny-by-default para qualquer rota sem metadata; 14 rotas de auth classificadas explicitamente; grants carregados do PostgreSQL em toda requisicao, ignorando role/permissao soft-deleted; nenhum bypass por nome de cargo; Administrador exige sessao MFA mesmo apos promocao.
+- Ownership: `role_permissions.scope` com `ALL`, `OWN` e `ASSIGNED`; Operacional recebe `OWN` em clientes e `ASSIGNED` em projetos; papeis multiplos formam uniao e `ALL` domina; helper de decisao nega IDOR cross-owner/cross-assignee.
+- Endpoints: `GET /api/v1/users` protegido por `users.manage`; `GET/POST /api/v1/roles` protegidos por `roles.manage`; criacao de cargo customizado valida permissoes existentes, scopes, duplicidade, CSRF e auditoria.
+- Validacao tecnica: 47 testes aprovados; TEST-004 Comercial -> Usuarios retorna 403 RFC 7807; matriz completa dos cinco cargos, custom role, revogacao imediata, soft-delete, MFA de admin e ownership testados; migration aplicada/idempotente; seed 5/18/47 com scopes aprovado.
+- QA corretiva: a primeira revisao SPEC detectou que um scope restrito poderia alimentar uma colecao administrativa sem filtro; scopes nao-`ALL` foram limitados a `clients.read`/`projects.read|update`, e todas as rotas administrativas passaram a exigir grant `ALL` antes do handler.
+- QA de seguranca corretiva: a primeira revisao SECURITY detectou que scopes `OWN`/`ASSIGNED` ainda nao atravessavam o guard e que o default da migration ampliava grants operacionais preexistentes para `ALL`; decorators de scope, contexto autorizado e consultas SQL com ownership no mesmo `WHERE` foram exercitados por HTTP, e a migration passou a fazer o backfill restritivo antes da constraint. O harness HTTP existe somente em `NODE_ENV=test` e nao e registrado em runtime de desenvolvimento/producao.
+- Limite honesto: `FR-006` permanece parcial porque convite e lifecycle de usuario dependem do fluxo de e-mail; listagem e fronteira `users.manage` estao funcionais. Dominios de clientes/projetos consumirao o predicate de ownership nas fases proprietarias.
+- QA final: SPEC aprovou apos DEV-0049; SECURITY aprovou apos DEV-0050 e prova runtime de isolamento do harness; QA final rejeitou somente evidencias de cobertura/status ainda nao staged, e aprovou a repeticao apos alinhamento documental. Nenhum achado material remanescente.
+- Proxima acao: iniciar automaticamente PHASE-008.
+
+## PHASE-008 - Backend Foundation (NestJS + Fastify)
+
+- Inicio: `2026-07-21`.
+- Estado: `IN_PROGRESS`.
+- Gate: `GATE-008 = IN_PROGRESS`.
+- Escopo: correlation ID, envelope RFC 7807 completo, OpenAPI Swagger gerada em `/docs`, liveness `/health` e readiness `/readiness` para PostgreSQL/PgBouncer e Redis.
+- Inputs ativos: DOC-07, DOC-09 e documentacao atual do NestJS 11 consultada via Context7.
+- Proxima acao: consolidar a fundacao transversal existente sem afrouxar o guard deny-by-default da PHASE-007.

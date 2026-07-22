@@ -10,6 +10,7 @@ import {
 } from './auth.schemas.js';
 import { Inject } from '@nestjs/common';
 import { AUTH_ENVIRONMENT } from './auth.tokens.js';
+import { AuthenticatedAccess, PublicAccess } from '../../core/authorization/access-policy.js';
 
 function parsed<T>(schema: ZodType<T>, value: unknown): T {
   try { return schema.parse(value); }
@@ -43,6 +44,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @PublicAccess()
   @HttpCode(200)
   async login(@Body() body: unknown, @Req() request: FastifyRequest, @Res({ passthrough: true }) reply: FastifyReply) {
     const input = parsed(loginSchema, body);
@@ -56,6 +58,7 @@ export class AuthController {
   }
 
   @Post('mfa/challenge')
+  @PublicAccess()
   @HttpCode(200)
   async mfaChallenge(@Body() body: unknown, @Req() request: FastifyRequest, @Res({ passthrough: true }) reply: FastifyReply) {
     const input = parsed(mfaChallengeSchema, body);
@@ -65,18 +68,21 @@ export class AuthController {
   }
 
   @Post('mfa/setup')
+  @PublicAccess()
   setupMfa(@Body() body: unknown) {
     const input = parsed(enrollmentChallengeSchema, body);
     return this.auth.setupMfa(input.challengeToken);
   }
 
   @Post('mfa/enrollment')
+  @AuthenticatedAccess()
   async beginMfaEnrollment(@Req() request: FastifyRequest, @Headers('x-csrf-token') csrf: string | undefined) {
     const session = await this.session(request); this.auth.verifyCsrf(session, csrf);
     return this.auth.beginMfaEnrollment(session);
   }
 
   @Post('mfa/activate')
+  @PublicAccess()
   async activateMfa(@Body() body: unknown, @Req() request: FastifyRequest, @Res({ passthrough: true }) reply: FastifyReply) {
     const input = parsed(mfaActivateSchema, body);
     const result = await this.auth.activateMfa(input.challengeToken, input.code, this.metadata(request));
@@ -85,12 +91,14 @@ export class AuthController {
   }
 
   @Get('me')
+  @AuthenticatedAccess()
   async me(@Req() request: FastifyRequest) {
     const session = await this.session(request);
     return { id: session.userId, email: session.email, fullName: session.fullName, passwordChangeRequired: session.passwordChangeRequired, mfaVerified: session.mfaVerified };
   }
 
   @Post('csrf')
+  @AuthenticatedAccess()
   @HttpCode(200)
   async csrf(@Req() request: FastifyRequest, @Headers('x-csrf-token') csrf: string | undefined, @Res({ passthrough: true }) reply: FastifyReply) {
     const session = await this.session(request); this.auth.verifyCsrf(session, csrf);
@@ -99,6 +107,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @AuthenticatedAccess()
   @HttpCode(204)
   async logout(@Req() request: FastifyRequest, @Headers('x-csrf-token') csrf: string | undefined, @Res({ passthrough: true }) reply: FastifyReply) {
     const session = await this.session(request); this.auth.verifyCsrf(session, csrf);
@@ -106,6 +115,7 @@ export class AuthController {
   }
 
   @Post('logout-all')
+  @AuthenticatedAccess()
   @HttpCode(204)
   async logoutAll(@Req() request: FastifyRequest, @Headers('x-csrf-token') csrf: string | undefined, @Res({ passthrough: true }) reply: FastifyReply) {
     const session = await this.session(request); this.auth.verifyCsrf(session, csrf);
@@ -113,9 +123,11 @@ export class AuthController {
   }
 
   @Get('sessions')
+  @AuthenticatedAccess()
   async sessions(@Req() request: FastifyRequest) { const session = await this.session(request); return { items: await this.auth.listSessions(session) }; }
 
   @Delete('sessions/:id')
+  @AuthenticatedAccess()
   @HttpCode(204)
   async revoke(@Param('id') id: string, @Req() request: FastifyRequest, @Headers('x-csrf-token') csrf: string | undefined) {
     const session = await this.session(request); this.auth.verifyCsrf(session, csrf);
@@ -123,14 +135,17 @@ export class AuthController {
   }
 
   @Post('password/forgot')
+  @PublicAccess()
   @HttpCode(202)
   async forgot(@Body() body: unknown, @Req() request: FastifyRequest) { const input = parsed(forgotPasswordSchema, body); await this.auth.forgotPassword(input.email, this.metadata(request)); return { accepted: true }; }
 
   @Post('password/reset')
+  @PublicAccess()
   @HttpCode(204)
   async reset(@Body() body: unknown, @Req() request: FastifyRequest) { const input = parsed(resetPasswordSchema, body); await this.auth.resetPassword(input.token, input.newPassword, this.metadata(request)); }
 
   @Post('password/change')
+  @AuthenticatedAccess()
   @HttpCode(204)
   async change(@Body() body: unknown, @Req() request: FastifyRequest, @Headers('x-csrf-token') csrf: string | undefined, @Res({ passthrough: true }) reply: FastifyReply) {
     const session = await this.session(request); this.auth.verifyCsrf(session, csrf);

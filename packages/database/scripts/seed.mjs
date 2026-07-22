@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { evaluatePasswordPolicy, hashPassword } from "@lyvox/auth";
+import { scopeForRole } from "@lyvox/permissions";
 import pg from "pg";
 
 const mode = process.argv[2] ?? "apply";
@@ -174,7 +175,7 @@ async function verifySeed(client, email) {
   if (permissionResult.rowCount !== permissions.length) fail("Canonical permission verification failed.");
 
   const assignments = await client.query(
-    `select r.name, p.key
+    `select r.name, p.key, rp.scope
      from role_permissions rp
      join roles r on r.id = rp.role_id
      join permissions p on p.id = rp.permission_id
@@ -185,6 +186,9 @@ async function verifySeed(client, email) {
   const actual = new Set(assignments.rows.map((row) => `${row.name}\u0000${row.key}`));
   if (actual.size !== expected.size || [...expected].some((entry) => !actual.has(entry))) {
     fail("Canonical role-permission matrix verification failed.");
+  }
+  if (assignments.rows.some((row) => row.scope !== scopeForRole(row.name, row.key))) {
+    fail("Canonical role-permission scope verification failed.");
   }
 
   const admin = await client.query(
@@ -219,8 +223,10 @@ async function applySeed(pool, input) {
     for (const [roleName, permissionKeys] of rolePermissionMatrix) {
       for (const permissionKey of permissionKeys) {
         await client.query(
-          "insert into role_permissions (role_id, permission_id) values ($1, $2) on conflict do nothing",
-          [roleIds.get(roleName), permissionIds.get(permissionKey)],
+          `insert into role_permissions (role_id, permission_id, scope) values ($1, $2, $3)
+           on conflict (role_id, permission_id) do update set scope = excluded.scope
+           where role_permissions.scope is distinct from excluded.scope`,
+          [roleIds.get(roleName), permissionIds.get(permissionKey), scopeForRole(roleName, permissionKey)],
         );
       }
     }

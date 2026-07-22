@@ -1,0 +1,70 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Lyvox Authorization API", "version": "0.7.0" },
+  "servers": [{ "url": "/api/v1" }],
+  "paths": {
+    "/users": {
+      "get": {
+        "operationId": "listUsers",
+        "security": [{ "sessionCookie": [] }],
+        "x-required-permission": "users.manage",
+        "responses": { "200": { "description": "Active users" }, "401": { "$ref": "#/components/responses/Problem" }, "403": { "$ref": "#/components/responses/Problem" } }
+      }
+    },
+    "/roles": {
+      "get": {
+        "operationId": "listRoles",
+        "security": [{ "sessionCookie": [] }],
+        "x-required-permission": "roles.manage",
+        "responses": { "200": { "description": "Active roles and permissions" }, "401": { "$ref": "#/components/responses/Problem" }, "403": { "$ref": "#/components/responses/Problem" } }
+      },
+      "post": {
+        "operationId": "createRole",
+        "security": [{ "sessionCookie": [], "csrfHeader": [] }],
+        "x-required-permission": "roles.manage",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateRole" } } }
+        },
+        "responses": { "201": { "description": "Custom role created" }, "400": { "$ref": "#/components/responses/Problem" }, "401": { "$ref": "#/components/responses/Problem" }, "403": { "$ref": "#/components/responses/Problem" }, "409": { "$ref": "#/components/responses/Problem" } }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": { "type": "apiKey", "in": "cookie", "name": "lyvox_session" },
+      "csrfHeader": { "type": "apiKey", "in": "header", "name": "X-CSRF-Token" }
+    },
+    "schemas": {
+      "CreateRole": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "permissions"],
+        "properties": {
+          "name": { "type": "string", "minLength": 2, "maxLength": 100 },
+          "description": { "type": "string", "minLength": 1, "maxLength": 2000 },
+          "permissions": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["key"],
+              "properties": {
+                "key": { "type": "string", "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$" },
+                "scope": { "type": "string", "enum": ["ALL", "OWN", "ASSIGNED"], "default": "ALL" }
+              }
+            }
+          }
+        }
+      },
+      "Problem": {
+        "type": "object", "required": ["type", "title", "status", "detail", "instance"],
+        "properties": { "type": { "type": "string", "format": "uri" }, "title": { "type": "string" }, "status": { "type": "integer" }, "detail": { "type": "string" }, "instance": { "type": "string" }, "traceId": { "type": "string" } }
+      }
+    },
+    "responses": {
+      "Problem": { "description": "RFC 7807 error", "content": { "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } } } }
+    }
+  }
+}

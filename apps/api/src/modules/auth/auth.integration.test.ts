@@ -7,6 +7,20 @@ import { readFileSync } from 'node:fs';
 import { Pool } from 'pg';
 import { generateCsrfToken, generateOpaqueToken, generateTotpCode, hashCsrfToken, hashOpaqueToken, hashPassword } from '@lyvox/auth';
 import { createApp } from '../../create-app.js';
+import { AuthorizationService } from '../../core/authorization/authorization.service.js';
+
+const permissionKeys = [
+  'users.manage', 'roles.manage', 'dashboard.read', 'clients.read', 'clients.create', 'clients.update',
+  'clients.archive', 'clients.delete', 'crm.read', 'crm.update', 'proposals.approve', 'projects.read',
+  'projects.update', 'financial.read', 'financial.update', 'financial.pay', 'automations.manage', 'audit.read',
+] as const;
+const roleMatrix: Record<string, readonly string[]> = {
+  Administrador: permissionKeys,
+  'Gestão': ['dashboard.read', 'clients.read', 'clients.create', 'clients.update', 'clients.archive', 'clients.delete', 'crm.read', 'crm.update', 'proposals.approve', 'projects.read', 'projects.update', 'financial.read', 'financial.update', 'financial.pay'],
+  Financeiro: ['dashboard.read', 'clients.read', 'financial.read', 'financial.update', 'financial.pay'],
+  Comercial: ['dashboard.read', 'clients.read', 'clients.create', 'clients.update', 'crm.read', 'crm.update'],
+  Operacional: ['dashboard.read', 'clients.read', 'projects.read', 'projects.update'],
+};
 
 function readLocalEntries() {
   return Object.fromEntries(readFileSync(new URL('../../../../../.env', import.meta.url), 'utf8')
@@ -49,6 +63,8 @@ describe.sequential('opaque session authentication integration', () => {
   const admin = { email: `admin-${suffix}@example.invalid`, password: 'StrongPassword3!', id: '' };
   const softDeleted = { email: `deleted-${suffix}@example.invalid`, password: 'StrongPassword4!', id: '' };
   let adminCookie = '';
+  let adminCsrf = '';
+  const roleUsers = new Map<string, { id: string; cookie: string }>();
 
   async function clearTestRateLimits() {
     const redis = createClient({ url: environment.REDIS_URL }); await redis.connect();
@@ -89,7 +105,7 @@ describe.sequential('opaque session authentication integration', () => {
     const migrationClient = await pool.connect();
     try {
       let legacyUserId = '';
-      for (const name of ['0001_initial_schema.sql', '0002_auth_security.sql']) {
+      for (const name of ['0001_initial_schema.sql', '0002_auth_security.sql', '0003_rbac_scopes.sql']) {
         const sql = readFileSync(new URL(`../../../../../migrations/${name}`, import.meta.url), 'utf8');
         for (const statement of sql.split('--> statement-breakpoint').map((value) => value.trim()).filter(Boolean)) {
           await migrationClient.query(statement);
@@ -98,18 +114,48 @@ describe.sequential('opaque session authentication integration', () => {
           const legacyUser = await migrationClient.query("insert into users (email, full_name) values ('legacy-session@example.invalid', 'Legacy Session') returning id");
           legacyUserId = legacyUser.rows[0].id;
           await migrationClient.query("insert into sessions (user_id, token_hash, ip_address, user_agent, expires_at) values ($1, repeat('a', 64), '127.0.0.1', 'migration-proof', now() + interval '1 hour')", [legacyUserId]);
-        } else {
+        } else if (name === '0002_auth_security.sql') {
           const migrated = await migrationClient.query("select revoked_at is not null as revoked, csrf_token_hash = repeat('0', 64) as backfilled from sessions where user_id = $1", [legacyUserId]);
           if (!migrated.rows[0]?.revoked || !migrated.rows[0]?.backfilled) throw new Error('Legacy session migration invariant failed');
           await migrationClient.query('delete from sessions where user_id = $1', [legacyUserId]);
           await migrationClient.query('delete from users where id = $1', [legacyUserId]);
+          const operationalRole = await migrationClient.query("insert into roles (name) values ('Operacional') returning id");
+          for (const key of ['clients.read', 'projects.read', 'projects.update']) {
+            const permission = await migrationClient.query('insert into permissions (key) values ($1) returning id', [key]);
+            await migrationClient.query('insert into role_permissions (role_id, permission_id) values ($1, $2)', [operationalRole.rows[0].id, permission.rows[0].id]);
+          }
+        } else if (name === '0003_rbac_scopes.sql') {
+          const upgraded = await migrationClient.query("select p.key, rp.scope from role_permissions rp join roles r on r.id = rp.role_id join permissions p on p.id = rp.permission_id where r.name = 'Operacional' order by p.key");
+          expect(upgraded.rows).toEqual([
+            { key: 'clients.read', scope: 'OWN' },
+            { key: 'projects.read', scope: 'ASSIGNED' },
+            { key: 'projects.update', scope: 'ASSIGNED' },
+          ]);
+          await migrationClient.query("delete from role_permissions where role_id = (select id from roles where name = 'Operacional')");
+          await migrationClient.query("delete from roles where name = 'Operacional'");
+          await migrationClient.query("delete from permissions where key = any($1::varchar[])", [['clients.read', 'projects.read', 'projects.update']]);
         }
       }
     } finally { migrationClient.release(); }
     await clearTestRateLimits();
     await createUser(normal); await createUser(locked); await createUser(admin); await createUser(softDeleted);
-    const role = await pool.query("insert into roles (name, description) values ('Administrador', 'Integration test') on conflict (name) do update set description = excluded.description returning id");
-    await pool.query('insert into user_roles (user_id, role_id) values ($1, $2) on conflict do nothing', [admin.id, role.rows[0].id]);
+    for (const permission of permissionKeys) await pool.query('insert into permissions (key) values ($1)', [permission]);
+    for (const [roleName, assigned] of Object.entries(roleMatrix)) {
+      const role = await pool.query('insert into roles (name, description) values ($1, $2) returning id', [roleName, 'Integration test']);
+      for (const permission of assigned) {
+        const scope = roleName === 'Operacional' && permission === 'clients.read' ? 'OWN' : roleName === 'Operacional' && permission.startsWith('projects.') ? 'ASSIGNED' : 'ALL';
+        await pool.query('insert into role_permissions (role_id, permission_id, scope) select $1, id, $3 from permissions where key = $2', [role.rows[0].id, permission, scope]);
+      }
+      let userId = admin.id;
+      if (roleName !== 'Administrador') {
+        const user = await pool.query('insert into users (email, full_name, password_change_required) values ($1, $2, false) returning id', [`${roleName.toLowerCase()}-${suffix}@example.invalid`, roleName]);
+        userId = user.rows[0].id;
+      }
+      await pool.query('insert into user_roles (user_id, role_id) values ($1, $2)', [userId, role.rows[0].id]);
+      const token = generateOpaqueToken();
+      await pool.query("insert into sessions (user_id, token_hash, csrf_token_hash, ip_address, user_agent, expires_at) values ($1, $2, $3, '127.0.0.80', 'rbac-integration', now() + interval '1 hour')", [userId, hashOpaqueToken(token), hashCsrfToken(generateCsrfToken())]);
+      roleUsers.set(roleName, { id: userId, cookie: `lyvox_session=${token}` });
+    }
     app = await createApp({ env: environment, logger: false }); await app.init(); await app.getHttpAdapter().getInstance().ready();
   }, 60_000);
 
@@ -177,7 +223,7 @@ describe.sequential('opaque session authentication integration', () => {
     expect(totpReplay.statusCode).toBe(401);
     const backup = activate.json().backupCodes[0];
     const completed = await app.inject({ method: 'POST', url: '/api/v1/auth/mfa/challenge', headers: { origin: environment.TRUSTED_ORIGINS }, payload: { challengeToken: secondLogin.json().challengeToken, backupCode: backup }, remoteAddress: '127.0.0.31' });
-    expect(completed.statusCode).toBe(200); adminCookie = cookie(completed);
+    expect(completed.statusCode).toBe(200); adminCookie = cookie(completed); adminCsrf = completed.json().csrfToken;
     const thirdLogin = await app.inject({ method: 'POST', url: '/api/v1/auth/login', headers: { origin: environment.TRUSTED_ORIGINS }, payload: { email: admin.email, password: admin.password }, remoteAddress: '127.0.0.32' });
     const replay = await app.inject({ method: 'POST', url: '/api/v1/auth/mfa/challenge', headers: { origin: environment.TRUSTED_ORIGINS }, payload: { challengeToken: thirdLogin.json().challengeToken, backupCode: backup }, remoteAddress: '127.0.0.32' });
     expect(replay.statusCode).toBe(401);
@@ -189,6 +235,78 @@ describe.sequential('opaque session authentication integration', () => {
     const attempts = await pool.query('select attempts from mfa_challenges where challenge_hash = $1', [hashOpaqueToken(parallelToken)]);
     expect(attempts.rows[0].attempts).toBe(5);
   }, 60_000);
+
+  it('enforces the exact five-role matrix, TEST-004, live revocation and administrator MFA', async () => {
+    const authorization = app.get(AuthorizationService);
+    for (const [roleName, expected] of Object.entries(roleMatrix)) {
+      const actor = roleUsers.get(roleName)!;
+      const actual = (await authorization.grantsFor(actor.id)).map((grant) => grant.permission).sort();
+      expect(actual).toEqual([...expected].sort());
+      expect(permissionKeys.filter((key) => !actual.includes(key))).toHaveLength(permissionKeys.length - expected.length);
+    }
+    expect((await app.inject({ method: 'GET', url: '/api/v1/users' })).statusCode).toBe(401);
+    const commercial = await app.inject({ method: 'GET', url: '/api/v1/users', headers: { cookie: roleUsers.get('Comercial')!.cookie } });
+    expect(commercial.statusCode).toBe(403);
+    expect(commercial.headers['content-type']).toContain('application/problem+json');
+    expect(commercial.json()).not.toHaveProperty('permission');
+    expect((await app.inject({ method: 'GET', url: '/api/v1/users', headers: { cookie: adminCookie } })).statusCode).toBe(200);
+    const nonMfaToken = generateOpaqueToken();
+    await pool.query("insert into sessions (user_id, token_hash, csrf_token_hash, ip_address, user_agent, expires_at) values ($1, $2, $3, '127.0.0.81', 'admin-promoted', now() + interval '1 hour')", [admin.id, hashOpaqueToken(nonMfaToken), hashCsrfToken(generateCsrfToken())]);
+    expect((await app.inject({ method: 'GET', url: '/api/v1/users', headers: { cookie: `lyvox_session=${nonMfaToken}` } })).statusCode).toBe(403);
+
+    await pool.query("update permissions set deleted_at = now() where key = 'users.manage'");
+    expect((await app.inject({ method: 'GET', url: '/api/v1/users', headers: { cookie: adminCookie } })).statusCode).toBe(403);
+    await pool.query("update permissions set deleted_at = null where key = 'users.manage'");
+  });
+
+  it('creates a scoped custom role from database permissions with CSRF and no role-name bypass', async () => {
+    const customPermissions = [{ key: 'clients.read', scope: 'OWN' }, { key: 'users.manage', scope: 'ALL' }];
+    const withoutCsrf = await app.inject({ method: 'POST', url: '/api/v1/roles', headers: { origin: environment.TRUSTED_ORIGINS, cookie: adminCookie }, payload: { name: `Custom ${suffix}`, permissions: customPermissions } });
+    expect(withoutCsrf.statusCode).toBe(401);
+    const created = await app.inject({ method: 'POST', url: '/api/v1/roles', headers: { origin: environment.TRUSTED_ORIGINS, cookie: adminCookie, 'x-csrf-token': adminCsrf }, payload: { name: `Custom ${suffix}`, permissions: customPermissions } });
+    expect(created.statusCode).toBe(201);
+    expect(created.json().permissions).toEqual(customPermissions);
+    const customUser = await pool.query('insert into users (email, full_name, password_change_required) values ($1, $2, false) returning id', [`custom-${suffix}@example.invalid`, 'Custom']);
+    await pool.query('insert into user_roles (user_id, role_id) values ($1, $2)', [customUser.rows[0].id, created.json().id]);
+    expect(await app.get(AuthorizationService).grantsFor(customUser.rows[0].id)).toEqual(expect.arrayContaining([{ permission: 'clients.read', scope: 'OWN' }, { permission: 'users.manage', scope: 'ALL' }]));
+    const customToken = generateOpaqueToken();
+    await pool.query("insert into sessions (user_id, token_hash, csrf_token_hash, ip_address, user_agent, expires_at) values ($1, $2, $3, '127.0.0.82', 'custom-role', now() + interval '1 hour')", [customUser.rows[0].id, hashOpaqueToken(customToken), hashCsrfToken(generateCsrfToken())]);
+    expect((await app.inject({ method: 'GET', url: '/api/v1/users', headers: { cookie: `lyvox_session=${customToken}` } })).statusCode).toBe(200);
+    await pool.query('delete from user_roles where user_id = $1 and role_id = $2', [customUser.rows[0].id, created.json().id]);
+    expect((await app.inject({ method: 'GET', url: '/api/v1/users', headers: { cookie: `lyvox_session=${customToken}` } })).statusCode).toBe(403);
+    const duplicate = await app.inject({ method: 'POST', url: '/api/v1/roles', headers: { origin: environment.TRUSTED_ORIGINS, cookie: adminCookie, 'x-csrf-token': adminCsrf }, payload: { name: `Custom ${suffix}`, permissions: [] } });
+    expect(duplicate.statusCode).toBe(409);
+    const unknown = await app.inject({ method: 'POST', url: '/api/v1/roles', headers: { origin: environment.TRUSTED_ORIGINS, cookie: adminCookie, 'x-csrf-token': adminCsrf }, payload: { name: `Unknown ${suffix}`, permissions: [{ key: 'unknown.read', scope: 'ALL' }] } });
+    expect(unknown.statusCode).toBe(409);
+    const unsafeScope = await app.inject({ method: 'POST', url: '/api/v1/roles', headers: { origin: environment.TRUSTED_ORIGINS, cookie: adminCookie, 'x-csrf-token': adminCsrf }, payload: { name: `Unsafe ${suffix}`, permissions: [{ key: 'users.manage', scope: 'OWN' }] } });
+    expect(unsafeScope.statusCode).toBe(409);
+  });
+
+  it('enforces persisted ownership scopes and lets an unrestricted second role dominate', async () => {
+    const authorization = app.get(AuthorizationService);
+    const operational = roleUsers.get('Operacional')!;
+    const commercial = roleUsers.get('Comercial')!;
+    expect(await authorization.canAccessResource(operational.id, 'clients.read', { ownerId: operational.id })).toBe(true);
+    expect(await authorization.canAccessResource(operational.id, 'clients.read', { ownerId: commercial.id })).toBe(false);
+    expect(await authorization.canAccessResource(operational.id, 'clients.read', { ownerId: null })).toBe(false);
+    expect(await authorization.canAccessResource(operational.id, 'projects.read', { assigneeIds: [operational.id] })).toBe(true);
+    expect(await authorization.canAccessResource(operational.id, 'projects.read', { assigneeIds: [commercial.id] })).toBe(false);
+    expect(await authorization.canAccessResource(commercial.id, 'clients.read', { ownerId: operational.id })).toBe(true);
+    const documentSuffix = suffix.slice(0, 8);
+    const ownClient = await pool.query("insert into clients (type, name, document, email, created_by_id) values ('PJ', 'Own Client', $1, $2, $3) returning id", [`own-${documentSuffix}`, `own-${suffix}@example.invalid`, operational.id]);
+    const otherClient = await pool.query("insert into clients (type, name, document, email, created_by_id) values ('PJ', 'Other Client', $1, $2, $3) returning id", [`other-${documentSuffix}`, `other-${suffix}@example.invalid`, commercial.id]);
+    expect((await app.inject({ method: 'GET', url: `/api/v1/__test/authorization/clients/${ownClient.rows[0].id}`, headers: { cookie: operational.cookie } })).statusCode).toBe(200);
+    expect((await app.inject({ method: 'GET', url: `/api/v1/__test/authorization/clients/${otherClient.rows[0].id}`, headers: { cookie: operational.cookie } })).statusCode).toBe(404);
+    expect((await app.inject({ method: 'GET', url: `/api/v1/__test/authorization/clients/${otherClient.rows[0].id}`, headers: { cookie: commercial.cookie } })).statusCode).toBe(200);
+    const ownProject = await pool.query("insert into projects (client_id, owner_id, name) values ($1, $2, 'Assigned Project') returning id", [ownClient.rows[0].id, operational.id]);
+    const otherProject = await pool.query("insert into projects (client_id, owner_id, name) values ($1, $2, 'Other Project') returning id", [otherClient.rows[0].id, commercial.id]);
+    expect((await app.inject({ method: 'GET', url: `/api/v1/__test/authorization/projects/${ownProject.rows[0].id}`, headers: { cookie: operational.cookie } })).statusCode).toBe(200);
+    expect((await app.inject({ method: 'GET', url: `/api/v1/__test/authorization/projects/${otherProject.rows[0].id}`, headers: { cookie: operational.cookie } })).statusCode).toBe(404);
+    expect((await app.inject({ method: 'GET', url: `/api/v1/__test/authorization/projects/${otherProject.rows[0].id}`, headers: { cookie: roleUsers.get('Gestão')!.cookie } })).statusCode).toBe(200);
+    await pool.query("insert into user_roles (user_id, role_id) select $1, id from roles where name = 'Gestão'", [operational.id]);
+    expect(await authorization.canAccessResource(operational.id, 'clients.read', { ownerId: commercial.id })).toBe(true);
+    await pool.query("delete from user_roles where user_id = $1 and role_id = (select id from roles where name = 'Gestão')", [operational.id]);
+  });
 
   it('consumes a password-reset token once and revokes active sessions', async () => {
     const resetToken = generateOpaqueToken();

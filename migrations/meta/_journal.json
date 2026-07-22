@@ -15,6 +15,13 @@
       "when": 1784680144955,
       "tag": "0002_auth_security",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784685800092,
+      "tag": "0003_rbac_scopes",
+      "breakpoints": true
     }
   ]
 }
