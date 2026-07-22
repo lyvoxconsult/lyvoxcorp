@@ -25,6 +25,7 @@ const permissions = [
   ["clients.archive", "Arquivar clientes."],
   ["clients.delete", "Excluir clientes."],
   ["crm.read", "Consultar o CRM."],
+  ["crm.create", "Criar e importar leads."],
   ["crm.update", "Atualizar o CRM."],
   ["proposals.approve", "Aprovar propostas."],
   ["projects.read", "Consultar projetos."],
@@ -49,6 +50,7 @@ const rolePermissionMatrix = new Map([
       "clients.archive",
       "clients.delete",
       "crm.read",
+      "crm.create",
       "crm.update",
       "proposals.approve",
       "projects.read",
@@ -59,7 +61,7 @@ const rolePermissionMatrix = new Map([
     ],
   ],
   ["Financeiro", ["dashboard.read", "clients.read", "financial.read", "financial.update", "financial.pay"]],
-  ["Comercial", ["dashboard.read", "clients.read", "clients.create", "clients.update", "crm.read", "crm.update"]],
+  ["Comercial", ["dashboard.read", "clients.read", "clients.create", "clients.update", "crm.read", "crm.create", "crm.update"]],
   ["Operacional", ["dashboard.read", "clients.read", "projects.read", "projects.update"]],
 ]);
 

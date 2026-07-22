@@ -24,7 +24,11 @@ export class RbacGuard implements CanActivate {
     const session = await this.auth.resolveSession(request.cookies?.lyvox_session);
     const grants = policy.kind === 'PERMISSION'
       ? await this.authorization.requireGrant(session.userId, policy.permission, session.mfaVerified, policy.allowedScopes)
-      : [];
+      : policy.kind === 'PERMISSIONS'
+        ? (await Promise.all(policy.permissions.map((permission) => this.authorization.requireGrant(
+          session.userId, permission, session.mfaVerified, policy.allowedScopes,
+        )))).flat()
+        : [];
     request[AUTHORIZATION_CONTEXT] = { session, grants };
     return true;
   }

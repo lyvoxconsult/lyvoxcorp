@@ -1,8 +1,11 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppShell } from "./AppShell";
+import { useSession } from "../../auth/session-context";
+
+vi.mock("../../auth/session-context", () => ({ useSession: vi.fn() }));
 
 function renderShell() {
   return render(
@@ -13,6 +16,13 @@ function renderShell() {
 }
 
 describe("AppShell", () => {
+  beforeEach(() => vi.mocked(useSession).mockReturnValue({ user: null, grants: [], loading: false, error: null, retry: vi.fn(), can: () => true }));
+  it("shows only CRM navigation to a CRM-only user", () => {
+    vi.mocked(useSession).mockReturnValue({ user: null, grants: [], loading: false, error: null, retry: vi.fn(), can: (permission: string) => permission === "crm.read" });
+    renderShell();
+    expect(screen.getByRole("link", { name: "CRM" })).toBeVisible();
+    expect(screen.queryByRole("link", { name: "Clientes" })).not.toBeInTheDocument();
+  });
   it("provides semantic navigation and skip link", () => {
     renderShell();
     expect(screen.getByRole("link", { name: "Ir para o conteúdo" })).toHaveAttribute("href", "#main-content");
@@ -50,7 +60,7 @@ describe("AppShell", () => {
     await user.click(screen.getByRole("button", { name: "Abrir menu" }));
     const dialog = screen.getByRole("dialog", { name: "Menu de navegação" });
     const close = within(dialog).getByRole("button", { name: "Fechar menu" });
-    const navigationLink = within(dialog).getByRole("link", { name: "Clientes" });
+    const navigationLink = within(dialog).getByRole("link", { name: "CRM" });
 
     expect(close).toHaveFocus();
     await user.tab({ shift: true });

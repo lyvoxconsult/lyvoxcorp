@@ -5,6 +5,7 @@ import {
   check,
   date,
   index,
+  integer,
   jsonb,
   numeric,
   primaryKey,
@@ -152,22 +153,100 @@ export const clientTimelineEvents = pgTable(
   ],
 );
 
+export const leadStages = pgTable(
+  "lead_stages",
+  {
+    ...auditedColumns(),
+    code: varchar("code", { length: 50 }).notNull(),
+    name: varchar("name", { length: 100 }).notNull(),
+    position: integer("position").notNull(),
+    color: varchar("color", { length: 7 }).notNull(),
+    outcome: varchar("outcome", { length: 10 }).default("OPEN").notNull(),
+    active: boolean("active").default(true).notNull(),
+  },
+  (table) => [
+    uniqueIndex("lead_stages_code_active_uidx").on(table.code).where(sql`${table.deletedAt} is null`),
+    uniqueIndex("lead_stages_position_active_uidx").on(table.position).where(sql`${table.deletedAt} is null and ${table.active} = true`),
+    index("lead_stages_outcome_idx").on(table.outcome),
+    check("lead_stages_code_check", sql`${table.code} ~ '^[A-Z][A-Z0-9_]*$'`),
+    check("lead_stages_name_check", sql`length(trim(${table.name})) > 0`),
+    check("lead_stages_position_check", sql`${table.position} > 0`),
+    check("lead_stages_color_check", sql`${table.color} ~ '^#[0-9A-Fa-f]{6}$'`),
+    check("lead_stages_outcome_check", sql`${table.outcome} in ('OPEN', 'WON', 'LOST')`),
+    check("lead_stages_version_check", sql`${table.version} > 0`),
+  ],
+);
+
 export const leads = pgTable(
   "leads",
   {
     ...auditedColumns(),
     convertedClientId: uuid("converted_client_id").references(() => clients.id),
+    convertedAt: timestamp("converted_at", { withTimezone: true }),
+    stageId: uuid("stage_id").notNull().references(() => leadStages.id),
+    responsibleId: uuid("responsible_id").references(() => users.id),
     name: varchar("name", { length: 255 }).notNull(),
     email: varchar("email", { length: 255 }),
-    stage: varchar("stage", { length: 50 }).default("NEW").notNull(),
+    phone: varchar("phone", { length: 30 }),
+    company: varchar("company", { length: 255 }),
+    estimatedValue: numeric("estimated_value", { precision: 15, scale: 2 }),
+    source: varchar("source", { length: 100 }),
     lossReason: varchar("loss_reason", { length: 100 }),
     lossNotes: text("loss_notes"),
   },
   (table) => [
-    index("leads_converted_client_id_idx").on(table.convertedClientId),
-    index("leads_stage_created_at_idx").on(table.stage, table.createdAt),
+    uniqueIndex("leads_converted_client_id_uidx").on(table.convertedClientId).where(sql`${table.convertedClientId} is not null`),
+    index("leads_stage_created_at_idx").on(table.stageId, table.createdAt),
+    index("leads_responsible_id_idx").on(table.responsibleId),
     index("leads_deleted_at_idx").on(table.deletedAt),
+    index("leads_name_trgm_idx").using("gin", table.name.op("gin_trgm_ops")),
+    index("leads_email_trgm_idx").using("gin", table.email.op("gin_trgm_ops")),
+    check("leads_estimated_value_check", sql`${table.estimatedValue} is null or ${table.estimatedValue} >= 0`),
+    check("leads_conversion_check", sql`(${table.convertedClientId} is null and ${table.convertedAt} is null) or (${table.convertedClientId} is not null and ${table.convertedAt} is not null)`),
+    check("leads_loss_fields_check", sql`(${table.lossReason} is null and ${table.lossNotes} is null) or (${table.lossReason} is not null and length(trim(${table.lossNotes})) > 0)`),
     check("leads_version_check", sql`${table.version} > 0`),
+  ],
+);
+
+export const leadStageHistory = pgTable(
+  "lead_stage_history",
+  {
+    ...auditedColumns(),
+    leadId: uuid("lead_id").notNull().references(() => leads.id),
+    fromStageId: uuid("from_stage_id").references(() => leadStages.id),
+    toStageId: uuid("to_stage_id").notNull().references(() => leadStages.id),
+    lossReason: varchar("loss_reason", { length: 100 }),
+    lossNotes: text("loss_notes"),
+    changedAt: timestamp("changed_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("lead_stage_history_lead_changed_idx").on(table.leadId, table.changedAt),
+    index("lead_stage_history_to_stage_idx").on(table.toStageId),
+    check("lead_stage_history_loss_fields_check", sql`(${table.lossReason} is null and ${table.lossNotes} is null) or (${table.lossReason} is not null and length(trim(${table.lossNotes})) > 0)`),
+    check("lead_stage_history_version_check", sql`${table.version} > 0`),
+  ],
+);
+
+export const leadFollowups = pgTable(
+  "lead_followups",
+  {
+    ...auditedColumns(),
+    leadId: uuid("lead_id").notNull().references(() => leads.id),
+    responsibleId: uuid("responsible_id").references(() => users.id),
+    type: varchar("type", { length: 20 }).notNull(),
+    dueAt: timestamp("due_at", { withTimezone: true }).notNull(),
+    status: varchar("status", { length: 20 }).default("PENDING").notNull(),
+    notes: text("notes"),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("lead_followups_lead_due_idx").on(table.leadId, table.dueAt),
+    index("lead_followups_status_due_idx").on(table.status, table.dueAt),
+    index("lead_followups_responsible_id_idx").on(table.responsibleId),
+    check("lead_followups_type_check", sql`${table.type} in ('EMAIL', 'CALL', 'MESSAGE')`),
+    check("lead_followups_status_check", sql`${table.status} in ('PENDING', 'COMPLETED', 'CANCELLED')`),
+    check("lead_followups_completion_check", sql`(${table.status} = 'COMPLETED' and ${table.completedAt} is not null) or (${table.status} <> 'COMPLETED' and ${table.completedAt} is null)`),
+    check("lead_followups_version_check", sql`${table.version} > 0`),
   ],
 );
 

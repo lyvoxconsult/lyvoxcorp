@@ -199,18 +199,23 @@ export class ClientsService {
     });
   }
 
+  async createInTransaction(tx: Transaction, actorUserId: string, input: CreateClientInput) {
+    const [client] = await tx.insert(clients).values({
+      type: input.type, name: input.name, tradeName: input.tradeName, document: input.document,
+      email: input.email, status: input.status, createdById: actorUserId, updatedById: actorUserId,
+    }).returning({ id: clients.id, version: clients.version });
+    if (!client) throw new Error('Client creation failed');
+    await this.replaceRelations(tx, client.id, actorUserId, input);
+    await tx.insert(clientTimelineEvents).values({ clientId: client.id, eventType: 'CLIENT_CREATED', sourceModule: 'clients', sourceEntityType: 'CLIENT', sourceEntityId: client.id, summary: 'Cliente cadastrado', createdById: actorUserId, updatedById: actorUserId });
+    await tx.insert(outboxEvents).values({ aggregateType: 'CLIENT', aggregateId: client.id, eventType: 'ClientCreated', payload: { clientId: client.id }, createdById: actorUserId, updatedById: actorUserId });
+    await tx.insert(auditLogs).values({ actorUserId, action: 'clients.created', module: 'clients', entityType: 'CLIENT', entityId: client.id });
+    return client;
+  }
+
   async create(actorUserId: string, key: string, input: CreateClientInput) {
     try {
       return await this.idempotent(actorUserId, 'clients.create', key, input, async (tx) => {
-        const [client] = await tx.insert(clients).values({
-          type: input.type, name: input.name, tradeName: input.tradeName, document: input.document,
-          email: input.email, status: input.status, createdById: actorUserId, updatedById: actorUserId,
-        }).returning({ id: clients.id, version: clients.version });
-        if (!client) throw new Error('Client creation failed');
-        await this.replaceRelations(tx, client.id, actorUserId, input);
-        await tx.insert(clientTimelineEvents).values({ clientId: client.id, eventType: 'CLIENT_CREATED', sourceModule: 'clients', sourceEntityType: 'CLIENT', sourceEntityId: client.id, summary: 'Cliente cadastrado', createdById: actorUserId, updatedById: actorUserId });
-        await tx.insert(outboxEvents).values({ aggregateType: 'CLIENT', aggregateId: client.id, eventType: 'ClientCreated', payload: { clientId: client.id }, createdById: actorUserId, updatedById: actorUserId });
-        await tx.insert(auditLogs).values({ actorUserId, action: 'clients.created', module: 'clients', entityType: 'CLIENT', entityId: client.id });
+        const client = await this.createInTransaction(tx, actorUserId, input);
         return { status: 201, body: client };
       });
     } catch (error) {

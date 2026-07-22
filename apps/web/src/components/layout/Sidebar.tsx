@@ -1,6 +1,7 @@
-import { PanelLeftClose, PanelLeftOpen, Users, X } from "lucide-react";
+import { Columns3, PanelLeftClose, PanelLeftOpen, Users, X } from "lucide-react";
 import type { RefObject } from "react";
 import { NavLink } from "react-router-dom";
+import { Can } from "../../auth/Can";
 import { Button } from "../ui/Button";
 
 type SidebarProps = {
@@ -21,7 +22,7 @@ export function Sidebar({ collapsed = false, mobile = false, onClose, onToggleCo
         {mobile && <Button ref={closeButtonRef} variant="ghost" onClick={onClose} aria-label="Fechar menu"><X aria-hidden="true" className="h-5 w-5" /></Button>}
       </div>
       <nav className="flex-1 p-3" aria-label="Seções">
-        <NavLink
+        <Can permission="clients.read"><NavLink
           to="/app/clientes"
           aria-label="Clientes"
           onClick={mobile ? onClose : undefined}
@@ -29,7 +30,18 @@ export function Sidebar({ collapsed = false, mobile = false, onClose, onToggleCo
         >
           <Users aria-hidden="true" className="h-5 w-5 shrink-0" />
           {(!collapsed || mobile) && <span>Clientes</span>}
-        </NavLink>
+        </NavLink></Can>
+        <Can permission="crm.read">
+          <NavLink
+            to="/app/crm"
+            aria-label="CRM"
+            onClick={mobile ? onClose : undefined}
+            className={({ isActive }) => `mt-1 flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 font-semibold ${isActive ? "bg-brand-accessible text-white" : "text-brand-subtle hover:bg-surface-muted"}`}
+          >
+            <Columns3 aria-hidden="true" className="h-5 w-5 shrink-0" />
+            {(!collapsed || mobile) && <span>CRM</span>}
+          </NavLink>
+        </Can>
       </nav>
       {!mobile && (
         <div className="border-t border-border-subtle p-3">

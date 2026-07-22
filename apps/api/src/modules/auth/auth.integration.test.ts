@@ -12,14 +12,14 @@ import { AuthorizationService } from '../../core/authorization/authorization.ser
 
 const permissionKeys = [
   'users.manage', 'roles.manage', 'dashboard.read', 'clients.read', 'clients.create', 'clients.update',
-  'clients.archive', 'clients.delete', 'crm.read', 'crm.update', 'proposals.approve', 'projects.read',
+  'clients.archive', 'clients.delete', 'crm.read', 'crm.create', 'crm.update', 'proposals.approve', 'projects.read',
   'projects.update', 'financial.read', 'financial.update', 'financial.pay', 'automations.manage', 'audit.read',
 ] as const;
 const roleMatrix: Record<string, readonly string[]> = {
   Administrador: permissionKeys,
-  'Gestão': ['dashboard.read', 'clients.read', 'clients.create', 'clients.update', 'clients.archive', 'clients.delete', 'crm.read', 'crm.update', 'proposals.approve', 'projects.read', 'projects.update', 'financial.read', 'financial.update', 'financial.pay'],
+  'Gestão': ['dashboard.read', 'clients.read', 'clients.create', 'clients.update', 'clients.archive', 'clients.delete', 'crm.read', 'crm.create', 'crm.update', 'proposals.approve', 'projects.read', 'projects.update', 'financial.read', 'financial.update', 'financial.pay'],
   Financeiro: ['dashboard.read', 'clients.read', 'financial.read', 'financial.update', 'financial.pay'],
-  Comercial: ['dashboard.read', 'clients.read', 'clients.create', 'clients.update', 'crm.read', 'crm.update'],
+  Comercial: ['dashboard.read', 'clients.read', 'clients.create', 'clients.update', 'crm.read', 'crm.create', 'crm.update'],
   Operacional: ['dashboard.read', 'clients.read', 'projects.read', 'projects.update'],
 };
 

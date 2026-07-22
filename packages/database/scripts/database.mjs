@@ -130,7 +130,7 @@ async function verifySchema() {
     "audit_logs", "client_addresses", "client_contacts", "client_responsibles", "client_tag_assignments",
     "client_tags", "client_timeline_events", "clients", "contracts", "financial_transactions", "idempotency_keys",
     "inbox_events", "leads", "meetings", "mfa_backup_codes", "mfa_challenges", "mfa_factors",
-    "outbox_events", "password_credentials", "password_reset_tokens", "permissions", "projects",
+    "lead_followups", "lead_stage_history", "lead_stages", "outbox_events", "password_credentials", "password_reset_tokens", "permissions", "projects",
     "proposal_items", "proposals", "role_permissions", "roles", "sessions", "task_attachments",
     "task_comments", "tasks", "user_roles", "users",
   ];
@@ -155,6 +155,10 @@ async function verifySchema() {
     "clients_email_trgm_idx",
     "clients_name_trgm_idx",
     "financial_transactions_status_created_at_idx",
+    "lead_followups_status_due_idx",
+    "lead_stage_history_lead_changed_idx",
+    "lead_stages_code_active_uidx",
+    "leads_stage_created_at_idx",
     "users_status_created_at_idx",
   ];
   const indexes = await pool.query(
@@ -236,6 +240,14 @@ async function verifySchema() {
       client,
       "financial amount check",
       "insert into financial_transactions (type, amount, due_date) values ('INCOME', -1, current_date)",
+    );
+    const stage = await client.query("select id from lead_stages where code = 'NEW' and deleted_at is null");
+    if (stage.rowCount !== 1) throw new Error("Canonical NEW lead stage is missing");
+    await expectRejected(
+      client,
+      "lead estimated value check",
+      "insert into leads (stage_id, name, estimated_value) values ($1, 'Invalid', -1)",
+      [stage.rows[0].id],
     );
     const outbox = await client.query(
       "insert into outbox_events (aggregate_type, aggregate_id, event_type, payload) values ('CLIENT', $1, 'ClientCreated', '{\"ok\":true}'::jsonb) returning processed, version",

@@ -35,5 +35,7 @@ describe('permission policy', () => {
     expect(isScopeAllowed('projects.update', 'ASSIGNED')).toBe(true);
     expect(isScopeAllowed('users.manage', 'OWN')).toBe(false);
     expect(isScopeAllowed('clients.read', 'ASSIGNED')).toBe(false);
+    expect(isScopeAllowed('crm.read', 'OWN')).toBe(false);
+    expect(isScopeAllowed('crm.update', 'ASSIGNED')).toBe(false);
   });
 });

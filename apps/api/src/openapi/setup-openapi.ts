@@ -3,6 +3,10 @@ import { DocumentBuilder, SwaggerModule, type OpenAPIObject } from '@nestjs/swag
 import { z, type ZodType } from 'zod';
 import {
   clientDetailResponseSchema, clientListResponseSchema, clientMutationResponseSchema, responsibleListResponseSchema,
+  changeLeadStageSchema, convertLeadSchema, createLeadFollowupSchema, createLeadSchema, crmResponsibleListResponseSchema,
+  customizeLeadStagesSchema, importLeadsSchema, leadConversionResponseSchema, leadFollowupMutationResponseSchema,
+  leadImportResponseSchema, leadMutationResponseSchema, leadPipelineResponseSchema, leadStageMutationResponseSchema,
+  leadStagesMutationResponseSchema,
 } from '@lyvox/validation';
 import {
   changePasswordSchema, enrollmentChallengeSchema, forgotPasswordSchema, loginSchema,
@@ -22,6 +26,12 @@ const requestSchemas: Readonly<Record<string, ZodType>> = {
   'post /api/v1/roles': createRoleSchema,
   'post /api/v1/clientes': createClientSchema,
   'put /api/v1/clientes/{id}': updateClientSchema,
+  'post /api/v1/crm/leads': createLeadSchema,
+  'post /api/v1/crm/leads/import': importLeadsSchema,
+  'patch /api/v1/crm/leads/{id}/stage': changeLeadStageSchema,
+  'post /api/v1/crm/leads/{id}/followups': createLeadFollowupSchema,
+  'post /api/v1/crm/leads/{id}/convert': convertLeadSchema,
+  'patch /api/v1/crm/stages': customizeLeadStagesSchema,
 };
 
 const successResponses: Readonly<Record<string, { status: string; description: string; schema?: ZodType }>> = {
@@ -31,6 +41,14 @@ const successResponses: Readonly<Record<string, { status: string; description: s
   'get /api/v1/clientes/{id}': { status: '200', description: 'Cliente e timeline', schema: clientDetailResponseSchema },
   'put /api/v1/clientes/{id}': { status: '200', description: 'Cliente atualizado', schema: clientMutationResponseSchema },
   'delete /api/v1/clientes/{id}': { status: '204', description: 'Cliente arquivado' },
+  'get /api/v1/crm/leads': { status: '200', description: 'Pipeline paginado de leads', schema: leadPipelineResponseSchema },
+  'post /api/v1/crm/leads': { status: '201', description: 'Lead criado', schema: leadMutationResponseSchema },
+  'post /api/v1/crm/leads/import': { status: '200', description: 'Importação de leads processada', schema: leadImportResponseSchema },
+  'patch /api/v1/crm/leads/{id}/stage': { status: '200', description: 'Etapa do lead alterada', schema: leadStageMutationResponseSchema },
+  'post /api/v1/crm/leads/{id}/followups': { status: '201', description: 'Follow-up agendado', schema: leadFollowupMutationResponseSchema },
+  'post /api/v1/crm/leads/{id}/convert': { status: '200', description: 'Lead convertido em cliente', schema: leadConversionResponseSchema },
+  'patch /api/v1/crm/stages': { status: '200', description: 'Etapas do pipeline atualizadas', schema: leadStagesMutationResponseSchema },
+  'get /api/v1/crm/responsaveis': { status: '200', description: 'Responsáveis elegíveis do CRM', schema: crmResponsibleListResponseSchema },
 };
 
 type QueryParameter = { name: string; in: 'query'; required: false; schema: Record<string, unknown> };
@@ -47,6 +65,16 @@ const queryParameters: Readonly<Record<string, readonly QueryParameter[]>> = {
     { name: 'timelinePageSize', in: 'query', required: false, schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 } },
   ],
   'get /api/v1/clientes/responsaveis': [
+    { name: 'search', in: 'query', required: false, schema: { type: 'string', maxLength: 120, default: '' } },
+  ],
+  'get /api/v1/crm/leads': [
+    { name: 'search', in: 'query', required: false, schema: { type: 'string', maxLength: 255 } },
+    { name: 'stageId', in: 'query', required: false, schema: { type: 'string', format: 'uuid' } },
+    { name: 'responsibleId', in: 'query', required: false, schema: { type: 'string', format: 'uuid' } },
+    { name: 'cursor', in: 'query', required: false, schema: { type: 'string', maxLength: 500 } },
+    { name: 'pageSize', in: 'query', required: false, schema: { type: 'integer', minimum: 1, maximum: 100, default: 50 } },
+  ],
+  'get /api/v1/crm/responsaveis': [
     { name: 'search', in: 'query', required: false, schema: { type: 'string', maxLength: 120, default: '' } },
   ],
 };
@@ -72,12 +100,23 @@ const csrfOperations = new Set([
   'post /api/v1/clientes',
   'put /api/v1/clientes/{id}',
   'delete /api/v1/clientes/{id}',
+  'post /api/v1/crm/leads',
+  'post /api/v1/crm/leads/import',
+  'patch /api/v1/crm/leads/{id}/stage',
+  'post /api/v1/crm/leads/{id}/followups',
+  'post /api/v1/crm/leads/{id}/convert',
+  'patch /api/v1/crm/stages',
 ]);
 
 const idempotentOperations = new Set([
   'post /api/v1/clientes',
   'put /api/v1/clientes/{id}',
   'delete /api/v1/clientes/{id}',
+  'post /api/v1/crm/leads',
+  'post /api/v1/crm/leads/import',
+  'post /api/v1/crm/leads/{id}/followups',
+  'post /api/v1/crm/leads/{id}/convert',
+  'patch /api/v1/crm/stages',
 ]);
 
 const problemSchema = {
