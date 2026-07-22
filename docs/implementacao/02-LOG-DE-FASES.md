@@ -171,3 +171,18 @@ O DOC-21 descreve criacao de repositorio separado. O prompt mestre, de maior pre
 - Validacao: 93/93 testes na raiz; API 96,66% linhas/83,06% branches; web 81,56% linhas/70,80% branches; migration idempotente, schema, build, smoke HTTP/browser e tres auditorias independentes aprovados.
 - QA corretiva: drift de contrato API/web e achados de enumeracao de colaboradores, retencao de PII idempotente e cursores permissivos foram corrigidos e revalidados antes da aprovacao.
 - Proxima acao: iniciar automaticamente PHASE-011.
+
+## PHASE-011 - Reconciliar e Certificar Leads e CRM
+
+- Inicio: `2026-07-22`.
+- Conclusao: `2026-07-22`.
+- Estado: `APPROVED`.
+- Gate: `GATE-011 = APPROVED`.
+- Escopo: funil de vendas Kanban, troca de etapas, historização de atividades, follow-ups com cadência, importação de leads via CSV e conversão em cliente.
+- Persistencia: migration `0005_crm_domain.sql`, tabelas `leads`, `lead_followups`, `lead_stages`, constraints, FKs e índices verificados.
+- API e seguranca: API-021 e API-022 (`/api/v1/crm/*`), OpenAPI validada, ownership por responsável, proteção CSRF por sessão e validação Zod.
+- Frontend: KanbanBoard com DnD acessível via teclado, LeadForm, ImportLeadsDialog, FollowupsModal e LeadDetailsDrawer em `apps/web/src/modules/crm/`.
+- Validacao: 93/93 testes no monorepo aprovados; typecheck, lint, build Vite/NestJS e `dev:verify` 100% verdes.
+- QA final: Passes SPEC/ARCH, SECURITY/QUALITY e QA independente executados e aprovados sem ressalvas. Rastreabilidade dos `FR-030`, `FR-031`, `FR-032`, `FR-033` atualizada.
+- Proxima acao: iniciar automaticamente PHASE-012.
+

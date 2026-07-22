@@ -184,3 +184,16 @@ Nenhum seed, endpoint ou comportamento funcional foi declarado nesta fase. Os da
 | 2026-07-22 | Revisao SPEC/ARCH inicial + repeticao | Canonicos FR-020..023/BR-020..021/API-010..014 + diff | FAIL_RESOLVED_PASS | Drift de detalhe/tags, respostas OpenAPI e busca por nome fantasia corrigidos; repeticao aprovou com FR-021 parcial explicita |
 | 2026-07-22 | Revisao SECURITY inicial + repeticao | Diff + integracao adversarial | FAIL_RESOLVED_PASS | Enumeracao no lookup, retencao idempotente de PII e UUID de cursor permissivo corrigidos; repeticao aprovou CSRF, RBAC, soft delete, logs e timeline sanitizada |
 | 2026-07-22 | Revisao QA final 3/3 | Suites, coverage, infra e smoke | PASS | `READY_TO_APPROVE`; contratos compartilhados, thresholds, preservacao dos prompts e ausencia de diff em planejamento confirmados |
+
+## PHASE-011
+
+| Data | Comando/checagem | Ambiente | Resultado | Evidencia |
+|---|---|---|---|---|
+| 2026-07-22 | `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm lint`, `pnpm build`, `pnpm test` | Node 24.14.0 / pnpm 10.34.5 | PASS | Monorepo verificado: 6/6 typechecks, oxlint 0 warnings/0 errors, 6/6 builds e 93/93 testes aprovados sem falhas |
+| 2026-07-22 | `pnpm db:migrate`, `pnpm db:verify`, `drizzle-kit check` | PostgreSQL 16 via PgBouncer | PASS | Migration `0005_crm_domain.sql` verificada idempotente, 35 tabelas no schema relacional relatorio limpo |
+| 2026-07-22 | Integracao backend CRM + NestJS/Fastify | Vitest + NestJS/Fastify | PASS | Rotas `/api/v1/crm/leads`, `/leads/stage`, `/leads/followups`, `/leads/convert`, `/stages` e `/responsaveis` mapeadas e protegidas por RBAC/CSRF |
+| 2026-07-22 | Componentes frontend CRM | React 19 / Vitest / jsdom | PASS | `KanbanBoard` (DnD com teclado e validação de etapa), `LeadForm`, `ImportLeadsDialog`, `FollowupsModal` e `LeadDetailsDrawer` testados |
+| 2026-07-22 | Revisao SPEC/ARCH 1/3 | FR-030..FR-033 / BR-030 / API-021..022 | PASS | Regras de negocio de CRM, cadencia de follow-up, importacao de CSV e conversao em cliente auditadas e em conformidade |
+| 2026-07-22 | Revisao SECURITY/QUALITY 2/3 | Validação de payloads e RBAC | PASS | Sanitização de dados, RBAC `crm.create/update/read`, ownership por responsável e proteção CSRF verificados |
+| 2026-07-22 | Revisao QA final 3/3 | Suíte unificada do monorepo | PASS | `READY_TO_APPROVE`; GATE-011 certificado e liberado para progressão automática à PHASE-012 |
+
