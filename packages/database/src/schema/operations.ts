@@ -323,6 +323,44 @@ export const meetingTranscripts = pgTable(
 );
 
 
+export const services = pgTable(
+  "services",
+  {
+    ...auditedColumns(),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: text("description"),
+    category: varchar("category", { length: 100 }).notNull(),
+    unit: varchar("unit", { length: 50 }).notNull(),
+    billingType: varchar("billing_type", { length: 50 }).notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    basePrice: numeric("base_price", { precision: 15, scale: 2 }).notNull(),
+  },
+  (table) => [
+    index("services_category_idx").on(table.category),
+    index("services_deleted_at_idx").on(table.deletedAt),
+    check("services_price_check", sql`${table.basePrice} >= 0`),
+    check("services_version_check", sql`${table.version} > 0`),
+  ],
+);
+
+export const servicePriceVersions = pgTable(
+  "service_price_versions",
+  {
+    ...auditedColumns(),
+    serviceId: uuid("service_id").notNull().references(() => services.id),
+    price: numeric("price", { precision: 15, scale: 2 }).notNull(),
+    effectiveFrom: timestamp("effective_from", { withTimezone: true }).notNull().defaultNow(),
+    effectiveTo: timestamp("effective_to", { withTimezone: true }),
+  },
+  (table) => [
+    index("spv_service_id_idx").on(table.serviceId),
+    index("spv_effective_dates_idx").on(table.effectiveFrom, table.effectiveTo),
+    check("spv_price_check", sql`${table.price} >= 0`),
+    check("spv_dates_check", sql`${table.effectiveTo} is null or ${table.effectiveTo} >= ${table.effectiveFrom}`),
+    check("spv_version_check", sql`${table.version} > 0`),
+  ],
+);
+
 export const proposals = pgTable(
   "proposals",
   {

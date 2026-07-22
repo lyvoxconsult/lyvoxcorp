@@ -205,3 +205,14 @@ Nenhum seed, endpoint ou comportamento funcional foi declarado nesta fase. Os da
 | 2026-07-22 | Integracao backend Meetings + NestJS/Fastify | Vitest + NestJS/Fastify | PASS | Rotas de reuniões, criação, edição, envio de notas e recebimento de transcrições testadas com validações `RequirePermission` e `verifyCsrf` |
 | 2026-07-22 | Componentes frontend Reuniões | React 19 / Vitest / jsdom | PASS | `MeetingsPage` e `MeetingFormDialog` criados e integrados com as rotas. Testes de acessibilidade corrigidos para suportar `AppShell` com nova aba de Reuniões. |
 | 2026-07-22 | Revisao QA final 3/3 | Suíte unificada do monorepo | PASS | `READY_TO_APPROVE`; GATE-012 certificado e liberado para progressão automática à PHASE-013 |
+
+## PHASE-013
+
+| Data | Comando/checagem | Ambiente | Resultado | Evidencia |
+|---|---|---|---|---|
+| 2026-07-22 | `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm lint`, `pnpm build`, `pnpm test` | Node 24.14.0 / pnpm 10.34.5 | PASS | Monorepo verificado: 6/6 typechecks, oxlint 0 warnings/0 errors, 6/6 builds e 131/131 testes aprovados sem falhas |
+| 2026-07-22 | `pnpm db:migrate`, `pnpm --filter @lyvox/database db:check` | PostgreSQL 16 via PgBouncer | PASS | Migration `0007_services_domain.sql` aplicada com sucesso (`applied=3 total=7`), `drizzle-kit check` `Everything's fine` |
+| 2026-07-22 | Integracao backend Services + NestJS/Fastify | Vitest + NestJS/Fastify | PASS | Rotas `/api/v1/servicos`, `/:id`, `/:id/precos` testadas com validações `RequirePermission` (`services.read/create/update/delete`) e CSRF |
+| 2026-07-22 | Componentes frontend Serviços | React 19 / Vitest / jsdom | PASS | `ServicesPage`, `ServiceFormDialog`, `ServicePriceDialog` e `services-api.ts` testados com 100% de sucesso. |
+| 2026-07-22 | Revisao QA final 3/3 | Suíte unificada do monorepo | PASS | `READY_TO_APPROVE`; GATE-013 certificado e liberado para progressão automática à PHASE-014 |
+

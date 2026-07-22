@@ -29,7 +29,9 @@ Nenhum FR foi implementado na PHASE-000. A matriz inicia o estado sem simular en
 | FR-041 | IMPLEMENTED | `apps/api/src/modules/meetings/meetings.controller.ts` | API-041 | DB-040 | `meetings.update` | TEST-007 | PHASE-012 | GATE-012 | Anotações anexáveis a reuniões |
 | FR-042 | PARTIAL_CROSS_PHASE_DEPENDENCY | `apps/api/src/modules/meetings/meetings.service.ts` | API-041 | DB-040 | `meetings.update` | TEST-007 | PHASE-012 | GATE-012 | Transcrição salva, mas extração depende de PHASE-022 |
 | FR-043 | PARTIAL_CROSS_PHASE_DEPENDENCY | `apps/api/src/modules/meetings/meetings.service.ts` | API-080 | DB-070 | `tasks.create` | TEST-007 | PHASE-012 | GATE-012 | Ações automáticas dependem de PHASE-022 |
-| FR-050..FR-052 | NOT_STARTED | - | API-050 | DB-050 | `services.*` | TEST-003 | PHASE-013 | GATE-013 | DOC-22:47-49 |
+| FR-050 | IMPLEMENTED | `apps/api/src/modules/services/*`, `apps/web/src/modules/services/*` | API-050 (`POST /servicos`) | DB-050 (`services`) | `services.create` | TEST-003 | PHASE-013 | GATE-013 | Catálogo de serviços com unidade e tipo de cobrança |
+| FR-051 | IMPLEMENTED | `ServicesRepository.updatePrice`, `ServicePriceDialog` | API-050 (`PUT /servicos/:id/precos`) | DB-050 (`service_price_versions`)| `services.update` | TEST-003 | PHASE-013 | GATE-013 | Versionamento de preços por data de vigência |
+| FR-052 | IMPLEMENTED | `ServicesController.list`, `ServicesPage` | API-050 (`GET /servicos`) | DB-050 (`services`) | `services.read` | TEST-003 | PHASE-013 | GATE-013 | Suporte a cobrança pontual e recorrente |
 | FR-060..FR-061 | NOT_STARTED | - | API-030 | DB-060 | `proposals.*` | TEST-006 | PHASE-014 | GATE-014 | DOC-22:50-51 |
 | FR-062 | OUT_OF_SCOPE_INITIAL | - | - | - | - | TEST-062 | - | - | Prompt mestre secao 46; DOC-22:52 |
 | FR-063 | NOT_STARTED | - | API-031 | DB-060 | `proposals.approve` | TEST-006 | PHASE-014 | GATE-014 | DOC-22:53 |

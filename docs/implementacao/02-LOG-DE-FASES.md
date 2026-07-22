@@ -197,3 +197,16 @@ O DOC-21 descreve criacao de repositorio separado. O prompt mestre, de maior pre
 - Frontend: UI de agendamento (`MeetingFormDialog`) e lista (`MeetingsPage`) integradas no client e rotas com testes ajustados.
 - Validacao: 122/122 testes no monorepo aprovados; typecheck, lint, build Vite/NestJS e `dev:verify` 100% verdes.
 - Proxima acao: iniciar automaticamente PHASE-013.
+
+## PHASE-013: Serviços e Valores
+
+- Inicio: `2026-07-22`.
+- Conclusao: `2026-07-22`.
+- Estado: `APPROVED`.
+- Gate: `GATE-013 = APPROVED`.
+- Escopo: catálogo de Serviços com nome, descrição, categoria, unidade (HOUR, UNIT, MONTH, PROJECT), cobrança (ONE_TIME, RECURRING) e versionamento de preços (BR-050) via tabelas `services` e `service_price_versions` na migration `0007_services_domain.sql`.
+- API e seguranca: Endpoints REST `/api/v1/servicos` com permissões RBAC (`services.read`, `services.create`, `services.update`, `services.delete`) e CSRF por sessão.
+- Frontend: UI de catálogo com busca/filtro por categoria (`ServicesPage`), modais de cadastro (`ServiceFormDialog`) e de reajuste com histórico (`ServicePriceDialog`).
+- Validacao: 131/131 testes no monorepo aprovados; typecheck, lint, build Vite/NestJS e `drizzle-kit check` 100% verdes.
+- Proxima acao: iniciar automaticamente PHASE-014.
+

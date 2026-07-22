@@ -8,6 +8,7 @@ import { ClientDetailPage } from "../modules/clients/ClientDetailPage";
 import { ClientsPage } from "../modules/clients/ClientsPage";
 import { CrmPage } from "../modules/crm/CrmPage";
 import { MeetingsPage } from "../modules/meetings/MeetingsPage";
+import { ServicesPage } from "../modules/services/ServicesPage";
 
 
 export function AppRoutes() {
@@ -26,6 +27,9 @@ export function AppRoutes() {
         </Route>
         <Route element={<ProtectedRoute permission="meetings.read" />}>
           <Route path="reunioes" element={<MeetingsPage />} />
+        </Route>
+        <Route element={<ProtectedRoute permission="services.read" />}>
+          <Route path="servicos" element={<ServicesPage />} />
         </Route>
 
       </Route>
