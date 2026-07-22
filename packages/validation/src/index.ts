@@ -3,4 +3,6 @@ export * from "./crm.js";
 export * from "./person-document.js";
 export * from "./meetings.js";
 export * from "./services.js";
+export * from "./proposals.js";
+
 

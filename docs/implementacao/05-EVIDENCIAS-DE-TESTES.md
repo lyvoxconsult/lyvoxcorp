@@ -216,3 +216,13 @@ Nenhum seed, endpoint ou comportamento funcional foi declarado nesta fase. Os da
 | 2026-07-22 | Componentes frontend Serviços | React 19 / Vitest / jsdom | PASS | `ServicesPage`, `ServiceFormDialog`, `ServicePriceDialog` e `services-api.ts` testados com 100% de sucesso. |
 | 2026-07-22 | Revisao QA final 3/3 | Suíte unificada do monorepo | PASS | `READY_TO_APPROVE`; GATE-013 certificado e liberado para progressão automática à PHASE-014 |
 
+## PHASE-014
+
+| Data | Comando/checagem | Ambiente | Resultado | Evidencia |
+|---|---|---|---|---|
+| 2026-07-22 | `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm lint`, `pnpm build`, `pnpm test` | Node 24.14.0 / pnpm 10.34.5 | PASS | Monorepo verificado: 6/6 typechecks, oxlint 0 warnings/0 errors, 6/6 builds e 136/136 testes aprovados sem falhas |
+| 2026-07-22 | Integracao backend Proposals + NestJS/Fastify | Vitest + NestJS/Fastify | PASS | Rotas `/api/v1/propostas`, `/:id`, `/:id/aprovar` (FR-062) e `/:id/converter-contrato` (FR-063) testadas com RBAC e CSRF |
+| 2026-07-22 | Componentes frontend Propostas e Contratos | React 19 / Vitest / jsdom | PASS | `ProposalsPage`, `ProposalFormDialog`, `ConvertContractDialog` e `ContractsPage` testados com 100% de sucesso. |
+| 2026-07-22 | Revisao QA final 3/3 | Suíte unificada do monorepo | PASS | `READY_TO_APPROVE`; GATE-014 certificado e liberado para progressão automática à PHASE-015 |
+
+

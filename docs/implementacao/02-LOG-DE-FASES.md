@@ -210,3 +210,16 @@ O DOC-21 descreve criacao de repositorio separado. O prompt mestre, de maior pre
 - Validacao: 131/131 testes no monorepo aprovados; typecheck, lint, build Vite/NestJS e `drizzle-kit check` 100% verdes.
 - Proxima acao: iniciar automaticamente PHASE-014.
 
+## PHASE-014: Propostas e Contratos
+
+- Inicio: `2026-07-22`.
+- Conclusao: `2026-07-22`.
+- Estado: `APPROVED`.
+- Gate: `GATE-014 = APPROVED`.
+- Escopo: emissão de propostas comerciais (FR-060, FR-061), cálculo automático de subtotais, descontos por item/geral e total final. Implementação de aprovação interna (FR-062) via `proposals.approve` e conversão em contratos ativos (FR-063) com metadados para liquidação financeira futura (PHASE-016).
+- API e seguranca: Endpoints REST `/api/v1/propostas` e `/api/v1/contratos` protegidos por RBAC (`proposals.read/create/update/approve` e `contracts.read/create`) e tokens CSRF por sessão.
+- Frontend: UI de listagem e emissão de propostas (`ProposalsPage`, `ProposalFormDialog`), modal de aprovação e conversão (`ConvertContractDialog`) e tela de listagem de contratos ativos (`ContractsPage`).
+- Validacao: 136/136 testes no monorepo aprovados; typecheck, lint, build Vite/NestJS e suíte Vitest 100% verdes.
+- Proxima acao: iniciar automaticamente PHASE-015.
+
+

@@ -32,9 +32,10 @@ Nenhum FR foi implementado na PHASE-000. A matriz inicia o estado sem simular en
 | FR-050 | IMPLEMENTED | `apps/api/src/modules/services/*`, `apps/web/src/modules/services/*` | API-050 (`POST /servicos`) | DB-050 (`services`) | `services.create` | TEST-003 | PHASE-013 | GATE-013 | Catálogo de serviços com unidade e tipo de cobrança |
 | FR-051 | IMPLEMENTED | `ServicesRepository.updatePrice`, `ServicePriceDialog` | API-050 (`PUT /servicos/:id/precos`) | DB-050 (`service_price_versions`)| `services.update` | TEST-003 | PHASE-013 | GATE-013 | Versionamento de preços por data de vigência |
 | FR-052 | IMPLEMENTED | `ServicesController.list`, `ServicesPage` | API-050 (`GET /servicos`) | DB-050 (`services`) | `services.read` | TEST-003 | PHASE-013 | GATE-013 | Suporte a cobrança pontual e recorrente |
-| FR-060..FR-061 | NOT_STARTED | - | API-030 | DB-060 | `proposals.*` | TEST-006 | PHASE-014 | GATE-014 | DOC-22:50-51 |
-| FR-062 | OUT_OF_SCOPE_INITIAL | - | - | - | - | TEST-062 | - | - | Prompt mestre secao 46; DOC-22:52 |
-| FR-063 | NOT_STARTED | - | API-031 | DB-060 | `proposals.approve` | TEST-006 | PHASE-014 | GATE-014 | DOC-22:53 |
+| FR-060 | IMPLEMENTED | `apps/api/src/modules/proposals/*`, `apps/web/src/modules/proposals/*` | API-030 (`POST /propostas`) | DB-060 (`proposals`) | `proposals.create` | TEST-006 | PHASE-014 | GATE-014 | Emissão de propostas comerciais com desconto e validade |
+| FR-061 | IMPLEMENTED | `proposals.repository.ts`, `ProposalFormDialog` | API-030 (`POST /propostas`) | DB-060 (`proposal_items`) | `proposals.create` | TEST-006 | PHASE-014 | GATE-014 | Itens da proposta com quantidade, preço unitário e desconto |
+| FR-062 | IMPLEMENTED | `ProposalsController.approve`, `ProposalsPage` | API-030 (`POST /propostas/:id/aprovar`) | DB-060 (`proposals`) | `proposals.approve` | TEST-062 | PHASE-014 | GATE-014 | Aprovação interna de propostas comerciais no escopo |
+| FR-063 | PARTIAL_CROSS_PHASE_DEPENDENCY | `ProposalsController.convertToContract`, `ConvertContractDialog` | API-031 (`POST /propostas/:id/converter-contrato`) | DB-060 (`contracts`) | `contracts.create` | TEST-006 | PHASE-014 | GATE-014 | Conversão em contrato ativo; parcelas financeiras pendentes da PHASE-016 |
 | FR-070..FR-072 | NOT_STARTED | - | API-040/API-041 | DB-070 | `projects.*`/`tasks.create` | TEST-005 | PHASE-015 | GATE-015 | DOC-22:54-56 |
 | FR-073 | OUT_OF_SCOPE_INITIAL | - | - | - | - | TEST-073 | - | - | Prompt mestre secao 46; DOC-22:57 |
 | FR-080..FR-083 | NOT_STARTED | - | API-050 | DB-080 | `financial.*` | TEST-006 | PHASE-016 | GATE-016 | DOC-22:58-61 |
