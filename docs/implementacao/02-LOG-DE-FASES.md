@@ -78,7 +78,22 @@ O DOC-21 descreve criacao de repositorio separado. O prompt mestre, de maior pre
 ## PHASE-005 - PostgreSQL 16 e migrations iniciais
 
 - Inicio: `2026-07-21`.
-- Estado: `IN_PROGRESS`.
-- Gate: `GATE-005 = PENDING_IMPLEMENTATION_VALIDATION`.
+- Conclusao: `2026-07-21`.
+- Estado: `APPROVED`.
+- Gate: `GATE-005 = APPROVED`.
 - Escopo: schema Drizzle e migrations versionadas iniciais conforme DOC-08, executadas no PostgreSQL local aprovado.
-- Proxima acao: consolidar dicionario de dados e criterios do gate antes de criar schema/migrations.
+- Arquivos: `packages/database/src/schema/*`, configuracao e runner do pacote, `migrations/0001_initial_schema.sql` e metadados Drizzle.
+- Implementacao: 22 tabelas fisicas — 19 nomeadas pelo DOC-08, `role_permissions` exigida pela relacao RBAC e `inbox_events`/`idempotency_keys` exigidas pelo prompt mestre — com UUID, timestamps UTC, soft delete, versao, autoria, FKs, UNIQUE, CHECK e indices reais conforme aplicabilidade.
+- Integridade especial: `audit_logs` e append-only por triggers de UPDATE, DELETE e TRUNCATE; `pg_trgm` e indices GIN atendem busca textual; unicidade ativa de documento de cliente usa indice parcial.
+- Migration: `0001_initial_schema.sql`, SHA-256 `806763598e302266eea72c33db825e3b6d053c34e2451fa16668db79d1a42e55`.
+- Validacao tecnica: geracao/check Drizzle, typecheck, deteccao negativa de drift, duas aplicacoes concorrentes serializadas (`applied=1` e `applied=0`), terceira aplicacao idempotente e verificacao transacional com 22 tabelas aprovadas.
+- QA: conformidade SPEC aprovada; qualidade/seguranca aprovada apos resolver cinco achados; validacao final independente `READY_TO_APPROVE`.
+- Proxima acao: iniciar automaticamente PHASE-006.
+
+## PHASE-006 - Autenticacao e sessoes opacas server-side
+
+- Inicio: `2026-07-21`.
+- Estado: `IN_PROGRESS`.
+- Gate: `GATE-006 = PENDING_IMPLEMENTATION`.
+- Escopo: login, logout, revogacao, cookies seguros, Argon2id e ativador MFA TOTP conforme DOC-10.
+- Proxima acao: consolidar contratos de autenticacao e criterios do gate antes da implementacao.

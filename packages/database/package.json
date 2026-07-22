@@ -2,5 +2,25 @@
   "name": "@lyvox/database",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema/index.ts"
+  },
+  "scripts": {
+    "db:check": "drizzle-kit check --config drizzle.config.ts",
+    "db:generate": "drizzle-kit generate --config drizzle.config.ts --name initial_schema",
+    "db:migrate": "node scripts/database.mjs migrate",
+    "db:verify": "node scripts/database.mjs verify",
+    "typecheck": "tsc --project tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.2",
+    "pg": "8.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.30",
+    "@types/pg": "8.15.5",
+    "drizzle-kit": "0.31.10"
+  }
 }

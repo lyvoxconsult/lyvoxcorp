@@ -13,6 +13,9 @@
     "build": "turbo run build",
     "dev": "turbo run dev --concurrency=4",
     "dev:verify": "node scripts/verify-dev-concurrency.mjs",
+    "db:generate": "pnpm --filter @lyvox/database db:generate",
+    "db:migrate": "pnpm --filter @lyvox/database db:migrate",
+    "db:verify": "pnpm --filter @lyvox/database db:verify",
     "infra:config": "node scripts/infra-local.mjs config",
     "infra:down": "node scripts/infra-local.mjs down",
     "infra:health": "node scripts/infra-local.mjs health",
@@ -23,6 +26,7 @@
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
-    "turbo": "2.10.5"
+    "turbo": "2.10.5",
+    "typescript": "7.0.2"
   }
 }

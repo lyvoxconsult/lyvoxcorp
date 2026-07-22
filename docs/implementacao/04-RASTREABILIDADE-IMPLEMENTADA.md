@@ -31,3 +31,7 @@ Nenhum FR foi implementado na PHASE-000. A matriz inicia o estado sem simular en
 | FR-130..FR-131 | NOT_STARTED | - | API-130 | DB-130 | `settings.update` | TEST-004 | PHASE-018 | GATE-018 | DOC-22:74-75; DEV-0016 |
 | FR-140..FR-142 | NOT_STARTED | - | API-080/N/A | DB-140/N/A | `ai.use`/N/A | TEST-007 | PHASE-022 | GATE-022 | DOC-22:76-78 |
 | FR-150..FR-151 | NOT_STARTED | - | API-150 | DB-150 | Internal/`audit.read` | TEST-008 | PHASE-023 | GATE-023 | DOC-22:79-80 |
+
+## Fundacao transversal de banco - PHASE-005
+
+Os FRs permanecem `NOT_STARTED`: a fase entregou apenas a persistencia mestre transversal. A migration `0001_initial_schema.sql` materializa as tabelas de DOC-08 e as estruturas obrigatorias de RBAC, inbox e idempotencia; comportamento funcional, seeds e APIs continuam sob os gates proprietarios.

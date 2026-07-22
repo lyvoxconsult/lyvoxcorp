@@ -85,3 +85,23 @@ Esta validacao prova apenas o ambiente de desenvolvimento concorrente da PHASE-0
 | 2026-07-21 | Revisao SPEC, qualidade e validacao final | Tres revisores independentes, somente leitura | PASS | `READY_TO_APPROVE`; zero secret, zero endpoint remoto, digests imutaveis e nenhum `HARD_BLOCKER` |
 
 O gate comprova apenas a infraestrutura de suporte local. Nenhuma aplicacao, migration, seed, schema ou prontidao de produto foi declarada.
+
+## PHASE-005
+
+| Data | Comando/checagem | Ambiente | Resultado | Evidencia |
+|---|---|---|---|---|
+| 2026-07-21 | Consulta de documentacao Drizzle atual | Context7, documentacao oficial | PASS | Padroes atuais de schema PostgreSQL, constraints, indices e migrations confirmados antes da implementacao |
+| 2026-07-21 | `pnpm install` e `pnpm install --frozen-lockfile` | Node 20.20.2 / pnpm 10.34.5 | PASS | 36 pacotes adicionados; lockfile reproduzivel |
+| 2026-07-21 | `pnpm --filter @lyvox/database db:generate` | Drizzle Kit 0.31.10 | PASS | Snapshot e SQL inicial gerados para 22 tabelas; migration final nomeada `0001_initial_schema.sql` |
+| 2026-07-21 | Recriacao controlada do schema local pre-gate | PostgreSQL 16.14 local, banco novo da implementacao | PASS | Somente schemas `drizzle` e `public` da fase removidos e recriados antes da aplicacao final; nenhum dado persistente de usuario existia |
+| 2026-07-21 | Teste negativo de drift em migration aplicada | PgBouncer local / PostgreSQL 16.14 | PASS | Alteracao pre-gate foi recusada com `Applied migration drift detected at position 1`; conexao encerrada e estado preservado |
+| 2026-07-21 | Duas execucoes concorrentes `pnpm db:migrate` em banco local limpo | PgBouncer local / PostgreSQL 16.14 | PASS | Advisory transaction lock serializou execucoes: uma retornou `applied=1`, outra `applied=0`, ambas com SHA-256 `806763598e302266eea72c33db825e3b6d053c34e2451fa16668db79d1a42e55` |
+| 2026-07-21 | Terceira execucao `pnpm db:migrate` | PgBouncer local / PostgreSQL 16.14 | PASS | `LYVOX_DB_MIGRATE_OK applied=0 total=1`; idempotencia e hash remoto/local comprovados |
+| 2026-07-21 | `pnpm db:verify` | PgBouncer local / PostgreSQL 16.14 | PASS | `LYVOX_DB_VERIFY_OK tables=22`; tabelas, `pg_trgm`, indices, UTC e colunas-base verificados |
+| 2026-07-21 | Testes negativos transacionais de constraints | PostgreSQL 16.14 | PASS | UNIQUE de email/documento ativo, CHECK de status/tipo/valor, FK de sessao, defaults de outbox e append-only contra UPDATE/DELETE/TRUNCATE rejeitaram/aceitaram conforme contrato; transacao revertida |
+| 2026-07-21 | `pnpm --filter @lyvox/database db:check` | Drizzle Kit 0.31.10 | PASS | `Everything's fine`; journal e snapshot consistentes |
+| 2026-07-21 | `pnpm typecheck` | Node 20.20.2 / TypeScript 7.0.2 / `@types/node` 20.19.30 | PASS | Pacote `@lyvox/database` compilado sem emissao e sem permitir APIs exclusivas de Node posterior |
+| 2026-07-21 | `pnpm audit --audit-level high` | Registry npm | PASS_WITH_MODERATE_FINDING | 0 high/critical; 1 moderada transitiva no esbuild de tooling, registrada em DEV-0028 |
+| 2026-07-21 | Revisao sequencial SPEC, qualidade/seguranca e validacao final | Tres revisores independentes, somente leitura | PASS | SPEC aprovada; cinco achados operacionais corrigidos e revalidados; `READY_TO_APPROVE`, 20 arquivos staged e nenhum `HARD_BLOCKER` |
+
+Nenhum seed, endpoint ou comportamento funcional foi declarado nesta fase. Os dados temporarios dos testes foram executados dentro de transacao e revertidos.

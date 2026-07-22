@@ -1,8 +1,8 @@
 ---
 title: Estado da Execucao
 date: 2026-07-21
-phase: PHASE-005
-gate: GATE-005
+phase: PHASE-006
+gate: GATE-006
 status: in-progress
 ---
 
@@ -10,20 +10,20 @@ status: in-progress
 
 | Campo | Estado |
 |---|---|
-| Fase atual | `PHASE-005` |
-| Ultima fase concluida | `PHASE-004` |
-| Gate atual | `GATE-005 = IN_PROGRESS` |
+| Fase atual | `PHASE-006` |
+| Ultima fase concluida | `PHASE-005` |
+| Gate atual | `GATE-006 = IN_PROGRESS` |
 | Branch | `feature/greenfield-foundation` |
 | Commit-base | `144007d2d540ce867024b1b3c8bdf46ce3d75f93` |
 | Servicos em execucao | Suporte local: PostgreSQL, PgBouncer, Redis e Mailpit healthy; nenhum servico do produto |
-| Migrations aplicadas | Nenhuma |
-| Testes aprovados | PHASE-000 documental; PHASE-001 Git/ignore; PHASE-002 monorepo/runtime; PHASE-003 dev concorrente; PHASE-004 infraestrutura local; todos com SPEC/qualidade/validacao final |
+| Migrations aplicadas | `0001_initial_schema.sql` aplicada uma vez; segunda execucao idempotente com `applied=0` |
+| Testes aprovados | PHASE-000..PHASE-005 aprovadas com revisoes sequenciais de SPEC, qualidade/seguranca e validacao final |
 | Testes falhando | `N/A` - testes de produto ainda nao executados |
 | FRs concluidos | `0/54` em escopo |
 | FRs pendentes | `54/54` em escopo |
 | FRs fora do escopo inicial | `FR-062`, `FR-073` por precedencia do prompt mestre |
-| Bloqueios | Nenhum `HARD_BLOCKER` local para PHASE-005 |
-| Proxima acao exata | Implementar schema Drizzle e migrations iniciais da PHASE-005 sobre PostgreSQL local |
+| Bloqueios | Nenhum `HARD_BLOCKER` local para PHASE-006 |
+| Proxima acao exata | Implementar autenticacao e sessoes opacas server-side conforme DOC-10 e criterios do GATE-006 |
 
 ## Restricoes ativas
 
